@@ -169,12 +169,24 @@ class Util():
             "progbar_dwd_readme": "+500+300"
         }
 
+    def create_language_config(self):
+        if not os.path.exists(self.resource_path("config.txt")):
+            with open(self.resource_path("config.txt"), "w+") as f:
+                f.write("language: en\n")
+                f.write("year: 2000\n")
+        with open(self.resource_path("config.txt"), "r+") as f:
+                file = f.read()
+                data_list = file.split()
+                return data_list[1]
     # get the languge in config txt
     def get_language_config(self):
-        with open(self.resource_path("config.txt"), "r") as f:
-            file = f.read()
-            data_list = file.split()
-            return data_list[1]
+        if(not os.path.exists(self.resource_path("config.txt"))):
+            self.create_language_config()
+        else:
+            with open(self.resource_path("config.txt"), "r+") as f:
+                file = f.read()
+                data_list = file.split()
+                return data_list[1]
 
     # change language config according to given lang <------- will have to be changed for future configs
     def change_lang(self, lang):

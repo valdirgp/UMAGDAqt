@@ -1,57 +1,58 @@
-# View/CalmDisturbPage.py
 from PyQt5.QtWidgets import QWidget, QLabel, QListWidget, QVBoxLayout, QGridLayout, QPushButton, QComboBox
 from PyQt5.QtCore import Qt
-from View.Frames.SideOptionsCalmDisturb import SideOptionsCalmDisturb
+from View.Frames.SideOptionsCalm import SideOptionsCalm
 from View.Frames.Map import Map
 from General.util import Util
 import re
 
-class CalmDisturbPage(QWidget):
+class CalmPage(QWidget):
     def __init__(self, parent=None, language='en', magnetic_eq_coords=None):
         super().__init__(parent)
         self.lang = language
+        self.side_options = SideOptionsCalm(self, self.lang)
+        self.map_widget = Map(self)
         self.magnetic_eq_coords = magnetic_eq_coords
         self.util = Util()
+        #SideOptionsCalm.__init__(self, parent, self.lang)
+        #Map.__init__(self, parent)
+        self.init_ui()
 
-        # Widgets filhos
-        self.side_options = SideOptionsCalmDisturb(self, self.lang)
-        self.map_widget = Map(self)
+    def init_ui(self):
+        self.layout = QGridLayout(self)
+        self.setLayout(self.layout)
 
-        # Inicializa dados
+        # Adiciona SideOptions e Map no layout
+        self.layout.addWidget(self.side_options, 0, 0)
+        self.layout.addWidget(self.map_widget, 0, 1)
+
+        # Lista de estações
+        self.list_all_stations = QListWidget()
         self.downloaded_data_stations = []
+        self.side_options.populate_list_options(self.list_all_stations, self.downloaded_data_stations)
+        self.list_all_stations.itemSelectionChanged.connect(self.listbox_on_click)
+        self.layout.addWidget(self.list_all_stations, 1, 0)
+
+        # Botão de plot
+        self.btn_plot_confirm = self.side_options.btn_plot_confirm
+        self.layout.addWidget(self.btn_plot_confirm, 2, 0)
+
+        # Combobox de local de download
+        self.combo_download_location = self.side_options.combo_download_location
+        self.layout.addWidget(self.combo_download_location, 3, 0)
+
+        # Criar mapa
         self.all_locals = []
         self.longitude = []
         self.latitude = []
         self.colors = []
+        self.downloaded_data_stations = []
 
-        self.init_ui()
-
-    def init_ui(self):
-        # Layout principal
-        self.layout = QGridLayout(self)
-        self.setLayout(self.layout)
-
-        # Adiciona SideOptions
-        self.layout.addWidget(self.side_options, 0, 0)
-
-        # Adiciona Map
-        self.layout.addWidget(self.map_widget, 0, 1)
-
-        # Inicializa lista de estações
-        self.list_all_stations = self.side_options.list_all_stations
-        self.list_all_stations.itemSelectionChanged.connect(self.listbox_on_click)
-
-        # Botão de plot
-        self.btn_plot_confirm = self.side_options.btn_plot_confirm
-
-        # Combo de local de download
-        self.combo_download_location = self.side_options.combo_download_location
-
-        # Atualiza lista de downloads e cria mapa
-        self.get_downloaded_stations_location()
         self.map_widget.create_map()
         self.map_widget.set_station_map(self.longitude, self.latitude)
         self.map_widget.set_stationsname_map(self.all_locals)
+
+
+        # Contorno do equador magnético, só se for dict
         if isinstance(self.magnetic_eq_coords, dict):
             self.map_widget.ax.contour(
                 self.magnetic_eq_coords['long'],
@@ -60,10 +61,9 @@ class CalmDisturbPage(QWidget):
                 levels=[0],
                 colors='gray'
             )
-
         self.map_widget.canvas.mpl_connect('button_press_event', self.map_on_click)
 
-    # ---------------------- Leitura de arquivo readme ----------------------
+
     def get_downloaded_stations_location(self):
         self.all_locals = []
         self.longitude = []
@@ -86,23 +86,16 @@ class CalmDisturbPage(QWidget):
             warning = QLabel(self.util.dict_language[self.lang]['lbl_noreadme'])
             self.layout.addWidget(warning, 3, 0, 1, 2)
 
-        # Inicializa cores
-        self.colors = ['red'] * len(self.all_locals)
-        self.map_widget.all_locals = self.all_locals
-        self.map_widget.colors = self.colors
-
-    # ---------------------- Funções de seleção ----------------------
     def listbox_on_click(self):
-        selected_items = [item.text() for item in self.list_all_stations.selectedItems()]
         for i, local in enumerate(self.all_locals):
+            selected_items = [item.text() for item in self.list_all_stations.selectedItems()]
             if self.colors[i] == 'red' and local['station'] in selected_items:
                 self.colors[i] = 'lightgreen'
             elif self.colors[i] == 'lightgreen' and local['station'] not in selected_items:
                 self.colors[i] = 'red'
 
-        if hasattr(self.map_widget, 'scart'):
-            self.map_widget.scart.set_facecolors(self.colors)
-            self.map_widget.canvas.draw()
+        self.scart.set_facecolors(self.colors)
+        self.canvas.draw()
 
     def map_on_click(self, event):
         if event.inaxes is not None:
@@ -119,8 +112,8 @@ class CalmDisturbPage(QWidget):
                             items[0].setSelected(False)
                         self.colors[i] = 'red'
 
-                    self.map_widget.scart.set_facecolors(self.colors)
-                    self.map_widget.canvas.draw()
+                    self.scart.set_facecolors(self.colors)
+                    self.canvas.draw()
 
     def can_be_number(self, value):
         try:
@@ -129,25 +122,22 @@ class CalmDisturbPage(QWidget):
         except ValueError:
             return False
 
-    # ---------------------- Atualização de dados ----------------------
     def update_data(self):
         self.list_all_stations.clear()
-        self.side_options.populate_list_options(self.list_all_stations, self.downloaded_data_stations)
-
-        # Limpa gráficos antigos do mapa
-        for scatter in self.map_widget.scart_plots:
+        self.populate_list_options(self.list_all_stations, self.downloaded_data_stations)
+        for scatter in self.scart_plots:
             scatter.remove()
-        self.map_widget.scart_plots.clear()
-        for text in self.map_widget.text_annotations:
+        self.scart_plots.clear()
+        for text in self.text_annotations:
             text.remove()
-        self.map_widget.text_annotations.clear()
+        self.text_annotations.clear()
 
         self.get_downloaded_stations_location()
-        self.map_widget.set_station_map(self.longitude, self.latitude)
-        self.map_widget.set_stationsname_map(self.all_locals)
-        self.map_widget.canvas.draw()
+        self.set_station_map(self.longitude, self.latitude)
+        self.set_stationsname_map(self.all_locals)
+        self.canvas.draw()
 
-    # ---------------------- Bindings ----------------------
+    # Bindings
     def bind_plot_graph(self, callback):
         self.btn_plot_confirm.clicked.connect(callback)
 
@@ -155,24 +145,21 @@ class CalmDisturbPage(QWidget):
         self.downloaded_data_stations = callback
 
     def bind_local_downloaded(self, callback):
-        self.side_options.local_downloads_function = callback
+        self.local_downloads_function = callback
 
-    # ---------------------- Getters ----------------------
+    # Getters
     def get_start_date(self):
-        return self.side_options.startdate.date()
+        return self.startdate.date()
 
     def get_end_date(self):
-        return self.side_options.enddate.date()
+        return self.enddate.date()
 
     def get_selected_station(self):
         items = self.list_all_stations.selectedItems()
         return items[0].text() if items else None
 
     def get_selected_calm_dates(self):
-        return self.side_options.selected_calm_dates
-
-    def get_selected_disturb_dates(self):
-        return self.side_options.selected_disturb_dates
+        return self.selected_calm_dates
 
     def get_local_download(self):
         return self.combo_download_location.currentText()
