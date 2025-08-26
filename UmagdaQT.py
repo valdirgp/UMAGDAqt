@@ -7,7 +7,7 @@ class UmagdaQT(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("UmagdaQT")
-        self.resize(900, 700)
+        self.resize(900, 600)
         self.showMaximized()
         
         self.app_controller = MainControl(self)
