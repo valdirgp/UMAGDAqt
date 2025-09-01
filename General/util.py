@@ -212,6 +212,7 @@ class Util():
     def resource_path(relative_path):
         try:
             base_path = sys._MEIPASS
+            print(base_path)
         except Exception:
             base_path = os.path.abspath("./General")
             

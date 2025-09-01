@@ -1,9 +1,10 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import Qt
 from PIL import Image
 from PIL import ImageQt
 from General.util import Util
+import os
 
 
 class InitialPage(QWidget):
@@ -12,6 +13,12 @@ class InitialPage(QWidget):
         self.root = root
         self.lang = language
         self.util = Util()
+    
+    def pil_to_qimage(self, pil_image: Image.Image) -> QImage:
+        pil_image = pil_image.convert("RGBA")
+        data = pil_image.tobytes("raw", "RGBA")
+        qimage = QImage(data, pil_image.width, pil_image.height, QImage.Format_RGBA8888)
+        return qimage
 
     # cria página inicial
     def load_page(self):
@@ -27,10 +34,11 @@ class InitialPage(QWidget):
         height = self.root.height()
 
         # carregar imagem
+        print(os.path.exists(self.util.resource_path("images/magnetic_field.png")))
         img = Image.open(self.util.resource_path("images/magnetic_field.png"))
         img_resized = img.resize((int(img.width * (width/2) / width),
                                   int(img.height * (height/2) / height)))
-        qt_image = ImageQt(img_resized)
+        qt_image = self.pil_to_qimage(img_resized)
         pixmap = QPixmap.fromImage(qt_image)
 
         lbl_image = QLabel()
