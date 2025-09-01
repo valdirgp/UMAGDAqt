@@ -1,9 +1,10 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
-from PyQt5.QtCore import Qt
 from General.util import Util
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PyQt5.QtGui import QFont
 
-class AboutPage:
+class AboutPage(QWidget):
     def __init__(self, root, language):
+        super().__init__(root)
         self.root = root
         self.lang = language
         self.util = Util()
@@ -11,49 +12,46 @@ class AboutPage:
     def load_page(self):
         self.util.destroy_existent_frames(self.root)
 
-        about_widget = QWidget()
-        layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
-        about_widget.setLayout(layout)
+        about_frame = QWidget(self.root)
+        about_layout = QVBoxLayout(about_frame)
+        about_frame.setLayout(about_layout)
+        about_frame.show()
 
-        # Desenvolvedores
-        dev_title = QLabel(f"{self.util.dict_language[self.lang]['lbl_dev']}:")
-        dev_title.setStyleSheet("font-size: 20pt; font-weight: bold;")
-        layout.addWidget(dev_title)
+        # Developer section
+        dev_label = QLabel(f"{self.util.dict_language[self.lang]['lbl_dev']}:")
+        dev_label.setFont(QFont("Arial", 20, QFont.Bold))
+        about_layout.addWidget(dev_label)
+        dev1 = QLabel('Leonardo Rafael dos Santos Faria')
+        dev1.setFont(QFont("Arial", 12))
+        about_layout.addWidget(dev1)
+        dev2 = QLabel('Thiago Alexander Moreira Mancilla')
+        dev2.setFont(QFont("Arial", 12))
+        about_layout.addWidget(dev2)
+        dev3 = QLabel('Valdir Gill Pillat')
+        dev3.setFont(QFont("Arial", 12))
+        about_layout.addWidget(dev3)
 
-        dev1 = QLabel("Leonardo Ribeiro da Silva Faria")
-        dev1.setStyleSheet("font-size: 12pt;")
-        layout.addWidget(dev1)
+        # Spacer
+        about_layout.addSpacing(10)
 
-        dev2 = QLabel("Thiago Alexander Moreira Mancilla")
-        dev2.setStyleSheet("font-size: 12pt; margin-bottom: 10px;")
-        
-        layout.addWidget(dev2)
+        # Contact section
+        contact_label = QLabel(f"{self.util.dict_language[self.lang]['lbl_contact']}:")
+        contact_label.setFont(QFont("Arial", 20, QFont.Bold))
+        about_layout.addWidget(contact_label)
+        email_label = QLabel('Email:')
+        email_label.setFont(QFont("Arial", 15, QFont.Bold))
+        about_layout.addWidget(email_label)
+        email1 = QLabel('leonardo.rsfaria91@gmail.com')
+        email1.setFont(QFont("Arial", 12))
+        about_layout.addWidget(email1)
+        email2 = QLabel('thiago.mancilla@hotmail.com')
+        email2.setFont(QFont("Arial", 12))
+        about_layout.addWidget(email2)
+        email3 = QLabel('valdirgp@univap.br')
+        email3.setFont(QFont("Arial", 12))
+        about_layout.addWidget(email3)
 
-        dev3 = QLabel("Valdir Gill Pillat")
-        dev3.setStyleSheet("font-size: 12pt;") 
-        layout.addWidget(dev3)
-
-        # Contato
-        contact_title = QLabel(f"{self.util.dict_language[self.lang]['lbl_contact']}:")
-        contact_title.setStyleSheet("font-size: 20pt; font-weight: bold; margin-top: 20px;")
-        layout.addWidget(contact_title)
-
-        email_label = QLabel("Email:")
-        email_label.setStyleSheet("font-size: 15pt; font-weight: bold; margin-top: 5px;")
-        layout.addWidget(email_label)
-
-        email1 = QLabel("leonardo.rsfaria91@gmail.com")
-        email1.setStyleSheet("font-size: 12pt;")
-        layout.addWidget(email1)
-
-        email2 = QLabel("thiago.mancilla@hotmail.com")
-        email2.setStyleSheet("font-size: 12pt;")
-        
-        layout.addWidget(email2)
-
-        email3 = QLabel("valdirgp@univap.br")
-        email3.setStyleSheet("font-size: 12pt;")
-        layout.addWidget(email3)
-
-        self.root.setCentralWidget(about_widget)
+        about_frame.setLayout(about_layout)
+        about_frame.setMinimumWidth(400)
+        about_frame.setMinimumHeight(300)
+        about_frame.show()

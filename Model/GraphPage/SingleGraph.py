@@ -9,7 +9,7 @@ class SingleGraph(GraphsModule):
     def __init__(self, root, language):
         self.root = root
         self.lang = language
-        super().__init__(self.lang, self.root)
+        super().__init__(self.lang)
 
     # Creates a line chart for H data for a given station on a specific day
     def plot_day(self, local_downloaded, stations, selected_types, bold_text, grid_graph, date, selected_dates, cal_selection, data_with_stations):
@@ -33,16 +33,14 @@ class SingleGraph(GraphsModule):
         self.can_plot = True
         self.info_time = None
         for slct_type in selected_types:
-            if 'd' in slct_type:
-                self.add_delta_dict(slct_type)
+            if 'd' in slct_type: self.add_delta_dict(slct_type)
 
         if 'reference' in selected_types:
             selected_types.remove('reference')
             selected_types.extend(f'{type.replace("d", "")}-reference' for type in selected_types if 'd' in type)
             self.add_reference(selected_types)
-
         avarage_types = self.calculate_type_averages(selected_types, stations)
-        if not avarage_types:
+        if not avarage_types: 
             return
         
         self.add_plots(selected_types)
@@ -50,11 +48,7 @@ class SingleGraph(GraphsModule):
         if not self.can_plot: 
             return
 
-        self.fig.canvas.manager.toolmanager.add_tool(
-            'Graph Info',
-            CustomPltOptions,
-            inform_graph=lambda: self.inform_graph(selected_types, avarage_types)
-        )
+        self.fig.canvas.manager.toolmanager.add_tool('Graph Info', CustomPltOptions, inform_graph=lambda: self.inform_graph(selected_types, avarage_types))
         self.fig.canvas.manager.toolbar.add_tool('Graph Info', 'io')
         plt.show()
 
@@ -86,7 +80,7 @@ class SingleGraph(GraphsModule):
     def add_plots(self, slct_types): 
         try:
             plt.close('all')
-            plt.rcParams['toolbar'] = 'toolmanager'
+            plt.rcParams['toolbar'] = 'toolmanager' # allows custom tools mode
             self.fig, self.ax = plt.subplots()
             self.filtred_values = []
 
@@ -97,29 +91,27 @@ class SingleGraph(GraphsModule):
                         plot_values = []
                         for time in times:
                             data = self.all_data[station][day][time][plot_type]
-                            if data is not None:
-                                self.filtred_values.append(data)
+                            if data is not None: self.filtred_values.append(data)
                             plot_values.append(data)
                         
-                        time_axis = [self.start_date + timedelta(minutes=min) for min in range(1440)]
+                        time = [self.start_date + timedelta(minutes=min) for min in range(1440)]
                         if 'reference' in plot_type:
-                            if control_reference:
-                                self.ax.plot(time_axis, plot_values, label=plot_type)
+                            if control_reference: # controle para que o mesmo tipo de referencia não se repita
+                                self.ax.plot(time, plot_values, label=plot_type)
                             break
                         else:
-                            self.ax.plot(time_axis, plot_values, label=f'{station}-{plot_type}')
+                            self.ax.plot(time, plot_values, label=f'{station}-{plot_type}')
                     control_reference = False
-                    
-        except Exception as error:
-            self.show_message(
+        except Exception:
+            QMessageBox.information(
+                None,
                 self.util.dict_language[self.lang]["mgbox_error"],
                 self.util.dict_language[self.lang]["mgbox_error_plt"]
             )
             self.can_plot = False
-            print(error)
             return
 
-    # configure graph specifications
+    # configure graph especifications
     def config_graph(self, plot_type, station):
         self.ax.minorticks_on()
         timehour = [self.start_date + timedelta(hours=i) for i in range(24)]
@@ -129,18 +121,19 @@ class SingleGraph(GraphsModule):
         self.ax.tick_params(axis='x', which='both', top=True, labeltop=False, bottom=True, labelbottom=True)
         self.ax.tick_params(axis='y', which='both', right=True, labelright=False, left=True, labelleft=True)
 
-        self.ax.set_xlim(self.start_date, self.start_date + timedelta(days=1))
+        self.ax.set_xlim(self.start_date, self.end_date)
         if self.filtred_values:
             self.ax.set_ylim(min(self.filtred_values), max(self.filtred_values))
         else:
-            self.show_message(
+            QMessageBox.information(
+                None,
                 self.util.dict_language[self.lang]["mgbox_error"],
                 self.util.dict_language[self.lang]["mgbox_error_noinfo_period"]
             )
             self.can_plot = False
             return
 
-        self.ax.set_ylabel(F'{", ".join(plot_type)} ({self.get_measure(plot_type)})')
+        self.ax.set_ylabel(f'{", ".join(plot_type)} ({self.get_measure(plot_type)})')
         self.ax.set_xlabel('UT')
         self.ax.set_title(f'{station} {self.start_date.date()}')
         self.ax.legend()
@@ -156,7 +149,3 @@ class SingleGraph(GraphsModule):
             self.ax.grid()
 
         self.fig.canvas.mpl_connect('button_press_event', lambda event: self.create_exporter_level_top(event, plot_type))
-
-    # PyQt5 message box
-    def show_message(self, title, message):
-        QMessageBox.information(self.root, title, message)

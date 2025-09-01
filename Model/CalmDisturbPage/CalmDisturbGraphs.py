@@ -2,10 +2,9 @@ from Model.GraphPage.GraphsModule import GraphsModule
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from PyQt5.QtWidgets import QMessageBox
 import os
 import math
-
-from PyQt5.QtWidgets import QMessageBox
 
 class CalmDisturbModel(GraphsModule):
     def __init__(self, root, language):
@@ -30,7 +29,7 @@ class CalmDisturbModel(GraphsModule):
 
         # Validate dates
         self.start_date, self.end_date = self.format_dates(start, end)
-        if not self.start_date: 
+        if not self.start_date:
             return
 
         # Gather data from the station
@@ -40,7 +39,6 @@ class CalmDisturbModel(GraphsModule):
 
         # Plot data
         self.plot_calm_avg()
-        
 
     # Collects data for the selected station within the date range
     def gather_station_data(self):
@@ -69,10 +67,10 @@ class CalmDisturbModel(GraphsModule):
 
         time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages))]
 
-        ax.plot(time, calm_averages, label='Calm Days', color='black', linewidth = 2)
-        ax.plot(time, calm_avgPstd, label='Calm Days avg + std dev', color='gray', linewidth = 1)
-        ax.plot(time, calm_avgMstd, label='Calm Days avg - std dev', color='gray', linewidth = 1)
-        ax.plot(time, lista_legal, label='Disturbed Day', color='red', linewidth = 1.5)
+        ax.plot(time, calm_averages, label='Calm Days', color='black', linewidth=2)
+        ax.plot(time, calm_avgPstd, label='Calm Days avg + std dev', color='gray', linewidth=1)
+        ax.plot(time, calm_avgMstd, label='Calm Days avg - std dev', color='gray', linewidth=1)
+        ax.plot(time, lista_legal, label='Disturbed Day', color='red', linewidth=1.5)
 
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
         ax.set_ylabel('H(nT)')
@@ -80,15 +78,13 @@ class CalmDisturbModel(GraphsModule):
         ax.set_title(f"Station: {self.station}")
         ax.grid(True)
         ax.legend()
-
-        # Ajustar limites do eixo X para tocar o lado esquerdo
         ax.set_xlim(left=time[0], right=time[-1])
 
         fig.suptitle('Calm and Disturbed Days Data')
-        plt.subplots_adjust(left=0.1)  # Ajuste do espaço entre o gráfico e a borda
+        plt.subplots_adjust(left=0.1)
         plt.show()
 
-    def get_cal_datas(self, selected_dates): 
+    def get_cal_datas(self, selected_dates):
         data = []
         for date in selected_dates:
             data.append(self.get_data(date, self.station, self.data_with_stations[f'{self.station}'][0]))
@@ -96,63 +92,61 @@ class CalmDisturbModel(GraphsModule):
 
     def calculate_calm_average(self):
         calm_averages = []
-        calm_values = self.get_cal_datas(self.selected_calm_dates) 
+        calm_values = self.get_cal_datas(self.selected_calm_dates)
         for hour in range(1440):
             try:
                 H_data = []
-                for i,_ in enumerate(calm_values):            
+                for i, _ in enumerate(calm_values):
                     H_data.append(calm_values[i][hour]['H'])
-                average = sum(H_data)/len(self.selected_calm_dates)
+                average = sum(H_data) / len(self.selected_calm_dates)
                 calm_averages.append(average)
             except Exception:
                 calm_averages.append(None)
-
         return calm_averages
-    
+
+    # Average + Std Dev
     def calculate_calm_averagePstd(self):
         calm_avgPstd = []
-        calm_values = self.get_cal_datas(self.selected_calm_dates) 
+        calm_values = self.get_cal_datas(self.selected_calm_dates)
         for hour in range(1440):
             try:
                 H_data = []
-                for i,_ in enumerate(calm_values):            
+                for i, _ in enumerate(calm_values):
                     H_data.append(calm_values[i][hour]['H'])
-                average = sum(H_data)/len(self.selected_calm_dates)
+                average = sum(H_data) / len(self.selected_calm_dates)
                 variance = sum((x - average) ** 2 for x in H_data) / len(H_data)
-                std = variance ** 0.5  + average # Standard deviation + average
+                std = variance ** 0.5 + average
                 calm_avgPstd.append(std)
             except Exception:
                 calm_avgPstd.append(None)
-
         return calm_avgPstd
-    
+
+    # Average - Std Dev
     def calculate_calm_averageMstd(self):
         calm_avgMstd = []
-        calm_values = self.get_cal_datas(self.selected_calm_dates) 
+        calm_values = self.get_cal_datas(self.selected_calm_dates)
         for hour in range(1440):
             try:
                 H_data = []
-                for i,_ in enumerate(calm_values):            
+                for i, _ in enumerate(calm_values):
                     H_data.append(calm_values[i][hour]['H'])
-                average = sum(H_data)/len(self.selected_calm_dates)
+                average = sum(H_data) / len(self.selected_calm_dates)
                 variance = sum((x - average) ** 2 for x in H_data) / len(H_data)
-                std = average -  variance ** 0.5  # Standard deviation - average
+                std = average - variance ** 0.5
                 calm_avgMstd.append(std)
             except Exception:
                 calm_avgMstd.append(None)
-
         return calm_avgMstd
-    
 
     # Retrieves the data for a given station and date from the corresponding file
     def get_data(self, day, station, network_station):
         self.st = station
         self.day = day
-        path_station = os.path.join(self.lcl_downloaded, 
-                                    'Magnetometer', 
-                                    network_station, 
-                                    str(self.day.year), 
-                                    self.st, 
+        path_station = os.path.join(self.lcl_downloaded,
+                                    'Magnetometer',
+                                    network_station,
+                                    str(self.day.year),
+                                    self.st,
                                     f'{self.st.lower()}{self.day.year}{self.day.month:02}{self.day.day:02}min.min'
                                     )
         is_header = True
@@ -162,13 +156,13 @@ class CalmDisturbModel(GraphsModule):
             with open(path_station, 'r') as file:
                 lines = file.read().split('\n')
         except FileNotFoundError:
-             return [{'D':None, 'H':None, 'Z':None, 'I':None, 'F':None, 'G': None, 'X': None, 'Y': None}] * 1440
+            return [{'D': None, 'H': None, 'Z': None, 'I': None, 'F': None, 'G': None, 'X': None, 'Y': None}] * 1440
 
         try:
             self.st = 'VSS' if (self.st == 'VSI') or (self.st == 'VSE') else self.st
             for line in lines:
                 if line == '':
-                    continue 
+                    continue
                 if is_header:
                     if line.find('H(nT)') != -1:
                         is_header = False
@@ -202,8 +196,8 @@ class CalmDisturbModel(GraphsModule):
 
                         case 'intermagnet:x,y,f':
                             try:
-                                if float(separated_data[3]) != 99999.00 and float(separated_data[4]) != 99999.00:   
-                                    data_dict['H'] = math.sqrt(float(separated_data[3])**2+float(separated_data[4])**2)
+                                if float(separated_data[3]) != 99999.00 and float(separated_data[4]) != 99999.00:
+                                    data_dict['H'] = math.sqrt(float(separated_data[3]) ** 2 + float(separated_data[4]) ** 2)
                                 else:
                                     data_dict['H'] = None
                                 data_dict['X'] = float(separated_data[3]) if float(separated_data[3]) != 99999.00 else None
@@ -216,7 +210,7 @@ class CalmDisturbModel(GraphsModule):
                         case 'intermagnet:x,y,g':
                             try:
                                 if float(separated_data[3]) != 99999.00 and float(separated_data[4]) != 99999.00:
-                                    data_dict['H'] = math.sqrt(float(separated_data[3])**2+float(separated_data[4])**2)
+                                    data_dict['H'] = math.sqrt(float(separated_data[3]) ** 2 + float(separated_data[4]) ** 2)
                                 else:
                                     data_dict['H'] = None
                                 data_dict['X'] = float(separated_data[3]) if float(separated_data[3]) != 99999.00 else None
@@ -238,7 +232,9 @@ class CalmDisturbModel(GraphsModule):
                     data.append(data_dict)
             return data
         except Exception as error:
-            QMessageBox.information(self.root,
-                                    self.util.dict_language[self.lang]["mgbox_error"],
-                                    f'{self.util.dict_language[self.lang]["mgbox_error_info_ad"]}: {error}')
+            QMessageBox.information(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                f'{self.util.dict_language[self.lang]["mgbox_error_info_ad"]}: {error}'
+            )
             return data

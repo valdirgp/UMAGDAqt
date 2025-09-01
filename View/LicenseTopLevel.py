@@ -1,45 +1,62 @@
-from PyQt5.QtWidgets import QDialog, QLabel, QLineEdit, QPushButton, QVBoxLayout, QFormLayout
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton
 from PyQt5.QtCore import Qt
 from General.util import Util
 
-class LicenseTopLevel:
+
+class LicenseTopLevel():
     def __init__(self, root, language):
-        self.root = root  # Espera-se que seja QMainWindow ou QWidget
+        self.root = root
         self.lang = language
         self.util = Util()
-        self.license_window = None  # QDialog será criado em `load_page`
 
+        # elementos que serão criados em load_page()
+        self.license_window = None
+        self.name_entry = None
+        self.inst_entry = None
+        self.confirm_button = None
+
+    # cria a janela/toplevel (sem bloquear)
     def load_page(self):
         self.license_window = QDialog(self.root)
         self.license_window.setWindowTitle(self.util.dict_language[self.lang]["lbl_lcr"])
-        self.license_window.setFixedSize(300, 180)
-        self.license_window.setWindowModality(Qt.ApplicationModal)  # Bloqueia interação com janela principal
-        self.license_window.setAttribute(Qt.WA_DeleteOnClose)
+        self.license_window.setFixedSize(220, 150)
+        self.license_window.setWindowModality(Qt.ApplicationModal)
+        self.license_window.setWindowFlag(Qt.WindowStaysOnTopHint, True)
 
-        form_layout = QFormLayout()
-
-        # Campo nome
-        self.name_entry = QLineEdit()
-        form_layout.addRow(QLabel(self.util.dict_language[self.lang]["lbl_name"]), self.name_entry)
-
-        # Campo instituição
-        self.inst_entry = QLineEdit()
-        form_layout.addRow(QLabel(self.util.dict_language[self.lang]["lbl_inst"]), self.inst_entry)
-
-        # Botão de confirmar
-        self.confirm_button = QPushButton(self.util.dict_language[self.lang]["btn_confirm"])
         layout = QVBoxLayout()
-        layout.addLayout(form_layout)
-        layout.addWidget(self.confirm_button, alignment=Qt.AlignCenter)
+        layout.setAlignment(Qt.AlignTop)
+
+        name_label = QLabel(self.util.dict_language[self.lang]["lbl_name"])
+        name_label.setStyleSheet("font-size: 15px;")
+        layout.addWidget(name_label)
+
+        self.name_entry = QLineEdit()
+        layout.addWidget(self.name_entry)
+
+        inst_label = QLabel(self.util.dict_language[self.lang]["lbl_inst"])
+        inst_label.setStyleSheet("font-size: 15px;")
+        layout.addWidget(inst_label)
+
+        self.inst_entry = QLineEdit()
+        layout.addWidget(self.inst_entry)
+
+        self.confirm_button = QPushButton(self.util.dict_language[self.lang]["btn_confirm"])
+        layout.addWidget(self.confirm_button)
 
         self.license_window.setLayout(layout)
 
-        # Exibe a janela de forma modal
-        self.license_window.exec_()
+        # exibe a janela (não bloqueante aqui; o bloqueio será feito em bind_get_new_user_info)
+        self.license_window.show()
 
+    # vincula o botão confirmar ao callback e espera pela janela (comportamento equivalente ao wait_window)
     def bind_get_new_user_info(self, callback):
-        self.confirm_button.clicked.connect(lambda: callback(
-            self.name_entry.text(),
-            self.inst_entry.text(),
-            self.license_window
-        ))
+        if self.license_window is None:
+            raise RuntimeError("Chame load_page() antes de bind_get_new_user_info()")
+
+        # o callback recebe (nome, instituicao, janela) — mesmas coisas que no Tkinter
+        self.confirm_button.clicked.connect(
+            lambda: callback(self.name_entry.text(), self.inst_entry.text(), self.license_window)
+        )
+
+        # bloqueia até o diálogo ser fechado (equivalente ao wait_window)
+        self.license_window.exec_()

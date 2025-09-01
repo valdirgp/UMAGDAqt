@@ -2,15 +2,13 @@ from Model.GraphPage.GraphsModule import GraphsModule
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from PyQt5.QtWidgets import QMessageBox
 import os
 import math
-from PyQt5.QtWidgets import QMessageBox
-
-# https://www.swpc.noaa.gov/products/solar-cycle-progression
 
 class CalmModel(GraphsModule):
     def __init__(self, root, language):
-        self.root = root  # root deve ser um QWidget válido para QMessageBox
+        self.root = root
         self.lang = language
 
         self.start_date = None
@@ -27,11 +25,10 @@ class CalmModel(GraphsModule):
         self.station = station
         self.data_with_stations = data_with_stations
         self.selected_calm_dates = get_selected_calm_dates
-
+        
         # Validate dates
         self.start_date, self.end_date = self.format_dates(start, end)
-        if not self.start_date:
-            return
+        if not self.start_date: return
 
         # Gather data from the station
         self.data_all = self.gather_station_data()
@@ -41,6 +38,7 @@ class CalmModel(GraphsModule):
         # Plot data
         self.plot_calm_avg_H()
         self.plot_calm_avg_Z()
+        
 
     # Collects data for the selected station within the date range
     def gather_station_data(self):
@@ -73,7 +71,6 @@ class CalmModel(GraphsModule):
         ax.set_title(f"Station: {self.station}")
         ax.grid(True)
         ax.legend()
-
         ax.set_xlim(left=time[0], right=time[-1])
 
         fig.suptitle('Calm Days H(nT) Data')
@@ -100,7 +97,6 @@ class CalmModel(GraphsModule):
         ax.set_title(f"Station: {self.station}")
         ax.grid(True)
         ax.legend()
-
         ax.set_xlim(left=time[0], right=time[-1])
 
         fig.suptitle('Calm Days Z(nT) Data')
@@ -108,7 +104,7 @@ class CalmModel(GraphsModule):
         plt.show()
 
     # Pega a data inicial e final, lista dos nomes das estações e os dados das estações
-    def get_cal_datas(self, selected_dates):
+    def get_cal_datas(self, selected_dates): 
         data = []
         for date in selected_dates:
             data.append(self.get_data(date, self.station, self.data_with_stations[f'{self.station}'][0]))
@@ -117,26 +113,26 @@ class CalmModel(GraphsModule):
     # Calculates the average for calm days using selected_calm_dates.
     def calculate_calm_average_H(self):
         calm_averages_H = []
-        calm_values = self.get_cal_datas(self.selected_calm_dates)
+        calm_values = self.get_cal_datas(self.selected_calm_dates) 
         for hour in range(1440):
             try:
                 H_data = []
-                for i, _ in enumerate(calm_values):
+                for i, _ in enumerate(calm_values):            
                     H_data.append(calm_values[i][hour]['H'])
                 average = sum(H_data) / len(self.selected_calm_dates)
                 calm_averages_H.append(average)
             except Exception:
                 calm_averages_H.append(None)
         return calm_averages_H
-
+    
     # Average + Std Dev
     def calculate_calm_averagePstd_H(self):
         calm_avgPstd_H = []
-        calm_values = self.get_cal_datas(self.selected_calm_dates)
+        calm_values = self.get_cal_datas(self.selected_calm_dates) 
         for hour in range(1440):
             try:
                 H_data = []
-                for i, _ in enumerate(calm_values):
+                for i, _ in enumerate(calm_values):            
                     H_data.append(calm_values[i][hour]['H'])
                 average = sum(H_data) / len(self.selected_calm_dates)
                 variance = sum((x - average) ** 2 for x in H_data) / len(H_data)
@@ -145,15 +141,15 @@ class CalmModel(GraphsModule):
             except Exception:
                 calm_avgPstd_H.append(None)
         return calm_avgPstd_H
-
+    
     # Average - Std Dev
     def calculate_calm_averageMstd_H(self):
         calm_avgMstd_H = []
-        calm_values = self.get_cal_datas(self.selected_calm_dates)
+        calm_values = self.get_cal_datas(self.selected_calm_dates) 
         for hour in range(1440):
             try:
                 H_data = []
-                for i, _ in enumerate(calm_values):
+                for i, _ in enumerate(calm_values):            
                     H_data.append(calm_values[i][hour]['H'])
                 average = sum(H_data) / len(self.selected_calm_dates)
                 variance = sum((x - average) ** 2 for x in H_data) / len(H_data)
@@ -166,26 +162,26 @@ class CalmModel(GraphsModule):
     # Calculates the average (Using Z(nT)) for calm days using selected_calm_dates.
     def calculate_calm_average_Z(self):
         calm_averages_Z = []
-        calm_values = self.get_cal_datas(self.selected_calm_dates)
+        calm_values = self.get_cal_datas(self.selected_calm_dates) 
         for hour in range(1440):
             try:
                 Z_data = []
-                for i, _ in enumerate(calm_values):
+                for i, _ in enumerate(calm_values):            
                     Z_data.append(calm_values[i][hour]['Z'])
                 average = sum(Z_data) / len(self.selected_calm_dates)
                 calm_averages_Z.append(average)
             except Exception:
                 calm_averages_Z.append(None)
         return calm_averages_Z
-
+    
     # Average + Std Dev
     def calculate_calm_averagePstd_Z(self):
         calm_avgPstd_Z = []
-        calm_values = self.get_cal_datas(self.selected_calm_dates)
+        calm_values = self.get_cal_datas(self.selected_calm_dates) 
         for hour in range(1440):
             try:
                 Z_data = []
-                for i, _ in enumerate(calm_values):
+                for i, _ in enumerate(calm_values):            
                     Z_data.append(calm_values[i][hour]['Z'])
                 average = sum(Z_data) / len(self.selected_calm_dates)
                 variance = sum((x - average) ** 2 for x in Z_data) / len(Z_data)
@@ -194,15 +190,15 @@ class CalmModel(GraphsModule):
             except Exception:
                 calm_avgPstd_Z.append(None)
         return calm_avgPstd_Z
-
+    
     # Average - Std Dev
     def calculate_calm_averageMstd_Z(self):
         calm_avgMstd_Z = []
-        calm_values = self.get_cal_datas(self.selected_calm_dates)
+        calm_values = self.get_cal_datas(self.selected_calm_dates) 
         for hour in range(1440):
             try:
                 Z_data = []
-                for i, _ in enumerate(calm_values):
+                for i, _ in enumerate(calm_values):            
                     Z_data.append(calm_values[i][hour]['Z'])
                 average = sum(Z_data) / len(self.selected_calm_dates)
                 variance = sum((x - average) ** 2 for x in Z_data) / len(Z_data)
@@ -216,14 +212,13 @@ class CalmModel(GraphsModule):
     def get_data(self, day, station, network_station):
         self.st = station
         self.day = day
-        path_station = os.path.join(
-            self.lcl_downloaded,
-            'Magnetometer',
-            network_station,
-            str(self.day.year),
-            self.st,
-            f'{self.st.lower()}{self.day.year}{self.day.month:02}{self.day.day:02}min.min'
-        )
+        path_station = os.path.join(self.lcl_downloaded, 
+                                    'Magnetometer', 
+                                    network_station, 
+                                    str(self.day.year), 
+                                    self.st, 
+                                    f'{self.st.lower()}{self.day.year}{self.day.month:02}{self.day.day:02}min.min'
+                                    )
         is_header = True
         data = []
 
@@ -237,7 +232,7 @@ class CalmModel(GraphsModule):
             self.st = 'VSS' if (self.st == 'VSI') or (self.st == 'VSE') else self.st
             for line in lines:
                 if line == '':
-                    continue
+                    continue 
                 if is_header:
                     if line.find('H(nT)') != -1:
                         is_header = False
@@ -266,33 +261,33 @@ class CalmModel(GraphsModule):
                                 data_dict['Z'] = float(separated_data[7]) if float(separated_data[7]) != 99999.00 else None
                                 data_dict['I'] = float(separated_data[8]) if float(separated_data[8]) != 99999.00 else None
                                 data_dict['F'] = float(separated_data[9]) if float(separated_data[9]) != 99999.00 else None
-                            except Exception:
+                            except Exception as error:
                                 print('error getting data: ', archive_case)
 
                         case 'intermagnet:x,y,f':
                             try:
-                                if float(separated_data[3]) != 99999.00 and float(separated_data[4]) != 99999.00:
-                                    data_dict['H'] = math.sqrt(float(separated_data[3]) ** 2 + float(separated_data[4]) ** 2)
+                                if float(separated_data[3]) != 99999.00 and float(separated_data[4]) != 99999.00:   
+                                    data_dict['H'] = math.sqrt(float(separated_data[3])**2+float(separated_data[4])**2)
                                 else:
                                     data_dict['H'] = None
                                 data_dict['X'] = float(separated_data[3]) if float(separated_data[3]) != 99999.00 else None
                                 data_dict['Y'] = float(separated_data[4]) if float(separated_data[4]) != 99999.00 else None
                                 data_dict['Z'] = float(separated_data[5]) if float(separated_data[5]) != 99999.00 else None
                                 data_dict['F'] = float(separated_data[6]) if float(separated_data[6]) != 99999.00 else None
-                            except Exception:
+                            except Exception as error:
                                 print('error getting data: ', archive_case)
 
                         case 'intermagnet:x,y,g':
                             try:
                                 if float(separated_data[3]) != 99999.00 and float(separated_data[4]) != 99999.00:
-                                    data_dict['H'] = math.sqrt(float(separated_data[3]) ** 2 + float(separated_data[4]) ** 2)
+                                    data_dict['H'] = math.sqrt(float(separated_data[3])**2+float(separated_data[4])**2)
                                 else:
                                     data_dict['H'] = None
                                 data_dict['X'] = float(separated_data[3]) if float(separated_data[3]) != 99999.00 else None
                                 data_dict['Y'] = float(separated_data[4]) if float(separated_data[4]) != 99999.00 else None
                                 data_dict['Z'] = float(separated_data[5]) if float(separated_data[5]) != 99999.00 else None
                                 data_dict['G'] = float(separated_data[6]) if float(separated_data[6]) != 99999.00 else None
-                            except Exception:
+                            except Exception as error:
                                 print('error getting data: ', archive_case)
 
                         case 'intermagnet:h':
@@ -301,16 +296,15 @@ class CalmModel(GraphsModule):
                                 data_dict['D'] = float(separated_data[4]) if float(separated_data[4]) != 99999.00 else None
                                 data_dict['Z'] = float(separated_data[5]) if float(separated_data[5]) != 99999.00 else None
                                 data_dict['F'] = float(separated_data[6]) if float(separated_data[6]) != 99999.00 else None
-                            except Exception:
+                            except Exception as error:
                                 print('error getting data: ', archive_case)
 
-                    if data_dict != {}:
-                        data.append(data_dict)
-
+                    data.append(data_dict)
             return data
-
         except Exception as error:
-            QMessageBox.information(self.root,
+            QMessageBox.information(
+                None,
                 self.util.dict_language[self.lang]["mgbox_error"],
-                f'{self.util.dict_language[self.lang]["mgbox_error_info_ad"]}: {error}')
+                f'{self.util.dict_language[self.lang]["mgbox_error_info_ad"]}: {error}'
+            )
             return data

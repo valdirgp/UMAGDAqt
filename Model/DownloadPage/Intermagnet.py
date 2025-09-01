@@ -10,10 +10,9 @@ import threading as mt
 import queue
 from PyQt5.QtWidgets import QMessageBox
 
-
 class Intermagnet(DownloadModule):
-    def __init__(self, language):
-        super().__init__(language)
+    def __init__(self, language, root=None):
+        super().__init__(language, root)
 
     # creates a list with all stations from the Intermagnet network
     def create_stationlist(self):
@@ -24,7 +23,7 @@ class Intermagnet(DownloadModule):
                 verify=False)
             soup = BeautifulSoup(response.content, 'html.parser')
             options = soup.find_all('option')
-            stations = []
+            stations = list()
             for option in options:
                 station = option.get('value')
                 if len(station) == 3 and station.isalpha():
@@ -33,24 +32,23 @@ class Intermagnet(DownloadModule):
             return stations
         except Exception:
             QMessageBox.information(
-                None,
-                self.util.dict_language[self.lang]["mgbox_error"],
-                "Erro ao conectar-se com intermagnet"
-            )
+                self.root,
+                self.util.dict_language[self.lang]["mgbox_error"], 
+                'Erro ao conectar-se com intermagnet')
             return []
-
+    
     # gets information and control save data
     def initialize_download_Intermagnet(self, root, local_download, selected_stations, duration, duration_type, start_date):
         self.root = root
         self.lcl_download = local_download
         self.opener = request.build_opener(request.HTTPSHandler)
-
+        
         number_days, final_date = self.calculate_num_days(int(duration), duration_type, start_date)
         total_downloads = number_days * len(selected_stations)
-
-        max_threads = 8
+        
+        max_threads = 8 
         self.semaphore_threading = mt.Semaphore(max_threads)
-        requests_list = []
+        requests_list = list()
         self.requests_queue = queue.Queue()
 
         for station in selected_stations:
@@ -60,71 +58,50 @@ class Intermagnet(DownloadModule):
                 date += timedelta(days=1)
         for req in requests_list:
             self.requests_queue.put(req)
-        threads = []
+        threads = [] 
         for _ in range(max_threads):
             threads.append(mt.Thread(target=self.get_file))
 
-        self.create_progressbar("progbar_dwd_Intermagnet", total_downloads)
+        self.create_progressbar('progbar_dwd_Intermagnet', total_downloads)
         for thread in threads:
-            thread.start()
+            thread.start()        
 
-    def add_request_queue(self, station, date, requests_list):
-        """makes queue for download with info from each request"""
-        st = "VSS" if station == "VSI" else station
-        url = (
-            f"https://imag-data.bgs.ac.uk/GIN_V1/GINServices?Request=GetData&format=IAGA2002&testObsys=0"
-            f"&observatoryIagaCode={st}&samplesPerDay=1440&orientation=Native&publicationState=adj-or-rep"
-            f"&recordTermination=UNIX&dataStartDate={date.year}-{date.month:02}-{date.day:02}&dataDuration=1"
-        )
-        requests_list.append({"url": url, "station": station, "date": date})
-        return requests_list
-
+    def add_request_queue(self, station, date, requests):
+        st = 'VSS' if station == 'VSI' else station
+        url = f'https://imag-data.bgs.ac.uk/GIN_V1/GINServices?Request=GetData&format=IAGA2002&testObsys=0&observatoryIagaCode={st}&samplesPerDay=1440&orientation=Native&publicationState=adj-or-rep&recordTermination=UNIX&dataStartDate={date.year}-{date.month:02}-{date.day:02}&dataDuration=1'
+        requests.append({'url': url, 'station': station, 'date': date})
+        return requests
+        
     # gets all the text
     def get_file(self):
         while not self.requests_queue.empty():
-            request_info = self.requests_queue.get()
+            request_item = self.requests_queue.get()
             try:
                 with self.semaphore_threading:
-                    with self.opener.open(request_info["url"]) as f_in:
+                    with self.opener.open(request_item['url']) as f_in:
                         raw_data = f_in.read()
                     result = detect(raw_data[:1000])
-                    encoding = result["encoding"]
+                    encoding = result['encoding']
                     text = raw_data.decode(encoding)
-                    lines = text.split("\n")
+                    lines = text.split('\n')
 
                     data_exists = False
-                    for line in lines:
-                        if re.search("Publication Date", line):
+                    for line in lines: 
+                        if re.search('Publication Date', line):
                             l = line.split()
-                            if l[2] == "|":
-                                print(
-                                    f"Sem dados: {request_info['station'].lower()}"
-                                    f"{request_info['date'].year}{request_info['date'].month:02}"
-                                    f"{request_info['date'].day:02}min.min"
-                                )
+                            if l[2] == '|':
+                                print(f'Sem dados: {request_item["station"].lower()}{request_item["date"].year}{request_item["date"].month:02}{request_item["date"].day:02}min.min')
                             else:
                                 data_exists = True
                             break
 
                     if data_exists:
-                        directory_path = self.create_dict_path(
-                            request_info["station"],
-                            str(request_info["date"].year),
-                            "INTERMAGNET"
-                        )
-                        file_path = os.path.join(
-                            directory_path,
-                            f"{request_info['station'].lower()}{str(request_info['date'].year)}"
-                            f"{request_info['date'].month:02}{request_info['date'].day:02}min.min"
-                        )
-                        with open(file_path, "w+", encoding="utf-8") as file:
+                        directory_path = self.create_dict_path(request_item['station'], str(request_item['date'].year), 'INTERMAGNET')
+                        file_path = os.path.join(directory_path, f'{request_item["station"].lower()}{str(request_item["date"].year)}{request_item["date"].month:02}{request_item["date"].day:02}min.min')
+                        with open(file_path, 'w+', encoding='utf-8') as file:
                             for line in lines:
-                                file.write(line + "\n")
+                                file.write(line+'\n')
             except Exception as error:
-                print(
-                    f"Erro no download: {request_info['station'].lower()}"
-                    f"{str(request_info['date'].year)}{request_info['date'].month:02}"
-                    f"{request_info['date'].day:02}min.min: {error}"
-                )
+                print(f'Erro no download: {request_item["station"].lower()}{request_item["date"].year}{request_item["date"].month:02}{request_item["date"].day:02}min.min: {error}')
             finally:
                 self.update_progressbar()

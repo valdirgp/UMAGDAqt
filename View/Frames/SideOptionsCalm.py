@@ -1,80 +1,126 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget, QComboBox, QPushButton, QCalendarWidget, QHBoxLayout
-from PyQt5.QtCore import Qt
-from General.util import Util
+from Model.Custom.CustomttkFrame import ScrollableFrame
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QListWidget, QAbstractItemView,
+    QPushButton, QCalendarWidget, QDateEdit, QSizePolicy, QScrollBar
+)
+from PyQt5.QtCore import QDate
 import psutil
+from General.util import Util
 
 class SideOptionsCalm(QWidget):
-    def __init__(self, parent=None, language='en'):
-        super().__init__(parent)
+    def __init__(self, root, language):
+        super().__init__(root)
+        self.window = root
         self.lang = language
         self.util = Util()
         self.selected_calm_dates = []
+        self.combo_local_download = None
         self.local_downloads_function = None
 
-        self.layout = QVBoxLayout(self)
-        self.setLayout(self.layout)
-
-        self.combo_download_location = QComboBox()
-        self.list_all_stations = QListWidget()
-        self.startdate = QCalendarWidget()
-        self.enddate = QCalendarWidget()
-        self.cal_calm = QCalendarWidget()
-        self.btn_clear_all = QPushButton()
-        self.btn_plot_confirm = QPushButton()
-
-        self.create_calm_plot_options()
-
+    # Creates options to create graphs
     def create_calm_plot_options(self):
+        self.frame_side_functions_calm = ScrollableFrame(self.window, 255)
+        self.frame_side_functions_calm.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        self.frame_side_functions_calm.setMinimumWidth(255)
+        self.frame_side_functions_calm.setMaximumWidth(255)
+        self.frame_side_functions_calm.setFixedWidth(255)
+        self.frame_side_functions_calm.setObjectName("sideOptionsCalmFrame")
+
+        layout = QVBoxLayout(self.frame_side_functions_calm.inner_frame)
+        layout.setContentsMargins(5, 5, 5, 5)
+        layout.setSpacing(8)
+
         # Drive selection
-        self.layout.addWidget(QLabel(self.util.dict_language[self.lang]['lbl_dr']))
+        lbl_drive = QLabel(self.util.dict_language[self.lang]['lbl_dr'])
+        layout.addWidget(lbl_drive)
+        self.combo_download_location = QComboBox()
         self.populate_combo_local()
         self.combo_download_location.currentIndexChanged.connect(self.change_local)
-        self.layout.addWidget(self.combo_download_location)
+        layout.addWidget(self.combo_download_location)
 
         # Station selection
-        self.layout.addWidget(QLabel(self.util.dict_language[self.lang]['lbl_st']))
-        self.layout.addWidget(self.list_all_stations)
+        lbl_station = QLabel(self.util.dict_language[self.lang]['lbl_st'])
+        layout.addWidget(lbl_station)
+        self.list_all_stations = QListWidget()
+        self.list_all_stations.setSelectionMode(QAbstractItemView.SingleSelection)
+        layout.addWidget(self.list_all_stations)
+        self.scrollbar = QScrollBar()
+        self.list_all_stations.setVerticalScrollBar(self.scrollbar)
 
-        # Duration
-        self.layout.addWidget(QLabel(self.util.dict_language[self.lang]['lbl_dur']))
-        self.layout.addWidget(QLabel(self.util.dict_language[self.lang]['lbl_init_dt']))
-        self.layout.addWidget(self.startdate)
-        self.layout.addWidget(QLabel(self.util.dict_language[self.lang]['lbl_fin_dt']))
-        self.layout.addWidget(self.enddate)
+        # Duration label
+        lbl_duration = QLabel(self.util.dict_language[self.lang]['lbl_dur'])
+        layout.addWidget(lbl_duration)
 
-        # Calm date selection
-        self.layout.addWidget(QLabel(self.util.dict_language[self.lang]['lbl_calm']))
+        # Initial date
+        lbl_initial_date = QLabel(self.util.dict_language[self.lang]['lbl_init_dt'])
+        layout.addWidget(lbl_initial_date)
+        self.startdate = QDateEdit()
+        self.startdate.setDisplayFormat('dd/MM/yyyy')
+        self.startdate.setCalendarPopup(True)
+        self.startdate.setDate(QDate.currentDate())
+        layout.addWidget(self.startdate)
+
+        # Final date
+        lbl_final_date = QLabel(self.util.dict_language[self.lang]['lbl_fin_dt'])
+        layout.addWidget(lbl_final_date)
+        self.enddate = QDateEdit()
+        self.enddate.setDisplayFormat('dd/MM/yyyy')
+        self.enddate.setCalendarPopup(True)
+        self.enddate.setDate(QDate.currentDate())
+        layout.addWidget(self.enddate)
+
+        # Calm days calendar
+        lbl_calm_date = QLabel(self.util.dict_language[self.lang]['lbl_calm'])
+        layout.addWidget(lbl_calm_date)
+        self.cal_calm = QCalendarWidget()
+        self.cal_calm.setGridVisible(True)
         self.cal_calm.selectionChanged.connect(lambda: self.add_date(self.cal_calm, self.selected_calm_dates))
-        self.layout.addWidget(self.cal_calm)
+        layout.addWidget(self.cal_calm)
 
-        # Buttons
-        self.btn_clear_all.setText(self.util.dict_language[self.lang]['btn_clr'])
+        # Clear all button
+        self.btn_clear_all = QPushButton(self.util.dict_language[self.lang]['btn_clr'])
         self.btn_clear_all.clicked.connect(self.clean_all)
-        self.layout.addWidget(self.btn_clear_all)
+        layout.addWidget(self.btn_clear_all)
 
-        self.btn_plot_confirm.setText(self.util.dict_language[self.lang]['btn_confirm'])
-        self.layout.addWidget(self.btn_plot_confirm)
+        # Confirm button
+        self.btn_plot_confirm = QPushButton(self.util.dict_language[self.lang]['btn_confirm'])
+        layout.addWidget(self.btn_plot_confirm)
 
+        self.frame_side_functions_calm.inner_frame.setLayout(layout)
+        self.frame_side_functions_calm.setLayout(QVBoxLayout())
+        self.frame_side_functions_calm.show()
+
+    # Add or remove selected date
     def add_date(self, calendar_widget, list_type):
         date = calendar_widget.selectedDate().toPyDate()
         if date not in list_type:
             list_type.append(date)
+            # No direct equivalent to calevent_create in QCalendarWidget, so just store in list
         else:
             list_type.remove(date)
+            # No direct equivalent to calevent_remove in QCalendarWidget
 
+    # Clear all station's list
     def clean_all(self):
         self.selected_calm_dates.clear()
+        # No direct equivalent to calevent_remove("all") in QCalendarWidget, so just clear the list
 
-    def populate_list_options(self, list_widget, stations):
-        list_widget.clear()
-        for station in stations:
-            list_widget.addItem(station)
+    # Fill a listbox with the given data
+    def populate_list_options(self, listwidget, stations):
+        listwidget.clear()
+        for i in stations:
+            listwidget.addItem(i)
 
+    # Fill combobox that chooses path
     def populate_combo_local(self):
-        combo_list = [part.device for part in psutil.disk_partitions()]
+        combo_list = []
+        particoes = psutil.disk_partitions()
+        for particao in particoes:
+            combo_list.append(particao.device)
         self.combo_download_location.clear()
         self.combo_download_location.addItems(combo_list)
 
-    def change_local(self):
+    # Update all info came from the chosen drive 
+    def change_local(self, index):
         if self.local_downloads_function:
             self.local_downloads_function()

@@ -10,12 +10,10 @@ import re
 from charset_normalizer import detect
 from urllib3.exceptions import InsecureRequestWarning
 from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtCore import QTimer
-
 
 class Readme(DownloadModule):
-    def __init__(self, language):
-        super().__init__(language)
+    def __init__(self, language, root=None):
+        super().__init__(language, root)
         self.util = Util()
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -31,20 +29,17 @@ class Readme(DownloadModule):
 
         self.request_embrace_queue = queue.Queue()
         self.request_intermagnet_queue = queue.Queue()
-        for station in liststations_Embrace: 
-            self.request_embrace_queue.put(station)
-        for station in liststations_Intermagnet: 
-            self.request_intermagnet_queue.put(station)
+        for station in liststations_Embrace: self.request_embrace_queue.put(station)
+        for station in liststations_Intermagnet: self.request_intermagnet_queue.put(station)
 
         self.threads = []
-        for _ in range(int(max_threads / 2)):
+        for _ in range(int(max_threads/2)): 
             self.threads.append(mt.Thread(target=self.get_embrace_info))
             self.threads.append(mt.Thread(target=self.get_Intermagnet_info))
 
         # download start with threading
         self.create_progressbar('progbar_dwd_readme', total_downloads)
-        for thread in self.threads: 
-            thread.start()
+        for thread in self.threads: thread.start()
         self.check_write(restart_page)
 
     # searches station's full name in their files and location in embrace's readme
@@ -60,33 +55,27 @@ class Readme(DownloadModule):
                     for link_year in links_year:
                         year = link_year.get('href')
                         year = year.replace('/', '')
-
+                            
                         if year.isdigit():
                             response = requests.get(f'https://embracedata.inpe.br/magnetometer/{station}/{year}/', verify=False)
                             soup = BeautifulSoup(response.content, 'html.parser')
                             linksday = soup.find_all('a')
-
+                                
                             for linkday in linksday:
                                 day = linkday.get('href')
 
                                 if day[0].isalpha():
-                                    response = requests.get(
-                                        f'https://embracedata.inpe.br/magnetometer/{station}/{year}/{day}', 
-                                        verify=False
-                                    )
+                                    response = requests.get(f'https://embracedata.inpe.br/magnetometer/{station}/{year}/{day}', verify=False)
                                     soup = BeautifulSoup(response.content, 'html.parser')
                                     text = soup.get_text()
                                     lines = text.split('\n')
                                     station_name = ''
-
+                                        
                                     for i in lines[0]:
                                         if i != '-':
                                             station_name += i
                                         else:
-                                            station_info = {
-                                                'station_acronym': station, 
-                                                'station_name': station_name.upper()
-                                            }
+                                            station_info = {'station_acronym': station, 'station_name': station_name.upper()} 
                                             break
                                     break
                             break
@@ -94,13 +83,13 @@ class Readme(DownloadModule):
                     response = requests.get('https://embracedata.inpe.br/magnetometer/readme_magnetometer.txt', verify=False)
                     soup = BeautifulSoup(response.content, 'html.parser')
                     text = soup.get_text().split('\n')
-                    for line in text:
+                    for line in text: 
                         if re.search(station.lower(), line):
                             word = line.split()
                             station_info.update({'long': word[0], 'lat': word[1]})
                             self.info_embrace_stations.append(station_info)
                             break
-            except Exception as error:
+            except Exception as error: 
                 print('Erro no download readme(Embrace): ', error)
             finally:
                 self.update_progressbar()
@@ -112,17 +101,12 @@ class Readme(DownloadModule):
             station = 'VSS' if station == 'VSI' else station
             try:
                 with self.semaphore_threading:
-                    url = (
-                        f'https://imag-data.bgs.ac.uk/GIN_V1/GINServices?Request=GetData&format=IAGA2002&testObsys=0'
-                        f'&observatoryIagaCode={station}&samplesPerDay=1440&orientation=Native'
-                        f'&publicationState=adj-or-rep&recordTermination=UNIX&dataStartDate=1900-01-01&dataDuration=1'
-                    )
+                    url = f'https://imag-data.bgs.ac.uk/GIN_V1/GINServices?Request=GetData&format=IAGA2002&testObsys=0&observatoryIagaCode={station}&samplesPerDay=1440&orientation=Native&publicationState=adj-or-rep&recordTermination=UNIX&dataStartDate=1900-01-01&dataDuration=1'
                     default_handler = request.HTTPSHandler
                     opener = request.build_opener(default_handler)
                     station_info = {}
                     try:
-                        with opener.open(url) as f_in: 
-                            raw_data = f_in.read()
+                        with opener.open(url) as f_in: raw_data = f_in.read()
                         result = detect(raw_data[:1000])
                         encoding = result['encoding']
                         text = raw_data.decode(encoding)
@@ -135,12 +119,12 @@ class Readme(DownloadModule):
                                 station_info['station_acronym'] = station
                             elif re.search('^ Geodetic Latitude', line):
                                 station_info['lat'] = l[1]
-                            elif re.search('^ Geodetic Longitude', line):
+                            elif re.search('^ Geodetic Longitude', line):    
                                 station_info['long'] = l[1]
-
+                            
                     except (URLError, IOError, OSError) as error:
                         print(f'Erro no download readme {station}', error)
-
+            
                     self.info_intermagnet_stations.append(station_info)
             except Exception as error:
                 print(f'Erro no download readme(Intermagnet): ', error)
@@ -151,28 +135,22 @@ class Readme(DownloadModule):
     def write_readme(self):
         with open('readme_stations.txt', 'w') as f:
             f.write("acronym     station                                             longitude     latitude    source\n")
-            if self.info_embrace_stations:  # check if embrace info was obtained
+            if self.info_embrace_stations: # check if embrace info was obtained
                 for station in self.info_embrace_stations:
-                    f.write(
-                        f"{station['station_acronym']: <10}  {station['station_name']: <50}  "
-                        f"{station['long']: <12}  {station['lat']: <10}  EMBRACE\n"
-                    )
+                    f.write(f"{station['station_acronym']: <10}  {station['station_name']: <50}  {station['long']: <12}  {station['lat']: <10}  EMBRACE\n")
             else:
                 QMessageBox.information(
-                    None,
+                    self.root,
                     self.util.dict_language[self.lang]["mgbox_error"],
                     self.util.dict_language[self.lang]["mgbox_error_readme_embrace"]
                 )
 
-            if self.info_intermagnet_stations:  # check if intermagnet info was obtained
+            if self.info_intermagnet_stations: # check if intermagnet info was obtained
                 for station in self.info_intermagnet_stations:
-                    f.write(
-                        f"{station['station_acronym']: <10}  {station['station_name'].upper(): <50}  "
-                        f"{station['long']: <12}  {station['lat']: <10}  INTERMAGNET\n"
-                    )
+                    f.write(f"{station['station_acronym']: <10}  {station['station_name'].upper(): <50}  {station['long']: <12}  {station['lat']: <10}  INTERMAGNET\n")
             else:
                 QMessageBox.information(
-                    None,
+                    self.root,
                     self.util.dict_language[self.lang]["mgbox_error"],
                     self.util.dict_language[self.lang]["mgbox_error_readme_intermag"]
                 )
@@ -180,6 +158,8 @@ class Readme(DownloadModule):
     # checks if download is completed to write file and restart pages
     def check_write(self, restart_page):
         if self.porcentage < 100:
+            # Em PyQt5, use QTimer.singleShot para agendar a checagem
+            from PyQt5.QtCore import QTimer
             QTimer.singleShot(500, lambda: self.check_write(restart_page))
         else:
             self.write_readme()

@@ -4,12 +4,14 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from PyQt5.QtWidgets import QMessageBox
+import os
+import re
 
 class TideGraph(GraphsModule):
     def __init__(self, root, language):
         self.root = root
         self.lang = language
-        super().__init__(self.lang, self.root)
+        super().__init__(self.lang)
 
     # creates one graph that has all data in a period of time
     def plot_tide(self, local_downloaded, stations, selected_types, bold_text, grid_graph, start, end, selected_dates, cal_selection, data_with_stations):
@@ -23,29 +25,27 @@ class TideGraph(GraphsModule):
         self.slct_types = selected_types
 
         self.start_date, self.end_date = self.format_dates(start, end)
-        if not self.start_date:
-            return
         self.end_date += timedelta(days=1)
+        if not self.start_date: 
+            return
 
         # gets all data needed
         self.all_data = self.get_stations_data()
-        if not self.all_data:
+        if not self.all_data: 
             return
 
         # organize and plot data
         self.can_plot = True
         self.info_time = None
         for slct_type in selected_types:
-            if 'd' in slct_type:
-                self.add_delta_dict(slct_type)
+            if 'd' in slct_type: self.add_delta_dict(slct_type)
 
         if 'reference' in selected_types:
             selected_types.remove('reference')
             selected_types.extend(f'{type.replace("d", "")}-reference' for type in selected_types if 'd' in type)
             self.add_reference(selected_types)
-
         avarage_types = self.calculate_type_averages(selected_types, stations)
-        if not avarage_types:
+        if not avarage_types: 
             return
 
         self.add_plots(selected_types)
@@ -53,11 +53,7 @@ class TideGraph(GraphsModule):
         if not self.can_plot:
             return
 
-        self.fig.canvas.manager.toolmanager.add_tool(
-            'Graph Info',
-            CustomPltOptions,
-            inform_graph=lambda: self.inform_graph(selected_types, avarage_types)
-        )
+        self.fig.canvas.manager.toolmanager.add_tool('Graph Info', CustomPltOptions, inform_graph=lambda: self.inform_graph(selected_types, avarage_types))
         self.fig.canvas.manager.toolbar.add_tool('Graph Info', 'io')
         plt.show()
 
@@ -84,12 +80,12 @@ class TideGraph(GraphsModule):
                     for day, times in self.all_data[station].items():
                         for t, time in enumerate(times):
                             self.all_data[station][day][time][type] = calm_averages[t] - delta if calm_averages[t] is not None else None
-
+    
     # add in plot the given data
     def add_plots(self, slct_types):
         try:
             plt.close('all')
-            plt.rcParams['toolbar'] = 'toolmanager'
+            plt.rcParams['toolbar'] = 'toolmanager' # allows custom tools mode
             self.fig, self.ax = plt.subplots()
             self.filtred_values = []
 
@@ -100,31 +96,33 @@ class TideGraph(GraphsModule):
                         plot_values = []
                         for time in times:
                             data = self.all_data[station][day][time][plot_type]
-                            if data is not None:
-                                self.filtred_values.append(data)
+                            if data is not None: self.filtred_values.append(data)
                             plot_values.append(data)
 
-                        time_axis = [self.start_date + timedelta(minutes=min) for min in range(1440)]
+                        # Use the actual start_date for the x-axis
+                        time = [self.start_date + timedelta(minutes=min) for min in range(1440)]
                         if 'reference' in plot_type:
-                            if control_reference:
-                                self.ax.plot(time_axis, plot_values, label=plot_type)
+                            if control_reference: # controle para que o mesmo tipo de referencia não se repita
+                                self.ax.plot(time, plot_values, label=plot_type)
                             break
                         else:
-                            self.ax.plot(time_axis, plot_values, label=f'{station}-{plot_type}')
+                            self.ax.plot(time, plot_values, label=f'{station}-{plot_type}')
                     control_reference = False
 
         except Exception as error:
-            self.show_message(
+            QMessageBox.information(
+                None,
                 self.util.dict_language[self.lang]["mgbox_error"],
                 self.util.dict_language[self.lang]["mgbox_error_plt"]
             )
             self.can_plot = False
             print(error)
 
-    # configure graph specifications
+    # configure graph especifications
     def config_graph(self, plot_type, station):
         final_date = self.end_date - timedelta(days=1)
         self.ax.minorticks_on()
+        # Use the actual start_date for the x-axis
         timehour = [self.start_date + timedelta(hours=i) for i in range(24)]
         self.ax.set_xticks(timehour, minor=True)
         self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
@@ -136,29 +134,25 @@ class TideGraph(GraphsModule):
         if self.filtred_values:
             self.ax.set_ylim(min(self.filtred_values), max(self.filtred_values))
         else:
-            self.show_message(
+            QMessageBox.information(
+                None,
                 self.util.dict_language[self.lang]["mgbox_error"],
                 self.util.dict_language[self.lang]["mgbox_error_noinfo_period"]
             )
             self.can_plot = False
             return
 
-        self.ax.set_ylabel(F'{", ".join(plot_type)} ({self.get_measure(plot_type)})')
+        self.ax.set_ylabel(f'{", ".join(plot_type)} ({self.get_measure(plot_type)})')
         self.ax.set_xlabel('UT')
         self.ax.set_title(f'{station} {self.start_date.day:02}/{self.start_date.month:02}/{self.start_date.year} - {final_date.day:02}/{final_date.month:02}/{final_date.year}')
+        # self.ax.legend()
 
         if self.bold_text:
             self.ax.xaxis.label.set_weight('bold')
             self.ax.yaxis.label.set_weight('bold')
             self.ax.title.set_weight('bold')
-            for label in self.ax.get_xticklabels() + self.ax.get_yticklabels():
-                label.set_fontweight('bold')
+            for label in self.ax.get_xticklabels() + self.ax.get_yticklabels(): label.set_fontweight('bold')
         
-        if self.grid_graph:
-            self.ax.grid()
+        if self.grid_graph: self.ax.grid()
         
         self.fig.canvas.mpl_connect('button_press_event', lambda event: self.create_exporter_level_top(event, plot_type))
-
-    # PyQt5 message box
-    def show_message(self, title, message):
-        QMessageBox.information(self.root, title, message)

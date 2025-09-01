@@ -4,12 +4,14 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from PyQt5.QtWidgets import QMessageBox
+import os
+import re
 
 class ManyGraphs(GraphsModule):
     def __init__(self, root, language):
         self.root = root
         self.lang = language
-        super().__init__(self.lang, self.root)
+        super().__init__(self.lang)
 
     # creates one graph that has all data in a period of time
     def plot_more_days(self, local_downloaded, stations, selected_types, bold_text, grid_graph, start, end, selected_dates, cal_selection, data_with_stations, number_columns=0, number_rows=0):
@@ -38,14 +40,12 @@ class ManyGraphs(GraphsModule):
         self.can_plot = True
         self.info_time = None
         for slct_type in selected_types:
-            if 'd' in slct_type: 
-                self.add_delta_dict(slct_type)
+            if 'd' in slct_type: self.add_delta_dict(slct_type)
 
         if 'reference' in selected_types:
             selected_types.remove('reference')
             selected_types.extend(f'{type.replace("d", "")}-reference' for type in selected_types if 'd' in type)
             self.add_reference(selected_types)
-
         avarage_types = self.calculate_type_averages(selected_types, stations)
         if not avarage_types: 
             return
@@ -54,11 +54,7 @@ class ManyGraphs(GraphsModule):
         if not self.can_plot:
             return
         
-        self.fig.canvas.manager.toolmanager.add_tool(
-            'Graph Info', 
-            CustomPltOptions, 
-            inform_graph=lambda: self.inform_graph(selected_types, avarage_types)
-        )
+        self.fig.canvas.manager.toolmanager.add_tool('Graph Info', CustomPltOptions, inform_graph= lambda: self.inform_graph(selected_types, avarage_types))
         self.fig.canvas.manager.toolbar.add_tool('Graph Info', 'io')
         plt.show()
 
@@ -66,7 +62,8 @@ class ManyGraphs(GraphsModule):
     def validate_grid(self, number_columns, number_rows):
         difference_dates = self.end_date - self.start_date
         if number_columns * number_rows != difference_dates.days:
-            self.show_message(
+            QMessageBox.information(
+                None,
                 self.util.dict_language[self.lang]["mgbox_error"],
                 self.util.dict_language[self.lang]["mgbox_error_rowcol"]
             )
@@ -118,12 +115,12 @@ class ManyGraphs(GraphsModule):
                             if data is not None: self.filtred_values.append(data)
                             plot_values.append(data)
 
-                        time_axis = [self.start_date + timedelta(minutes=min) for min in range(1440)]
+                        time = [self.start_date + timedelta(minutes=min) for min in range(1440)]
                         if 'reference' in plot_type:
-                            if control_reference:  # evita repetir a referência
-                                self.axs[dy].plot(time_axis, plot_values, label=plot_type)
+                            if control_reference: # controle para que o mesmo tipo de referencia não se repita
+                                self.axs[dy].plot(time, plot_values, label=plot_type)
                         else:
-                            self.axs[dy].plot(time_axis, plot_values, label=f'{station}-{plot_type}')
+                            self.axs[dy].plot(time, plot_values, label=f'{station}-{plot_type}')
 
                         timehour = [self.current_date + timedelta(hours=h) for h in range(24)]
                         self.axs[dy].minorticks_on()
@@ -132,11 +129,12 @@ class ManyGraphs(GraphsModule):
                         self.axs[dy].tick_params(axis='x', which='both', top=True, labeltop=False, bottom=True, labelbottom=True)
                         self.axs[dy].tick_params(axis='y', which='both', right=True, labelright=False, left=True, labelleft=True)
 
-                        self.axs[dy].set_xlim(self.start_date, self.start_date + timedelta(hours=24))
+                        self.axs[dy].set_xlim(self.start_date, self.start_date+timedelta(hours=24))
                         if self.filtred_values:
                             self.axs[dy].set_ylim(min(self.filtred_values), max(self.filtred_values))
                         else:
-                            self.show_message(
+                            QMessageBox.information(
+                                None,
                                 self.util.dict_language[self.lang]["mgbox_error"],
                                 self.util.dict_language[self.lang]["mgbox_error_noinfo_period"]
                             )
@@ -153,11 +151,9 @@ class ManyGraphs(GraphsModule):
                             self.axs[dy].xaxis.label.set_weight('bold')
                             self.axs[dy].yaxis.label.set_weight('bold')
                             self.axs[dy].title.set_weight('bold')
-                            for label in self.axs[dy].get_xticklabels() + self.axs[dy].get_yticklabels():
-                                label.set_fontweight('bold')
+                            for label in self.axs[dy].get_xticklabels() + self.axs[dy].get_yticklabels(): label.set_fontweight('bold')
 
-                        if self.grid_graph:
-                            self.axs[dy].grid()
+                        if self.grid_graph: self.axs[dy].grid()
 
                     self.fig.suptitle(f'{plot_type} {self.start_date.strftime("%d/%m/%Y")} - {final_date.strftime("%d/%m/%Y")}')
                     plt.tight_layout()
@@ -167,7 +163,8 @@ class ManyGraphs(GraphsModule):
             self.fig.canvas.mpl_connect('button_press_event', lambda event: self.create_exporter_level_top(event, slct_types))
 
         except Exception as error:
-            self.show_message(
+            QMessageBox.information(
+                None,
                 self.util.dict_language[self.lang]["mgbox_error"],
                 self.util.dict_language[self.lang]["mgbox_error_plt"]
             )

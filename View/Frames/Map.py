@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from Model.Custom.CustomToolBar import CustomToolbar
 import cartopy.crs as ccrs
@@ -6,18 +6,26 @@ import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 
 class Map(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.all_locals = []
-        self.colors = []
+    def __init__(self, root):
+        super().__init__(root)
+        self.page_frame = root
+        self.colors = None
+        self.map_frame = None
+        self.toolbar = None
+        self.canvas = None
+
         self.scart_plots = []
         self.text_annotations = []
+        self.all_locals = []
 
-        self.layout = QVBoxLayout(self)
-        self.setLayout(self.layout)
-        self.create_map()
-
+    # creates frame for to select stations
     def create_map(self):
+        # Main layout for the map frame
+        self.map_frame = QWidget(self.page_frame)
+        layout = QVBoxLayout(self.map_frame)
+        self.map_frame.setLayout(layout)
+
+        # Create matplotlib figure and axis with Cartopy
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(projection=ccrs.PlateCarree())
         self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
@@ -30,13 +38,18 @@ class Map(QWidget):
         self.ax.add_feature(cfeature.BORDERS)
         self.ax.add_feature(cfeature.RIVERS)
 
+        # Create the canvas and toolbar for PyQt5
         self.canvas = FigureCanvas(self.fig)
-        self.layout.addWidget(self.canvas)
+        self.toolbar = CustomToolbar(self.canvas, self.map_frame, total_locals=self.all_locals)
 
-        self.toolbar = CustomToolbar(self.canvas, self, total_locals=self.all_locals)
-        self.layout.addWidget(self.toolbar)
-        self.canvas.draw()
+        # Add toolbar and canvas to the layout
+        layout.addWidget(self.toolbar)
+        layout.addWidget(self.canvas)
 
+        self.map_frame.setLayout(layout)
+        self.map_frame.show()
+
+    # creates points in the map accordingly to longitude and latitude list
     def set_station_map(self, longitude, latitude):
         current_extent = self.ax.get_extent()
         self.colors = ['red'] * len(longitude)
@@ -45,6 +58,7 @@ class Map(QWidget):
         self.scart_plots.append(self.scart)
         self.canvas.draw()
 
+    # creates text in given coordinates in station_locals and its name
     def set_stationsname_map(self, station_locals):
         for coord in station_locals:
             text = self.ax.annotate(
@@ -57,14 +71,14 @@ class Map(QWidget):
             self.text_annotations.append(text)
         self.canvas.draw()
 
+    # select all points from map
     def select_all_points(self):
-        if self.colors:
-            self.colors = ['lightgreen'] * len(self.all_locals)
-            self.scart.set_facecolors(self.colors)
-            self.canvas.draw()
+        self.colors = ['lightgreen'] * len(self.all_locals)
+        self.scart.set_facecolors(self.colors)
+        self.canvas.draw()
 
+    # clear all points from map
     def clear_all_points(self):
-        if self.colors:
-            self.colors = ['red'] * len(self.all_locals)
-            self.scart.set_facecolors(self.colors)
-            self.canvas.draw()
+        self.colors = ['red'] * len(self.all_locals)
+        self.scart.set_facecolor(self.colors)
+        self.canvas.draw()

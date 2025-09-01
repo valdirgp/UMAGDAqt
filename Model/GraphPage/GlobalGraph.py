@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from PyQt5.QtWidgets import QMessageBox
 
-
 class GlobalGraph(GraphsModule):
     def __init__(self, root, language):
         self.root = root
@@ -33,12 +32,11 @@ class GlobalGraph(GraphsModule):
         if not self.all_data: 
             return
 
-        #orgaize and plot data
+        # organize and plot data
         self.can_plot = True
         self.info_time = None
         for slct_type in selected_types:
-            if 'd' in slct_type: 
-                self.add_delta_dict(slct_type)
+            if 'd' in slct_type: self.add_delta_dict(slct_type)
 
         if 'reference' in selected_types:
             selected_types.remove('reference')
@@ -53,11 +51,8 @@ class GlobalGraph(GraphsModule):
         if not self.can_plot:
             return
 
-        self.fig.canvas.manager.toolmanager.add_tool(
-            'Graph Info',
-            CustomPltOptions,
-            inform_graph=lambda: self.inform_graph(selected_types, avarage_types)
-        )
+        # Adaptação para PyQt5: usar CustomPltOptions normalmente, sem tk
+        self.fig.canvas.manager.toolmanager.add_tool('Graph Info', CustomPltOptions, inform_graph=lambda: self.inform_graph(selected_types, avarage_types))
         self.fig.canvas.manager.toolbar.add_tool('Graph Info', 'io')
         plt.show()
 
@@ -101,13 +96,12 @@ class GlobalGraph(GraphsModule):
                     for day, times in self.all_data[station].items():
                         for time in times:
                             data = self.all_data[station][day][time][plot_type]
-                            if data is not None: 
-                                self.filtred_values.append(data)
+                            if data is not None: self.filtred_values.append(data)
                             plot_values.append(data)
                         
                     time = [self.start_date + timedelta(minutes=i) for i in range(difference * 1440)]
                     if 'reference' in plot_type:
-                        if control_reference:  # garante que não repete referência
+                        if control_reference: # controle para que o mesmo tipo de referencia não se repita
                             self.ax.plot(time, plot_values, label=plot_type)
                         break
                     else:
@@ -145,7 +139,7 @@ class GlobalGraph(GraphsModule):
             self.can_plot = False
             return
 
-        self.ax.set_ylabel(f"{', '.join(plot_type)} ({self.get_measure(plot_type)})")
+        self.ax.set_ylabel(f'{", ".join(plot_type)} ({self.get_measure(plot_type)})')
         self.ax.set_xlabel('UT')
         self.ax.set_title(f'{station} {self.start_date.day:02}/{self.start_date.month:02}/{self.start_date.year} - {final_date.day:02}/{final_date.month:02}/{final_date.year}')
         self.ax.legend()
@@ -154,10 +148,10 @@ class GlobalGraph(GraphsModule):
             self.ax.xaxis.label.set_weight('bold')
             self.ax.yaxis.label.set_weight('bold')
             self.ax.title.set_weight('bold')
-            for label in self.ax.get_xticklabels() + self.ax.get_yticklabels(): 
+            for label in self.ax.get_xticklabels() + self.ax.get_yticklabels():
                 label.set_fontweight('bold')
 
-        if self.grid_graph: 
+        if self.grid_graph:
             self.ax.grid()
 
         self.fig.canvas.mpl_connect('button_press_event', lambda event: self.create_exporter_level_top(event, plot_type))

@@ -1,110 +1,120 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget, QComboBox, QLineEdit, QPushButton, QCalendarWidget, QHBoxLayout
-from PyQt5.QtGui import QDoubleValidator
-from PyQt5.QtCore import Qt
-from General.util import Util
+from Model.Custom.CustomttkFrame import ScrollableFrame
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QListWidget, QAbstractItemView,
+    QPushButton, QDateEdit, QSizePolicy, QScrollBar, QLineEdit
+)
+from PyQt5.QtCore import QDate
+from PyQt5.QtGui import QIntValidator
 import psutil
+from General.util import Util
 
 class SideOptionsDownload(QWidget):
-    def __init__(self, parent=None, language='en'):
-        super().__init__(parent)
+    def __init__(self, root, language):
+        super().__init__(root)
         self.util = Util()
+        self.page_frame = root
         self.language = language
 
-        self.layout = QVBoxLayout(self)
-        self.setLayout(self.layout)
-
-        # Widgets
-        self.combo_download_location = QComboBox()
-        self.list_all_stations = QListWidget()
-        self.ent_durationchosen = QLineEdit()
-        self.combo_durationtype = QComboBox()
-        self.cal_initial_date = QCalendarWidget()
-        self.btn_confirm = QPushButton()
-        self.btn_readme = QPushButton()
-        self.btn_select_all = QPushButton()
-        self.btn_clear_all = QPushButton()
-
-        self.create_download_options()
-
+    # create download widget
     def create_download_options(self):
+        self.options_frame = ScrollableFrame(self.page_frame, 255)
+        self.options_frame.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        self.options_frame.setMinimumWidth(255)
+        self.options_frame.setMaximumWidth(255)
+        self.options_frame.setFixedWidth(255)
+        self.options_frame.setObjectName("sideOptionsDownloadFrame")
+
+        layout = QVBoxLayout(self.options_frame.inner_frame)
+        layout.setContentsMargins(5, 5, 5, 5)
+        layout.setSpacing(8)
+
         # Drive selection
-        self.layout.addWidget(QLabel(self.util.dict_language[self.language]["lbl_dr"]))
+        lbl_drive = QLabel(self.util.dict_language[self.language]["lbl_dr"])
+        layout.addWidget(lbl_drive)
+        self.combo_download_location = QComboBox()
         self.populate_combo_local()
-        self.layout.addWidget(self.combo_download_location)
+        layout.addWidget(self.combo_download_location)
 
         # Station selection
-        self.layout.addWidget(QLabel(self.util.dict_language[self.language]["lbl_st"]))
-        self.list_all_stations.setSelectionMode(QListWidget.MultiSelection)
-        self.layout.addWidget(self.list_all_stations)
+        lbl_station = QLabel(self.util.dict_language[self.language]["lbl_st"])
+        layout.addWidget(lbl_station)
+        self.list_all_stations = QListWidget()
+        self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+        layout.addWidget(self.list_all_stations)
+        self.scrollbar = QScrollBar()
+        self.list_all_stations.setVerticalScrollBar(self.scrollbar)
 
-        # Buttons for select/clear
-        btn_layout = QHBoxLayout()
-        self.btn_select_all.setText(self.util.dict_language[self.language]["btn_slt"])
+        # Select/Clear all buttons
+        btns_layout = QHBoxLayout()
+        self.btn_select_all = QPushButton(self.util.dict_language[self.language]["btn_slt"])
         self.btn_select_all.clicked.connect(self.select_all_list)
-        btn_layout.addWidget(self.btn_select_all)
-
-        self.btn_clear_all.setText(self.util.dict_language[self.language]["btn_clr"])
+        btns_layout.addWidget(self.btn_select_all)
+        self.btn_clear_all = QPushButton(self.util.dict_language[self.language]["btn_clr"])
         self.btn_clear_all.clicked.connect(self.clear_all_list)
-        btn_layout.addWidget(self.btn_clear_all)
-
-        self.layout.addLayout(btn_layout)
+        btns_layout.addWidget(self.btn_clear_all)
+        layout.addLayout(btns_layout)
 
         # Duration
-        self.layout.addWidget(QLabel(self.util.dict_language[self.language]["lbl_dur"]))
-        self.ent_durationchosen.setValidator(QDoubleValidator())  # Apenas números
-        self.layout.addWidget(self.ent_durationchosen)
-
+        lbl_duration = QLabel(self.util.dict_language[self.language]["lbl_dur"])
+        layout.addWidget(lbl_duration)
+        duration_layout = QHBoxLayout()
+        self.ent_durationchosen = QLineEdit()
+        self.ent_durationchosen.setPlaceholderText("1")
+        self.ent_durationchosen.setFixedWidth(60)
+        # Adicionando validador para aceitar apenas números inteiros
+        self.ent_durationchosen.setValidator(QIntValidator(1, 9999, self.ent_durationchosen))
+        duration_layout.addWidget(self.ent_durationchosen)
+        self.combo_durationtype = QComboBox()
         self.combo_durationtype.addItems([
             self.util.dict_language[self.language]["combo_day"],
             self.util.dict_language[self.language]["combo_month"],
             self.util.dict_language[self.language]["combo_year"]
         ])
-        self.layout.addWidget(self.combo_durationtype)
+        duration_layout.addWidget(self.combo_durationtype)
+        layout.addLayout(duration_layout)
 
         # Initial date
-        self.layout.addWidget(QLabel(self.util.dict_language[self.language]["lbl_init_dt"]))
-        self.layout.addWidget(self.cal_initial_date)
+        lbl_initial_date = QLabel(self.util.dict_language[self.language]["lbl_init_dt"])
+        layout.addWidget(lbl_initial_date)
+        self.cal_initial_date = QDateEdit()
+        self.cal_initial_date.setDisplayFormat('dd/MM/yyyy')
+        self.cal_initial_date.setCalendarPopup(True)
+        self.cal_initial_date.setDate(QDate.currentDate())
+        layout.addWidget(self.cal_initial_date)
 
-        # Confirm and Readme buttons
-        self.btn_confirm.setText(self.util.dict_language[self.language]["btn_dwd"])
-        self.layout.addWidget(self.btn_confirm)
+        # Confirm Download button
+        self.btn_confirm = QPushButton(self.util.dict_language[self.language]["btn_dwd"])
+        layout.addWidget(self.btn_confirm)
 
-        self.btn_readme.setText(self.util.dict_language[self.language]["btn_readme"])
-        self.layout.addWidget(self.btn_readme)
+        # Readme button
+        self.btn_readme = QPushButton(self.util.dict_language[self.language]["btn_readme"])
+        layout.addWidget(self.btn_readme)
 
-    # Preenche lista de estações
-    def populate_stations_listbox(self, stations):
-        self.list_all_stations.clear()
-        self.list_all_stations.addItems(stations)
+        self.options_frame.inner_frame.setLayout(layout)
+        self.options_frame.setLayout(QVBoxLayout())
+        self.options_frame.show()
 
-    # Preenche combo de drives
+    # fill all listbox
+    def populate_stations_listbox(self, listwidget, stations):
+        listwidget.clear()
+        for i in stations:
+            listwidget.addItem(i)
+
+    # fill combox with all drive options
     def populate_combo_local(self):
-        drives = [d.device for d in psutil.disk_partitions()]
+        combo_list = []
+        all_drives = psutil.disk_partitions()
+        for drive in all_drives:
+            combo_list.append(drive.device)
         self.combo_download_location.clear()
-        self.combo_download_location.addItems(drives)
+        self.combo_download_location.addItems(combo_list)
+        if combo_list:
+            self.combo_download_location.setCurrentIndex(0)
 
-    # Seleciona todas as estações
+    # select all station's list
     def select_all_list(self):
-        for i in range(self.list_all_stations.count()):
-            self.list_all_stations.item(i).setSelected(True)
+        self.list_all_stations.selectAll()
 
-    # Limpa todas as seleções
+    # clear all station's list
     def clear_all_list(self):
-        for i in range(self.list_all_stations.count()):
-            self.list_all_stations.item(i).setSelected(False)
-
-    # Getters para integração com DownloadPage
-    def get_local_download(self):
-        return self.combo_download_location.currentText()
-
-    def get_stations_selected(self):
-        return [item.text() for item in self.list_all_stations.selectedItems()]
-
-    def get_duration_chosen(self):
-        return self.ent_durationchosen.text()
-
-    def get_duration_type(self):
-        return self.combo_durationtype.currentIndex()
-
-    def get_date(self):
-        return self.cal_initial_date.selectedDate().toPyDate()
+        self.list_all_stations.clearSelection()

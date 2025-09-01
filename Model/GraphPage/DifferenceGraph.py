@@ -1,10 +1,10 @@
 from Model.GraphPage.GraphsModule import GraphsModule
-from datetime import timedelta, datetime
+from datetime import timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from PyQt5.QtWidgets import QMessageBox
 import re
-
+from datetime import datetime
+from PyQt5.QtWidgets import QMessageBox
 
 class DifferenceGraph(GraphsModule):
     def __init__(self, root, language):
@@ -13,9 +13,7 @@ class DifferenceGraph(GraphsModule):
         super().__init__(self.lang)
 
     # creates graph for a subtracted station in a period of time
-    def plot_difference(self, local_downloaded, minuend_station, subtracted_station,
-                        selected_types, bold_text, grid_graph, start, end,
-                        selected_dates, cal_selection, data_with_stations):
+    def plot_difference(self, local_downloaded, minuend_station, subtracted_station, selected_types, bold_text, grid_graph, start, end, selected_dates, cal_selection, data_with_stations):
         self.lcl_downloaded = local_downloaded
         self.min_station = minuend_station
         self.sub_station = subtracted_station
@@ -29,33 +27,30 @@ class DifferenceGraph(GraphsModule):
 
         self.start_date, self.end_date = self.format_dates(start, end)
         self.end_date += timedelta(days=1)
-        if not self.start_date:
+        if not self.start_date: 
             return
-
+        
         # gets all data needed
         self.all_data = self.get_stations_data()
-        if not self.all_data:
+        if not self.all_data: 
             return
-
+        
         # organize and plot data
         self.can_plot = True
         self.info_time = None
         for slct_type in selected_types:
-            if 'd' in slct_type:
-                self.add_delta_dict(slct_type)
+            if 'd' in slct_type: self.add_delta_dict(slct_type)
 
         if 'reference' in selected_types:
             selected_types.remove('reference')
-            selected_types.extend(
-                f'{t.replace("d", "")}-reference' for t in selected_types if 'd' in t
-            )
+            selected_types.extend(f'{type.replace("d", "")}-reference' for type in selected_types if 'd' in type)
             self.add_difference_reference(selected_types)
-
+        
         self.add_plots(selected_types)
         self.config_graph(selected_types, ', '.join(self.stations))
         if not self.can_plot:
             return
-
+        
         plt.show()
 
     # add delta in dict if it was selected
@@ -67,11 +62,9 @@ class DifferenceGraph(GraphsModule):
             for day, times in self.all_data[station].items():
                 for time in times:
                     date = times[time].get(base_type)
-                    self.all_data[station][day][time][type] = (
-                        date - delta[st] if date is not None else None
-                    )
+                    self.all_data[station][day][time][type] = date - delta[st] if date is not None else None
 
-    # add reference line line
+    # add reference line
     def add_difference_reference(self, selected_types):
         for type in selected_types:
             if 'reference' in type:
@@ -82,9 +75,7 @@ class DifferenceGraph(GraphsModule):
                 for st, station in enumerate(self.stations):
                     for day, times in self.all_data[station].items():
                         for t, time in enumerate(times):
-                            self.all_data[station][day][time][type] = (
-                                averages[t] if averages[t] else None
-                            )
+                            self.all_data[station][day][time][type] = averages[t] if averages[t] else None
 
     def calculate_averages(self, type, base_type, delta):
         # gets data from calm day
@@ -92,24 +83,17 @@ class DifferenceGraph(GraphsModule):
         for station in self.stations:
             dates = []
             for date in self.slct_dates:
-                dt = datetime.combine(
-                    date, datetime.min.time()
-                ) + timedelta(
-                    hours=self.data_with_stations[station][3],
-                    minutes=self.data_with_stations[station][4]
-                )
+                dt = datetime.combine(date, datetime.min.time()) + timedelta(hours=self.data_with_stations[station][3], minutes=self.data_with_stations[station][4])
                 dates.append(dt.replace(hour=0, minute=0))
             especific_data = self.get_especific_dates(dates, station)
             all_data[station] = especific_data
 
-        # applies dH in H value from calm day
-        for st, (station, days) in enumerate(all_data.items()):
+        # applies dH in H value from calm day  
+        for st, (station, days)  in enumerate(all_data.items()):
             for day, times in days.items():
                 for time in times:
                     try:
-                        all_data[station][day][time][type] = (
-                            all_data.get(station, None).get(day, None).get(time, None).get(base_type, None) - delta[st]
-                        )
+                        all_data[station][day][time][type] = all_data.get(station, None).get(day, None).get(time, None).get(base_type, None) - delta[st]
                     except Exception:
                         all_data[station][day][time][type] = None
 
@@ -137,13 +121,12 @@ class DifferenceGraph(GraphsModule):
             data = []
             for day in day_data.keys():
                 value = day_data.get(day, None).get(f'{time.hour}:{time.minute}', None)
-                if value:
-                    data.append(value)
+                if value: data.append(value)
 
-            average = sum(data) / len(data) if data else None
+            average = sum(data)/ len(data) if data else None
             averages.append(average)
             time += timedelta(minutes=1)
-
+        
         return averages
 
     # plot the given data
@@ -161,10 +144,7 @@ class DifferenceGraph(GraphsModule):
                 for slct_type in all_types:
                     if 'reference' not in slct_type:
                         try:
-                            data = (
-                                self.all_data[self.min_station][day][time][slct_type]
-                                - self.all_data[self.sub_station][day][time][slct_type]
-                            )
+                            data = self.all_data[self.min_station][day][time][slct_type] - self.all_data[self.sub_station][day][time][slct_type]
                         except Exception:
                             data = None
                     else:
@@ -178,8 +158,7 @@ class DifferenceGraph(GraphsModule):
             for day, times in self.diff_data.items():
                 for time in times:
                     data = self.diff_data[day][time][slct_type]
-                    if data is not None:
-                        self.filtred_values.append(data)
+                    if data is not None: self.filtred_values.append(data)
                     plot_values.append(data)
 
             time = [self.start_date + timedelta(minutes=i) for i in range(difference * 1440)]
@@ -191,9 +170,9 @@ class DifferenceGraph(GraphsModule):
     # configure graph specifications
     def config_graph(self, plot_type, station):
         final_date = self.end_date - timedelta(days=1)
-        timeday = [self.start_date + timedelta(days=i) for i in range((self.end_date - self.start_date).days + 1)]
+        timeday = [self.start_date + timedelta(days=i) for i in range((self.end_date - self.start_date).days+1)]
         self.ax.set_xticks(timeday, minor=False)
-        self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%d'))
+        self.ax.xaxis.set_major_formatter(mdates.DateFormatter(f'%d'))
 
         self.ax.tick_params(axis='x', which='both', top=True, labeltop=False, bottom=True, labelbottom=True)
         self.ax.tick_params(axis='y', which='both', right=True, labelright=False, left=True, labelleft=True)
@@ -203,7 +182,7 @@ class DifferenceGraph(GraphsModule):
             self.ax.set_ylim(min(self.filtred_values), max(self.filtred_values))
         else:
             QMessageBox.information(
-                self.root,
+                None,
                 self.util.dict_language[self.lang]["mgbox_error"],
                 self.util.dict_language[self.lang]["mgbox_error_noinfo_period"]
             )
@@ -212,10 +191,7 @@ class DifferenceGraph(GraphsModule):
 
         self.ax.set_ylabel(f'{", ".join(plot_type)} ({self.get_measure(plot_type)})')
         self.ax.set_xlabel('UT')
-        self.ax.set_title(
-            f'{station} {self.start_date.day:02}/{self.start_date.month:02}/{self.start_date.year} - '
-            f'{final_date.day:02}/{final_date.month:02}/{final_date.year}'
-        )
+        self.ax.set_title(f'{station} {self.start_date.day:02}/{self.start_date.month:02}/{self.start_date.year} - {final_date.day:02}/{final_date.month:02}/{final_date.year}')
         self.ax.legend()
 
         if self.bold_text:
@@ -228,7 +204,4 @@ class DifferenceGraph(GraphsModule):
         if self.grid_graph:
             self.ax.grid()
 
-        self.fig.canvas.mpl_connect(
-            'button_press_event',
-            lambda event: self.create_exporter_level_top(event, plot_type, is_difference=True)
-        )
+        self.fig.canvas.mpl_connect('button_press_event', lambda event: self.create_exporter_level_top(event, plot_type, is_difference=True))
