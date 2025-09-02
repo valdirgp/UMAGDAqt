@@ -1,24 +1,23 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QScrollArea
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QSizePolicy
 
 class ScrollableFrame(QWidget):
     def __init__(self, parent, width):
         super().__init__(parent)
 
-        # Criando o QScrollArea
-        self.scroll_area = QScrollArea(self)
+        self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setFixedWidth(width)
 
-        # Criando o widget interno
         self.inner_frame = QWidget()
-        self.inner_frame.setFixedWidth(width)
-        self.inner_layout = QVBoxLayout(self.inner_frame)
+        self.inner_layout = QVBoxLayout()  # não passar parent aqui!
         self.inner_frame.setLayout(self.inner_layout)
 
-        # Adicionando o widget interno ao QScrollArea
         self.scroll_area.setWidget(self.inner_frame)
 
-        # Layout principal do ScrollableFrame
-        layout = QVBoxLayout()
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0,0,0,0)
         layout.addWidget(self.scroll_area)
         self.setLayout(layout)
+
+        self.setMinimumWidth(width)
+        self.setMaximumWidth(width)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)

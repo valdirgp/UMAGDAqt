@@ -6,6 +6,7 @@ from General.util import Util
 import cartopy.crs as ccrs
 import numpy as np
 
+
 class DownloadPage(QWidget):
     def __init__(self, root, language, magnetic_eq_coords):
         super().__init__(root)
@@ -18,18 +19,41 @@ class DownloadPage(QWidget):
         self.colors = []
 
         self.util = Util()
-        self.side_options = SideOptionsDownload(root, self.lang)
-        self.map_widget = Map(root)
+        self.side_options = SideOptionsDownload(self, self.lang)  # importante: agora passa "self"
+        self.map_widget = Map(self)                               # idem
         self.embrace_stations = []
         self.intermagnet_stations = []
 
-    # creates frames for the tool
-    def create_page_frames(self):
-        # Layout principal horizontal
-        main_layout = QHBoxLayout(self.root)
-        self.root.setLayout(main_layout)
+    def ensure_array(self, y, x):
+        """
+        Garante que y seja um array do mesmo tamanho que x.
+        Se y for um valor escalar, cria um array preenchido com esse valor.
+        Se y for None ou vazio, cria um array de zeros.
+        """
+        if y is None:
+            return np.zeros_like(x)
+        elif np.isscalar(y):
+            return np.full_like(x, y, dtype=float)
+        else:
+            y = np.array(y, dtype=float)
+            if y.shape != x.shape:
+                raise ValueError(f"y deve ter o mesmo tamanho que x. x:{x.shape}, y:{y.shape}")
+            return y
 
-        self.util.destroy_existent_frames(self.root)
+    # cria frames principais
+    def create_page_frames(self):
+        # Layout principal no PRÓPRIO widget
+        #main_layout = QHBoxLayout(self)
+        #self.setLayout(main_layout)
+
+        if self.layout() is None:
+            main_layout = QHBoxLayout(self)
+            self.setLayout(main_layout)
+        else:
+            main_layout = self.layout()  # usa o layout já existente
+
+
+        #self.util.destroy_existent_frames(self)
 
         self.side_options.create_download_options()
         self.side_options.btn_select_all.clicked.connect(self.set_all_selected)
@@ -43,11 +67,28 @@ class DownloadPage(QWidget):
 
         self.map_widget.create_map()
         self.get_stations_location()
+        # inicializa as cores com base nas estações carregadas
+        self.colors = ['red'] * len(self.all_locals)
+        self.map_widget.set_station_map(self.longitude, self.latitude)
+        self.map_widget.set_stationsname_map(self.all_locals)
+
         self.map_widget.set_station_map(self.longitude, self.latitude)
         self.map_widget.set_stationsname_map(self.all_locals)
 
         longitudes = np.linspace(-180, 180, 361)
-        self.map_widget.ax.plot(longitudes, self.magnetic_eq_coords, color='gray', transform=ccrs.PlateCarree())
+        y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
+        self.map_widget.ax.plot(longitudes, y_values, color='gray', transform=ccrs.PlateCarree())
+
+        # se magnetic_eq_coords for escalar, converta para array do mesmo tamanho
+        '''if np.isscalar(self.magnetic_eq_coords):
+            latitudes = np.full_like(longitudes, self.magnetic_eq_coords, dtype=float)
+        else:
+            latitudes = np.array(self.magnetic_eq_coords, dtype=float)
+            if latitudes.shape != longitudes.shape:
+                raise ValueError("magnetic_eq_coords deve ter o mesmo tamanho que longitudes")
+
+        # desenha a linha do equador magnético
+        self.map_widget.ax.plot(longitudes, latitudes, color='gray', linewidth=2, transform=ccrs.Geodetic())'''
 
         self.map_widget.fig.canvas.mpl_connect('button_press_event', self.map_on_click)
 
@@ -109,7 +150,7 @@ class DownloadPage(QWidget):
 
     # change map's status and listbox's status when map's button is selected
     def map_on_click(self, event):
-        if event.inaxes is not None:
+        '''if event.inaxes is not None:
             selected_longitude, selected_latitude = event.xdata, event.ydata
             items_from_list = [self.side_options.list_all_stations.item(i).text() for i in range(self.side_options.list_all_stations.count())]
             for i, local in enumerate(self.all_locals):
@@ -127,7 +168,40 @@ class DownloadPage(QWidget):
                             self.map_widget.scart.set_facecolors(self.colors)
                             self.map_widget.canvas.draw()
                     except ValueError:
-                        continue
+                        continue'''
+        
+        from math import hypot
+
+        if event.inaxes is not None:
+            selected_longitude, selected_latitude = event.xdata, event.ydata
+            items_from_list = [self.side_options.list_all_stations.item(i).text() for i in range(self.side_options.list_all_stations.count())]
+            # calcula a distância euclidiana em graus e encontra o ponto mais próximo
+            distances = [
+                (i, hypot(selected_longitude - local['longitude'], selected_latitude - local['latitude']))
+                for i, local in enumerate(self.all_locals)
+            ]
+
+            nearest_index, min_dist = min(distances, key=lambda x: x[1])
+
+            # define a tolerância (em graus)
+            tolerance = 0.5
+
+            if min_dist < tolerance:
+                local = self.all_locals[nearest_index]
+                try:
+                    selection = items_from_list.index(local['station'])
+                    item = self.side_options.list_all_stations.item(selection)
+                    if self.colors[nearest_index] == 'red':
+                        item.setSelected(True)
+                        self.colors[nearest_index] = 'lightgreen'
+                    else:
+                        item.setSelected(False)
+                        self.colors[nearest_index] = 'red'
+                    if hasattr(self.map_widget, 'scart'):
+                        self.map_widget.scart.set_facecolors(self.colors)
+                        self.map_widget.canvas.draw()
+                except ValueError:
+                    pass
 
     def set_embrace_options(self, callback):
         self.embrace_stations = callback

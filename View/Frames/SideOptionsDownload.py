@@ -11,20 +11,20 @@ from General.util import Util
 class SideOptionsDownload(QWidget):
     def __init__(self, root, language):
         super().__init__(root)
-        self.util = Util()
-        self.page_frame = root
         self.language = language
+        self.util = Util()
+        #self.page_frame = root
+        self.options_frame = None
 
     # create download widget
     def create_download_options(self):
-        self.options_frame = ScrollableFrame(self.page_frame, 255)
-        self.options_frame.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        self.options_frame.setMinimumWidth(255)
-        self.options_frame.setMaximumWidth(255)
-        self.options_frame.setFixedWidth(255)
-        self.options_frame.setObjectName("sideOptionsDownloadFrame")
+        # Parent do ScrollableFrame agora é self, e não DownloadPage
+        #self.options_frame = ScrollableFrame(self.page_frame, 255)
+        self.options_frame = ScrollableFrame(self, 255)
+        #self.options_frame.setStyleSheet("background-color: #2c2c2c;")
 
         layout = QVBoxLayout(self.options_frame.inner_frame)
+        layout = self.options_frame.inner_layout
         layout.setContentsMargins(5, 5, 5, 5)
         layout.setSpacing(8)
 
@@ -90,8 +90,8 @@ class SideOptionsDownload(QWidget):
         self.btn_readme = QPushButton(self.util.dict_language[self.language]["btn_readme"])
         layout.addWidget(self.btn_readme)
 
-        self.options_frame.inner_frame.setLayout(layout)
-        self.options_frame.setLayout(QVBoxLayout())
+        #self.options_frame.inner_frame.setLayout(layout)
+        #self.options_frame.setLayout(QVBoxLayout())
         self.options_frame.show()
 
     # fill all listbox

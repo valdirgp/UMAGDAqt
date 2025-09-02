@@ -55,3 +55,7 @@ class DownloadsControl():
                                                     self.DownloadPage.get_duration_chosen(), 
                                                     self.DownloadPage.get_duration_type(),
                                                     self.DownloadPage.get_date())
+            
+    # expõe o widget para ser adicionado ao QStackedWidget
+    def get_widget(self):
+        return self.DownloadPage

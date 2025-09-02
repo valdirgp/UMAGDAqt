@@ -41,7 +41,15 @@ class Intermagnet(DownloadModule):
     def initialize_download_Intermagnet(self, root, local_download, selected_stations, duration, duration_type, start_date):
         self.root = root
         self.lcl_download = local_download
-        self.opener = request.build_opener(request.HTTPSHandler)
+        #self.opener = request.build_opener(request.HTTPSHandler)
+        import ssl
+        from urllib import request
+
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+
+        self.opener = request.build_opener(request.HTTPSHandler(context=ctx))
         
         number_days, final_date = self.calculate_num_days(int(duration), duration_type, start_date)
         total_downloads = number_days * len(selected_stations)
@@ -101,6 +109,7 @@ class Intermagnet(DownloadModule):
                         with open(file_path, 'w+', encoding='utf-8') as file:
                             for line in lines:
                                 file.write(line+'\n')
+                        print(f'Download concluído: {request_item["station"].lower()}{str(request_item["date"].year)}{request_item["date"].month:02}{request_item["date"].day:02}min.min')
             except Exception as error:
                 print(f'Erro no download: {request_item["station"].lower()}{request_item["date"].year}{request_item["date"].month:02}{request_item["date"].day:02}min.min: {error}')
             finally:

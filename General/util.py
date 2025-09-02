@@ -212,7 +212,6 @@ class Util():
     def resource_path(relative_path):
         try:
             base_path = sys._MEIPASS
-            print(base_path)
         except Exception:
             base_path = os.path.abspath("./General")
             
@@ -228,7 +227,7 @@ class Util():
     def calculate_inclination(self):
         self.ano = datetime.now().year
         dip = []
-        # for long in range(-180, 181): 
+        #for long in range(-180, 181): 
         #     lat_range = np.linspace(-90, 90, 543)
         #     for lat in lat_range:
         #         result = igrf_value(lat, long, 0.0, self.ano)

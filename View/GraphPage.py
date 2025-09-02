@@ -42,10 +42,16 @@ class GraphPage(QWidget):
     # creates frames for the tool
     def create_page_frames(self):
         # Layout principal horizontal
-        main_layout = QHBoxLayout(self.root)
-        self.root.setLayout(main_layout)
+        #main_layout = QHBoxLayout(self.root)
+        #self.setLayout(main_layout)
+        if self.layout() is None:
+            main_layout = QHBoxLayout(self.root)
+            self.setLayout(main_layout)
+        else:
+            main_layout = self.layout()  # usa o layout já existente
 
-        self.util.destroy_existent_frames(self.root)
+
+        #self.util.destroy_existent_frames(self.root)
 
         self.side_options.create_plot_options()
         self.side_options.btn_select_all.clicked.connect(self.set_all_selected)

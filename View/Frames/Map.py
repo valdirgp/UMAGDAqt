@@ -24,6 +24,12 @@ class Map(QWidget):
         self.map_frame = QWidget(self.page_frame)
         layout = QVBoxLayout(self.map_frame)
         self.map_frame.setLayout(layout)
+        '''if self.map_frame.layout() is None:
+            layout = QVBoxLayout(self)
+            self.setLayout(main_layout)
+        else:
+            main_layout = self.layout()  # usa o layout já existente'''
+
 
         # Create matplotlib figure and axis with Cartopy
         self.fig = plt.figure()

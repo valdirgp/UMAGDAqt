@@ -34,7 +34,6 @@ class InitialPage(QWidget):
         height = self.root.height()
 
         # carregar imagem
-        print(os.path.exists(self.util.resource_path("images/magnetic_field.png")))
         img = Image.open(self.util.resource_path("images/magnetic_field.png"))
         img_resized = img.resize((int(img.width * (width/2) / width),
                                   int(img.height * (height/2) / height)))
