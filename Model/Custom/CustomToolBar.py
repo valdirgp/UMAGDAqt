@@ -1,16 +1,14 @@
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 from General.util import Util
 
-# Função que remove pontos fora do zoom atual
+# function that removes points outside of the zoomed map
 def on_zoom_done(ax, tl):
     xlim = ax.get_xlim()
     ylim = ax.get_ylim()
-    # Remove anotações antigas
     for annotation in ax.texts:
         annotation.remove()
-    # Adiciona anotações para coordenadas dentro do zoom
-    for coord in tl or []:  # evita erro se tl for None
-        if (xlim[0] <= coord['longitude'] <= xlim[1]) and (ylim[0] <= coord['latitude'] <= ylim[1]):
+    for coord in tl:
+        if coord['longitude'] >= xlim[0] and coord['longitude'] <= xlim[1] and coord['latitude'] >= ylim[0] and coord['latitude'] <= ylim[1]:
             ax.annotate(
                 text=coord['station'],
                 xy=(coord['longitude'], coord['latitude']),
@@ -18,11 +16,10 @@ def on_zoom_done(ax, tl):
                 textcoords='offset points',
                 ha='right',
             )
-    ax.figure.canvas.draw_idle()  # Atualiza o canvas
 
 class CustomToolbar(NavigationToolbar2QT):
-    def __init__(self, canvas, parent=None, total_locals=None):
-        super().__init__(canvas, parent)
+    def __init__(self, canvas, window, total_locals=None):
+        super().__init__(canvas, window)
         self.total_locals = total_locals
         self.util = Util()
 
@@ -40,4 +37,3 @@ class CustomToolbar(NavigationToolbar2QT):
 
     def forward(self):
         super().forward()
-        on_zoom_done(self.canvas.figure.gca(), self.total_locals)

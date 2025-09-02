@@ -121,3 +121,7 @@ class GraphControl():
                     self.Graphs.get_cal_selection(),
                     self.data_with_stations,
                 )
+    
+    # expõe o widget para ser adicionado ao QStackedWidget
+    def get_widget(self):
+        return self.Graphs
