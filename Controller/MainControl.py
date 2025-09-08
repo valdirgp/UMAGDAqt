@@ -132,24 +132,30 @@ class MainControl:
 
             self.CalmDisturbPage = CalmDisturbControl(self.root, lang, magnetic_eq_coords)
             self.CalmDisturbPage.load_widgets()
-            #self.CalmPage = CalmControl(self.root, lang)
 
-            #self.AboutPage = AboutPage(self.root, lang)
+            self.CalmPage = CalmControl(self.root, lang)
+            self.CalmPage.load_widgets()
+
+            self.AboutPage = AboutPage(self.root, lang)
+            self.AboutPage.load_page()
 
             # adiciona páginas ao stack
             self.stack.addWidget(self.DownloadPage.get_widget())
             self.stack.addWidget(self.GraphPage.get_widget())
             self.stack.addWidget(self.CalmDisturbPage.get_widget())
-            #self.stack.addWidget(self.CalmPage)
+            self.stack.addWidget(self.CalmPage.get_widget())
+
+            self.stack.addWidget(self.AboutPage)
 
             # menu principal
             func_menu = QMenu(self.util.dict_language[lang]["menu_main"], self.root)
 
             func_menu.addAction(self.util.dict_language[lang]["menu_dwd"], lambda: self.stack.setCurrentWidget(self.DownloadPage.get_widget()))
             func_menu.addAction(self.util.dict_language[lang]["menu_graph"], lambda: self.stack.setCurrentWidget(self.GraphPage.get_widget()))
-            
             func_menu.addAction(self.util.dict_language[lang]['menu_cd'], lambda: self.stack.setCurrentWidget(self.CalmDisturbPage.get_widget()))
-            #func_menu.addAction(self.util.dict_language[lang]['menu_c'], lambda: self.stack.setCurrentWidget(self.CalmPage))
+            func_menu.addAction(self.util.dict_language[lang]['menu_c'], lambda: self.stack.setCurrentWidget(self.CalmPage.get_widget()))
+
+            #func_menu.addAction(self.util.dict_language[lang]["menu_about"], lambda: self.stack.setCurrentWidget(self.AboutPage))
 
             # menu de configurações
             config_menu = QMenu(self.util.dict_language[lang]["menu_config"], self.root)
@@ -160,11 +166,10 @@ class MainControl:
 
             menubar.addMenu(func_menu)
             menubar.addMenu(config_menu)
-            #menubar.addAction(self.util.dict_language[lang]["menu_about"], self.AboutPage.load_page)
+            menubar.addAction(self.util.dict_language[lang]["menu_about"], lambda: self.stack.setCurrentWidget(self.AboutPage))
 
             # abre página inicial
-            #self.stack.setCurrentWidget(self.GraphPage.get_widget())
-            self.stack.setCurrentWidget(self.CalmDisturbPage.get_widget())
+            self.stack.setCurrentWidget(self.GraphPage.get_widget())
 
         else:
             self.InitialPage = InitialPage(self.root, lang)
