@@ -17,7 +17,7 @@ class Util():
                                     "menu_cd": "Gráficos Calmos e Perturbado",
                                     "menu_c": "Gráficos Calmos",
                                     "menu_config": "Configurações",
-                                    "menu_lang": "língua",
+                                    "menu_lang": "Idioma",
                                     "menu_en":"Inglês",
                                     "menu_port":"Português",
                                     "menu_about": "Sobre",

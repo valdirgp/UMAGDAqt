@@ -155,9 +155,18 @@ class Readme(DownloadModule):
                     self.util.dict_language[self.lang]["mgbox_error_readme_intermag"]
                 )
 
-    # checks if download is completed to write file and restart pages
+    '''# checks if download is completed to write file and restart pages
     def check_write(self, restart_page):
         if self.porcentage < 100:
+            # Em PyQt5, use QTimer.singleShot para agendar a checagem
+            from PyQt5.QtCore import QTimer
+            QTimer.singleShot(500, lambda: self.check_write(restart_page))
+        else:
+            self.write_readme()
+            restart_page()'''
+    
+    def check_write(self, restart_page):
+        if self.current_file < self.total_downloads:
             # Em PyQt5, use QTimer.singleShot para agendar a checagem
             from PyQt5.QtCore import QTimer
             QTimer.singleShot(500, lambda: self.check_write(restart_page))

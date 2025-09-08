@@ -6,6 +6,7 @@ from General.util import Util
 import cartopy.crs as ccrs
 import numpy as np
 
+
 class GraphPage(QWidget):
     def __init__(self, root, language, magnetic_eq_coords=0):
         super().__init__(root)
@@ -14,8 +15,8 @@ class GraphPage(QWidget):
         self.magnetic_eq_coords = magnetic_eq_coords
 
         self.util = Util()
-        self.side_options = SideOptionsPlot(root, self.lang)
-        self.map_widget = Map(root)
+        self.side_options = SideOptionsPlot(self, self.lang)
+        self.map_widget = Map(self)
         self.downloaded_data_stations = []
         self.colors = []
         self.all_locals = []
@@ -45,7 +46,7 @@ class GraphPage(QWidget):
         #main_layout = QHBoxLayout(self.root)
         #self.setLayout(main_layout)
         if self.layout() is None:
-            main_layout = QHBoxLayout(self.root)
+            main_layout = QHBoxLayout(self)
             self.setLayout(main_layout)
         else:
             main_layout = self.layout()  # usa o layout já existente

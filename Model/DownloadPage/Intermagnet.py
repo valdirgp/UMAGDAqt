@@ -113,4 +113,6 @@ class Intermagnet(DownloadModule):
             except Exception as error:
                 print(f'Erro no download: {request_item["station"].lower()}{request_item["date"].year}{request_item["date"].month:02}{request_item["date"].day:02}min.min: {error}')
             finally:
-                self.update_progressbar()
+                #self.update_progressbar()
+
+                self.progress_signal.emit()   # <-- em vez de self.update_progressbar()

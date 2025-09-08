@@ -17,7 +17,8 @@ class SingleGraph(GraphsModule):
         self.stations = stations
         self.bold_text = bold_text
         self.grid_graph = grid_graph
-        self.start_date = datetime.combine(datetime.strptime(date, r'%d/%m/%Y'), datetime.min.time())
+        #self.start_date = datetime.combine(datetime.strptime(date, r'%d/%m/%Y'), datetime.min.time())
+        self.start_date = datetime.combine(date, datetime.min.time())
         self.end_date = self.start_date + timedelta(days=1)
         self.slct_dates = selected_dates
         self.cal_selection = cal_selection

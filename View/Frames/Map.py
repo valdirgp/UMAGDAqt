@@ -23,7 +23,7 @@ class Map(QWidget):
         # Main layout for the map frame
         self.map_frame = QWidget(self.page_frame)
         layout = QVBoxLayout(self.map_frame)
-        self.map_frame.setLayout(layout)
+        #self.map_frame.setLayout(layout)
         '''if self.map_frame.layout() is None:
             layout = QVBoxLayout(self)
             self.setLayout(main_layout)
