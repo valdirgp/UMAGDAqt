@@ -20,13 +20,15 @@ class SideOptionsDownload(QWidget):
     def create_download_options(self):
         # Parent do ScrollableFrame agora é self, e não DownloadPage
         #self.options_frame = ScrollableFrame(self.page_frame, 255)
-        self.options_frame = ScrollableFrame(self, 255)
+        #self.options_frame = ScrollableFrame(self, 255)
         #self.options_frame.setStyleSheet("background-color: #2c2c2c;")
 
-        layout = QVBoxLayout(self.options_frame.inner_frame)
-        layout = self.options_frame.inner_layout
-        layout.setContentsMargins(5, 5, 5, 5)
+        self.options_frame = ScrollableFrame(self, 255)
+        layout = self.options_frame.inner_layout  # pega o layout do scroll
+        layout.setContentsMargins(5,5,5,5)
         layout.setSpacing(8)
+
+
 
         # Drive selection
         lbl_drive = QLabel(self.util.dict_language[self.language]["lbl_dr"])

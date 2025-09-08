@@ -29,7 +29,8 @@ class SideOptionsPlot(QWidget):
         self.frame_side_functions.setFixedWidth(255)
         self.frame_side_functions.setObjectName("sideOptionsPlotFrame")
 
-        layout = QVBoxLayout(self.frame_side_functions.inner_frame)
+        #layout = QVBoxLayout(self.frame_side_functions.inner_frame)
+        layout = self.frame_side_functions.inner_layout   # usa o já criado no ScrollableFrame
         layout.setContentsMargins(5, 5, 5, 5)
         layout.setSpacing(8)
 
@@ -126,8 +127,8 @@ class SideOptionsPlot(QWidget):
         self.cal_calm.setDate(QDate.currentDate())
         layout.addWidget(self.cal_calm)
 
-        self.frame_side_functions.inner_frame.setLayout(layout)
-        self.frame_side_functions.setLayout(QVBoxLayout())
+        #self.frame_side_functions.inner_frame.setLayout(layout)
+        #self.frame_side_functions.setLayout(QVBoxLayout())
         self.frame_side_functions.show()
 
     # create a child for frame_side_functions to have one day options

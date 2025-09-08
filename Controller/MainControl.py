@@ -123,28 +123,32 @@ class MainControl:
 
         if access_allow:
             magnetic_eq_coords = self.util.calculate_inclination()
+
             self.DownloadPage = DownloadsControl(self.root, lang, magnetic_eq_coords)
             self.DownloadPage.load_widgets()
         
-            #self.GraphPage = GraphControl(self.root, lang, magnetic_eq_coords)
-            #self.GraphPage.load_widgets()
-            #self.CalmDisturbPage = CalmDisturbControl(self.root, lang)
+            self.GraphPage = GraphControl(self.root, lang, magnetic_eq_coords)
+            self.GraphPage.load_widgets()
+
+            self.CalmDisturbPage = CalmDisturbControl(self.root, lang, magnetic_eq_coords)
+            self.CalmDisturbPage.load_widgets()
             #self.CalmPage = CalmControl(self.root, lang)
 
             #self.AboutPage = AboutPage(self.root, lang)
 
             # adiciona páginas ao stack
             self.stack.addWidget(self.DownloadPage.get_widget())
-            #self.stack.addWidget(self.GraphPage.get_widget())
-            #self.stack.addWidget(self.CalmDisturbPage)
+            self.stack.addWidget(self.GraphPage.get_widget())
+            self.stack.addWidget(self.CalmDisturbPage.get_widget())
             #self.stack.addWidget(self.CalmPage)
 
             # menu principal
             func_menu = QMenu(self.util.dict_language[lang]["menu_main"], self.root)
+
             func_menu.addAction(self.util.dict_language[lang]["menu_dwd"], lambda: self.stack.setCurrentWidget(self.DownloadPage.get_widget()))
-            #func_menu.addAction(self.util.dict_language[lang]["menu_graph"], lambda: self.stack.setCurrentWidget(self.GraphPage.get_widget()))
+            func_menu.addAction(self.util.dict_language[lang]["menu_graph"], lambda: self.stack.setCurrentWidget(self.GraphPage.get_widget()))
             
-            #func_menu.addAction(self.util.dict_language[lang]['menu_cd'], lambda: self.stack.setCurrentWidget(self.CalmDisturbPage))
+            func_menu.addAction(self.util.dict_language[lang]['menu_cd'], lambda: self.stack.setCurrentWidget(self.CalmDisturbPage.get_widget()))
             #func_menu.addAction(self.util.dict_language[lang]['menu_c'], lambda: self.stack.setCurrentWidget(self.CalmPage))
 
             # menu de configurações
@@ -159,8 +163,8 @@ class MainControl:
             #menubar.addAction(self.util.dict_language[lang]["menu_about"], self.AboutPage.load_page)
 
             # abre página inicial
-            #self.stack.setCurrentWidget(self.GraphPage)
-            self.stack.setCurrentWidget(self.DownloadPage.get_widget())
+            #self.stack.setCurrentWidget(self.GraphPage.get_widget())
+            self.stack.setCurrentWidget(self.CalmDisturbPage.get_widget())
 
         else:
             self.InitialPage = InitialPage(self.root, lang)
