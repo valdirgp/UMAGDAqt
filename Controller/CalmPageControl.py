@@ -39,3 +39,6 @@ class CalmControl():
         downloaded_data_stations, self.data_with_stations = self.Model.search_stations_downloaded(drive)
         self.Graphs.bind_search_stations_downloaded(downloaded_data_stations)
         self.Graphs.update_data()
+
+    def get_widget(self):
+        return self.Graphs

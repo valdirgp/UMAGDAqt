@@ -5,15 +5,15 @@ import re
 from General.util import Util
 
 class CalmPage(QWidget):
-    def __init__(self, root, language, magnetic_eq_coords):
+    def __init__(self, root, language, magnetic_eq_coords={"long":0, "lat":0, "dip":0}):
         super().__init__(root)
         self.root = root
         self.lang = language
         self.magnetic_eq_coords = magnetic_eq_coords
         self.util = Util()
         # Composição: instanciando componentes ao invés de herdar
-        self.side_options = SideOptionsCalm(root, self.lang)
-        self.map_widget = Map(root)
+        self.side_options = SideOptionsCalm(self, self.lang)
+        self.map_widget = Map(self)
         self.downloaded_data_stations = []
         self.longitude = []
         self.latitude = []
@@ -21,10 +21,16 @@ class CalmPage(QWidget):
 
     def create_page_frames(self):
         # Cria o layout principal horizontal
-        main_layout = QHBoxLayout(self.root)
-        self.root.setLayout(main_layout)
+        #main_layout = QHBoxLayout(self.root)
+        #self.root.setLayout(main_layout)
 
-        self.destroy_all_frames()
+        if self.layout() is None:
+            main_layout = QHBoxLayout(self)
+            self.setLayout(main_layout)
+        else:
+            main_layout = self.layout()
+
+        #self.destroy_all_frames()
 
         # Lado esquerdo: opções
         self.side_options.create_calm_plot_options()
@@ -36,12 +42,12 @@ class CalmPage(QWidget):
         self.map_widget.create_map()
         self.map_widget.set_station_map(self.longitude, self.latitude)
         self.map_widget.set_stationsname_map(self.all_locals)
-        self.map_widget.ax.contour(
+        '''self.map_widget.ax.contour(
             self.magnetic_eq_coords['long'],
             self.magnetic_eq_coords['lat'],
             self.magnetic_eq_coords['dip'],
             levels=[0], colors='gray'
-        )
+        )'''
         self.map_widget.fig.canvas.mpl_connect('button_press_event', self.map_on_click)
 
         # Adiciona frames ao layout principal
@@ -75,7 +81,7 @@ class CalmPage(QWidget):
                             self.all_locals.append({'station': station_info[0], 'longitude': long, 'latitude': lat})
         except Exception:
             warning = QLabel(self.util.dict_language[self.lang]['lbl_noreadme'])
-            self.side_options.frame_side_functions_calm.inner_frame.layout().addWidget(warning)
+            self.side_options.frame_side_functions_calm.inner_layout.addWidget(warning)
 
     def listbox_on_click(self):
         # Altera status do mapa quando a lista é selecionada

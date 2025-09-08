@@ -14,6 +14,7 @@ class SideOptionsCalm(QWidget):
         self.lang = language
         self.util = Util()
         self.selected_calm_dates = []
+
         self.combo_local_download = None
         self.local_downloads_function = None
 
@@ -22,11 +23,12 @@ class SideOptionsCalm(QWidget):
         self.frame_side_functions_calm = ScrollableFrame(self.window, 255)
         self.frame_side_functions_calm.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.frame_side_functions_calm.setMinimumWidth(255)
-        self.frame_side_functions_calm.setMaximumWidth(255)
-        self.frame_side_functions_calm.setFixedWidth(255)
+        self.frame_side_functions_calm.setMaximumWidth(325)
+        #self.frame_side_functions_calm.setFixedWidth(255)
         self.frame_side_functions_calm.setObjectName("sideOptionsCalmFrame")
 
-        layout = QVBoxLayout(self.frame_side_functions_calm.inner_frame)
+        #layout = QVBoxLayout(self.frame_side_functions_calm.inner_frame)
+        layout = self.frame_side_functions_calm.inner_layout
         layout.setContentsMargins(5, 5, 5, 5)
         layout.setSpacing(8)
 
@@ -86,8 +88,10 @@ class SideOptionsCalm(QWidget):
         self.btn_plot_confirm = QPushButton(self.util.dict_language[self.lang]['btn_confirm'])
         layout.addWidget(self.btn_plot_confirm)
 
-        self.frame_side_functions_calm.inner_frame.setLayout(layout)
-        self.frame_side_functions_calm.setLayout(QVBoxLayout())
+        #self.frame_side_functions_calm.inner_frame.setLayout(layout)
+
+        #self.frame_side_functions_calm.setLayout(QVBoxLayout())
+        
         self.frame_side_functions_calm.show()
 
     # Add or remove selected date
