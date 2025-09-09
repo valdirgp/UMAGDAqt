@@ -246,7 +246,8 @@ class GraphPage(QWidget):
         return self.side_options.date.date().toPyDate()
 
     def get_start_date(self):
-        return self.side_options.startdate.date().toPyDate()
+        #return self.side_options.startdate.date().toPyDate()
+        return self.side_options.startdate.date()
 
     def get_end_date(self):
         return self.side_options.enddate.date().toPyDate()

@@ -4,6 +4,8 @@ from datetime import timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import QDate
+from datetime import datetime
 
 class GlobalGraph(GraphsModule):
     def __init__(self, root, language):
@@ -80,13 +82,17 @@ class GlobalGraph(GraphsModule):
                         for t, time in enumerate(times):
                             self.all_data[station][day][time][type] = calm_averages[t] - delta if calm_averages[t] is not None else None
 
-    # plot the given data
+    '''# plot the given data
     def add_plots(self, slct_types):
         try:    
             plt.close('all')
             plt.rcParams['toolbar'] = 'toolmanager' # allows custom tools mode
             self.fig, self.ax = plt.subplots()
             self.filtred_values = []
+            if isinstance(self.start_date, QDate):
+                self.start_date = self.start_date.toPyDate()
+            if isinstance(self.end_date, QDate):
+                self.end_date = self.end_date.toPyDate()
             difference = (self.end_date - self.start_date).days
 
             for plot_type in slct_types:
@@ -97,8 +103,7 @@ class GlobalGraph(GraphsModule):
                         for time in times:
                             data = self.all_data[station][day][time][plot_type]
                             if data is not None: self.filtred_values.append(data)
-                            plot_values.append(data)
-                        
+                            plot_values.append(data)    
                     time = [self.start_date + timedelta(minutes=i) for i in range(difference * 1440)]
                     if 'reference' in plot_type:
                         if control_reference: # controle para que o mesmo tipo de referencia não se repita
@@ -115,10 +120,71 @@ class GlobalGraph(GraphsModule):
                 self.util.dict_language[self.lang]["mgbox_error_plt"]
             )
             self.can_plot = False
+            print(error)'''
+    
+    def add_plots(self, slct_types):
+        try:
+            plt.close('all')
+            plt.rcParams['toolbar'] = 'toolmanager'
+            self.fig, self.ax = plt.subplots()
+            self.filtred_values = []
+
+            if isinstance(self.start_date, QDate):
+                self.start_date = self.start_date.toPyDate()
+            if isinstance(self.end_date, QDate):
+                self.end_date = self.end_date.toPyDate()
+
+            for plot_type in slct_types:
+                control_reference = True
+                for station in self.stations:
+                    x_vals = []
+                    y_vals = []
+                    for day_str, times in self.all_data[station].items():
+                        day_date = datetime.strptime(day_str, "%d/%m/%Y").date()
+                        for time_str, data_dict in times.items():
+                            val = data_dict.get(plot_type)
+                            if val is not None:
+                                # Combina a data com a hora para ter datetime completo
+                                time_obj = datetime.strptime(time_str, "%H:%M").time()
+                                dt = datetime.combine(day_date, time_obj)
+                                x_vals.append(dt)
+                                y_vals.append(val)
+                                self.filtred_values.append(val)
+
+                    # Ordena os pontos para garantir que estão em ordem temporal
+                    sorted_pairs = sorted(zip(x_vals, y_vals))
+                    x_sorted, y_sorted = zip(*sorted_pairs) if sorted_pairs else ([], [])
+
+                    if 'reference' in plot_type:
+                        if control_reference:
+                            self.ax.plot(x_sorted, y_sorted, label=plot_type)
+                        break
+                    else:
+                        self.ax.plot(x_sorted, y_sorted, label=f'{station}-{plot_type}')
+                    control_reference = False
+
+        except Exception as error:
+            QMessageBox.information(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                self.util.dict_language[self.lang]["mgbox_error_plt"]
+            )
+            self.can_plot = False
             print(error)
+
 
     # configure graph especifications
     def config_graph(self, plot_type, station):
+        # Converter apenas se for QDate
+        if isinstance(self.start_date, QDate):
+            self.start_date = self.start_date.toPyDate()
+        else:
+            self.start_date = self.start_date
+
+        if isinstance(self.end_date, QDate):
+            self.end_date = self.end_date.toPyDate()
+        else:
+            self.end_date = self.end_date
         final_date = self.end_date - timedelta(days=1)
         timeday = [self.start_date + timedelta(days=i) for i in range((self.end_date - self.start_date).days+1)]
         self.ax.set_xticks(timeday, minor=False)

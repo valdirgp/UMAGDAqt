@@ -23,15 +23,18 @@ class InitialPage(QWidget):
     # cria página inicial
     def load_page(self):
         # remove widgets existentes
-        self.util.destroy_existent_frames(self.root)
+        #self.util.destroy_existent_frames(self.root)
 
         # container principal
-        initial_page_frame = QWidget(self.root)
-        initial_page_frame.setStyleSheet("background-color: #212121;")
-        layout = QVBoxLayout(initial_page_frame)
-        layout.setAlignment(Qt.AlignCenter)
         width = self.root.width()
         height = self.root.height()
+        print(f"Width: {width}, Height: {height}")
+        initial_page_frame = QWidget(self)
+        initial_page_frame.setStyleSheet(f"background-color: #212121;")
+        initial_page_frame.setFixedHeight(height)
+        initial_page_frame.setFixedWidth(width)
+        layout = QVBoxLayout(initial_page_frame)
+        layout.setAlignment(Qt.AlignCenter)
 
         # carregar imagem
         img = Image.open(self.util.resource_path("images/magnetic_field.png"))
@@ -59,6 +62,9 @@ class InitialPage(QWidget):
 
         # define layout no frame
         initial_page_frame.setLayout(layout)
-
         # adiciona ao root
-        self.root.setCentralWidget(initial_page_frame)
+        #self.root.setCentralWidget(initial_page_frame)
+
+        self.setLayout(layout)
+        self.setMinimumHeight(400)
+        self.setMinimumWidth(600)

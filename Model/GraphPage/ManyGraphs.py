@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import QDate
 import os
 import re
 
@@ -60,6 +61,10 @@ class ManyGraphs(GraphsModule):
 
     # Check if grid (columns x rows) matches the number of days in the range
     def validate_grid(self, number_columns, number_rows):
+        if isinstance(self.start_date, QDate):
+            self.start_date = self.start_date.toPyDate()
+        if isinstance(self.end_date, QDate):
+            self.end_date = self.end_date.toPyDate()
         difference_dates = self.end_date - self.start_date
         if number_columns * number_rows != difference_dates.days:
             QMessageBox.information(
