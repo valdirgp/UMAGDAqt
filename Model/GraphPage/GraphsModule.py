@@ -8,7 +8,7 @@ from datetime import timedelta
 from PyQt5.QtWidgets import (
     QMessageBox, QDialog, QVBoxLayout, QLabel, QCheckBox, QPushButton, QFileDialog, QWidget
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QDate
 
 class GraphsModule():
     def __init__(self, language):
@@ -201,10 +201,20 @@ class GraphsModule():
     # collects data from a period
     def get_stations_data(self):
         all_data = {}
+
         for station in self.stations:
-            current_date = self.start_date
+            # Converter apenas se for QDate
+            if isinstance(self.start_date, QDate):
+                current_date = self.start_date.toPyDate()
+            else:
+                current_date = self.start_date
+
+            if isinstance(self.end_date, QDate):
+                end_date = self.end_date.toPyDate()
+            else:
+                end_date = self.end_date
             station_data = {}
-            while current_date < self.end_date: 
+            while current_date < end_date: 
                 single_data = self.get_data(current_date, station, self.data_with_stations[f'{station}'][0])
                 station_data.update(single_data)
                 current_date += timedelta(days=1)
@@ -361,9 +371,12 @@ class GraphsModule():
             avarage_type = {}
             for station in slct_stations:
                 avarage_type[station] = {}
+                if isinstance(self.start_date, QDate):
+                    self.start_date = self.start_date.toPyDate()
                 date = datetime.combine(self.start_date, datetime.min.time())
                 for type in slct_types:
                     period_data = [0]
+                    date = datetime.combine(date, datetime.min.time())
                     while date < datetime.combine(self.end_date, datetime.min.time()):
                         data = self.all_data[station][f'{date.day}/{date.month}/{date.year}'][f'{date.hour}:{date.minute}'][type]
                         if data != None: 
@@ -385,8 +398,10 @@ class GraphsModule():
 
     # validate given dates and format them into datetime 
     def format_dates(self, start, end):
-        start_date = datetime.strptime(start, r'%d/%m/%Y')
-        end_date = datetime.strptime(end, r'%d/%m/%Y')
+        #start_date = datetime.strptime(start, r'%d/%m/%Y')
+        #end_date = datetime.strptime(end, r'%d/%m/%Y')
+        start_date = start
+        end_date = end
         if start_date > end_date:
             QMessageBox.information(
                 None,

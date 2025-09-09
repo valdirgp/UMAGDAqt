@@ -77,6 +77,7 @@ class SideOptionsCalm(QWidget):
         self.cal_calm = QCalendarWidget()
         self.cal_calm.setGridVisible(True)
         self.cal_calm.selectionChanged.connect(lambda: self.add_date(self.cal_calm, self.selected_calm_dates))
+        self.cal_calm.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         layout.addWidget(self.cal_calm)
 
         # Clear all button

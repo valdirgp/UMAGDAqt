@@ -173,10 +173,16 @@ class MainControl:
 
         else:
             self.InitialPage = InitialPage(self.root, lang)
+            self.InitialPage.load_page()
+
             self.LicenseTopLevel = LicenseTopLevel(self.root, lang)
+            #self.LicenseTopLevel.load_page()
+
             self.AboutPage = AboutPage(self.root, lang)
+            self.AboutPage.load_page()
 
             self.stack.addWidget(self.InitialPage)
+            self.stack.addWidget(self.AboutPage)
 
             menubar.addAction(self.util.dict_language[lang]["menu_initial"], lambda: self.stack.setCurrentWidget(self.InitialPage))
 
@@ -187,7 +193,7 @@ class MainControl:
             config_menu.addMenu(lang_menu)
 
             menubar.addMenu(config_menu)
-            menubar.addAction(self.util.dict_language[lang]["menu_about"], self.AboutPage.load_page)
+            menubar.addAction(self.util.dict_language[lang]["menu_about"], lambda: self.stack.setCurrentWidget(self.AboutPage))
             menubar.addAction(self.util.dict_language[lang]["menu_lc"], self.create_license_TopLevel)
 
             self.stack.setCurrentWidget(self.InitialPage)

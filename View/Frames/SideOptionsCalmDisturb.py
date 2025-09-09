@@ -78,6 +78,7 @@ class SideOptionsCalmDisturb(QWidget):
         self.cal_calm = QCalendarWidget()
         self.cal_calm.setGridVisible(True)
         self.cal_calm.selectionChanged.connect(lambda: self.add_date(self.cal_calm, self.selected_calm_dates))
+        self.cal_calm.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         layout.addWidget(self.cal_calm)
 
         # Disturbed days calendar
@@ -86,6 +87,7 @@ class SideOptionsCalmDisturb(QWidget):
         self.cal_disturb = QCalendarWidget()
         self.cal_disturb.setGridVisible(True)
         self.cal_disturb.selectionChanged.connect(lambda: self.add_date(self.cal_disturb, self.selected_disturb_dates))
+        self.cal_disturb.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         layout.addWidget(self.cal_disturb)
 
         # Clear all button
