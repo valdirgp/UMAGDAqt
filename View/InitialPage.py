@@ -28,7 +28,6 @@ class InitialPage(QWidget):
         # container principal
         width = self.root.width()
         height = self.root.height()
-        print(f"Width: {width}, Height: {height}")
         initial_page_frame = QWidget(self)
         initial_page_frame.setStyleSheet(f"background-color: #212121;")
         initial_page_frame.setFixedHeight(height)

@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtGui import QIcon
 import sys
 from Controller.MainControl import MainControl
 
@@ -15,5 +16,6 @@ class UmagdaApp(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = UmagdaApp()
+    window.setWindowIcon(QIcon('General/images/univap.png'))
     window.showMaximized()
     sys.exit(app.exec_())

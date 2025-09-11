@@ -82,6 +82,7 @@ class TideGraph(GraphsModule):
                             self.all_data[station][day][time][type] = calm_averages[t] - delta if calm_averages[t] is not None else None
     
     # add in plot the given data
+    '''
     def add_plots(self, slct_types):
         try:
             plt.close('all')
@@ -100,7 +101,10 @@ class TideGraph(GraphsModule):
                             plot_values.append(data)
 
                         # Use the actual start_date for the x-axis
-                        time = [self.start_date + timedelta(minutes=min) for min in range(1440)]
+                        day_datetime = datetime.strptime(day, "%d/%m/%Y")  # Ajuste o formato se necessário!
+                        time = [day_datetime + timedelta(minutes=m) for m in range(1440)]
+
+                        #time = [self.start_date + timedelta(minutes=min) for min in range(1440)]
                         if 'reference' in plot_type:
                             if control_reference: # controle para que o mesmo tipo de referencia não se repita
                                 self.ax.plot(time, plot_values, label=plot_type)
@@ -117,8 +121,55 @@ class TideGraph(GraphsModule):
             )
             self.can_plot = False
             print(error)
+    '''
+    def add_plots(self, slct_types):
+        try:
+            plt.close('all')
+            plt.rcParams['toolbar'] = 'toolmanager'
+            self.fig, self.ax = plt.subplots()
+            self.filtred_values = []
+
+            day_zero = datetime(2000, 1, 1)  # Base para normalizar o eixo X
+
+            for plot_type in slct_types:
+                control_reference = True
+                for station in self.stations:
+                    for day, times in self.all_data[station].items():
+                        plot_values = []
+                        for time in times:
+                            data = self.all_data[station][day][time].get(plot_type)
+                            if data is not None:
+                                self.filtred_values.append(data)
+                            plot_values.append(data)
+
+                        # Eixo X: sempre de 00:00 até 23:59 num mesmo dia fictício
+                        x_times = [day_zero + timedelta(minutes=m) for m in range(1440)]
+
+                        # Legenda: mostra o dia real da curva
+                        label = f'{station}-{plot_type} ({day})' if 'reference' not in plot_type else f'{plot_type}'
+
+                        if 'reference' in plot_type:
+                            if control_reference:
+                                self.ax.plot(x_times, plot_values, label=label)
+                        else:
+                            self.ax.plot(x_times, plot_values, label=label)
+
+                    control_reference = False
+
+            self.ax.legend()
+
+        except Exception as error:
+            QMessageBox.information(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                self.util.dict_language[self.lang]["mgbox_error_plt"]
+            )
+            self.can_plot = False
+            print(error)
+
 
     # configure graph especifications
+    '''
     def config_graph(self, plot_type, station):
         final_date = self.end_date - timedelta(days=1)
         self.ax.minorticks_on()
@@ -155,4 +206,46 @@ class TideGraph(GraphsModule):
         
         if self.grid_graph: self.ax.grid()
         
+        self.fig.canvas.mpl_connect('button_press_event', lambda event: self.create_exporter_level_top(event, plot_type))
+    '''
+
+    def config_graph(self, plot_type, station):
+        self.ax.minorticks_on()
+        day_zero = datetime(2000, 1, 1)
+
+        timehour = [day_zero + timedelta(hours=i) for i in range(25)]  # 00:00 até 24:00
+        self.ax.set_xticks(timehour, minor=True)
+        self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+
+        self.ax.tick_params(axis='x', which='both', top=True, labeltop=False, bottom=True, labelbottom=True)
+        self.ax.tick_params(axis='y', which='both', right=True, labelright=False, left=True, labelleft=True)
+
+        self.ax.set_xlim(day_zero, day_zero + timedelta(hours=24))
+
+        if self.filtred_values:
+            self.ax.set_ylim(min(self.filtred_values), max(self.filtred_values))
+        else:
+            QMessageBox.information(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                self.util.dict_language[self.lang]["mgbox_error_noinfo_period"]
+            )
+            self.can_plot = False
+            return
+
+        final_date = self.end_date - timedelta(days=1)
+        self.ax.set_ylabel(f'{", ".join(plot_type)} ({self.get_measure(plot_type)})')
+        self.ax.set_xlabel('UT')
+        self.ax.set_title(f'{station} {self.start_date.strftime("%d/%m/%Y")} - {final_date.strftime("%d/%m/%Y")}')
+
+        if self.bold_text:
+            self.ax.xaxis.label.set_weight('bold')
+            self.ax.yaxis.label.set_weight('bold')
+            self.ax.title.set_weight('bold')
+            for label in self.ax.get_xticklabels() + self.ax.get_yticklabels():
+                label.set_fontweight('bold')
+
+        if self.grid_graph:
+            self.ax.grid()
+
         self.fig.canvas.mpl_connect('button_press_event', lambda event: self.create_exporter_level_top(event, plot_type))

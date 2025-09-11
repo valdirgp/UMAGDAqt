@@ -64,6 +64,7 @@ class GraphPage(QWidget):
 
         self.get_downloaded_stations_location()
         self.map_widget.create_map()
+        self.colors = ['red'] * len(self.all_locals)
         self.map_widget.set_station_map(self.longitude, self.latitude)
         self.map_widget.set_stationsname_map(self.all_locals)
 

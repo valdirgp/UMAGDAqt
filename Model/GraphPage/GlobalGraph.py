@@ -138,6 +138,7 @@ class GlobalGraph(GraphsModule):
                 control_reference = True
                 for station in self.stations:
                     x_vals = []
+                    
                     y_vals = []
                     for day_str, times in self.all_data[station].items():
                         day_date = datetime.strptime(day_str, "%d/%m/%Y").date()

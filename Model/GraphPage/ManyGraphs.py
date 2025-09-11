@@ -105,14 +105,14 @@ class ManyGraphs(GraphsModule):
             final_date = self.end_date - timedelta(days=1)
             plt.close('all')
             plt.rcParams['toolbar'] = 'toolmanager' # allows custom tools mode
-            self.fig, axs = plt.subplots(number_rows, number_columns)
+            self.fig, axs = plt.subplots(number_rows, number_columns+1)
             self.axs = axs.flatten()
             self.filtred_values = []  
             self.current_date = self.start_date
 
             for plot_type in slct_types:
                 control_reference = True
-                for station in self.stations:
+                '''for station in self.stations:
                     for dy, (day, times) in enumerate(self.all_data[station].items()):
                         plot_values = []
                         for time in times:
@@ -125,40 +125,65 @@ class ManyGraphs(GraphsModule):
                             if control_reference: # controle para que o mesmo tipo de referencia não se repita
                                 self.axs[dy].plot(time, plot_values, label=plot_type)
                         else:
+                            self.axs[dy].plot(time, plot_values, label=f'{station}-{plot_type}')'''
+                # Extract all days to plot (assuming same days for all stations)
+                days = list(self.all_data[self.stations[0]].keys())
+                for dy, day in enumerate(days):
+                    self.filtred_values = []
+                    for station in self.stations:
+                        times = self.all_data[station][day]
+                        plot_values = []
+                        for time in times:
+                            data = times[time].get(plot_type)
+                            if data is not None:
+                                self.filtred_values.append(data)
+                            plot_values.append(data)
+                        
+                        day_datetime = datetime.strptime(day, "%d/%m/%Y")  # ou "%d/%m/%Y", dependendo do formato da chave
+                        time = [day_datetime + timedelta(minutes=m) for m in range(1440)]
+
+
+                        #time = [self.start_date + timedelta(minutes=min) for min in range(1440)]
+                        if 'reference' in plot_type:
+                            if control_reference:
+                                self.axs[dy].plot(time, plot_values, label=plot_type)
+                        else:
                             self.axs[dy].plot(time, plot_values, label=f'{station}-{plot_type}')
 
-                        timehour = [self.current_date + timedelta(hours=h) for h in range(24)]
-                        self.axs[dy].minorticks_on()
-                        self.axs[dy].set_xticks(timehour, minor=True)
-                        self.axs[dy].xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-                        self.axs[dy].tick_params(axis='x', which='both', top=True, labeltop=False, bottom=True, labelbottom=True)
-                        self.axs[dy].tick_params(axis='y', which='both', right=True, labelright=False, left=True, labelleft=True)
+                    timehour = [self.current_date + timedelta(hours=h) for h in range(24)]
+                    self.axs[dy].minorticks_on()
+                    self.axs[dy].set_xticks(timehour, minor=True)
+                    self.axs[dy].xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+                    self.axs[dy].tick_params(axis='x', which='both', top=True, labeltop=False, bottom=True, labelbottom=True)
+                    self.axs[dy].tick_params(axis='y', which='both', right=True, labelright=False, left=True, labelleft=True)
 
-                        self.axs[dy].set_xlim(self.start_date, self.start_date+timedelta(hours=24))
-                        if self.filtred_values:
-                            self.axs[dy].set_ylim(min(self.filtred_values), max(self.filtred_values))
-                        else:
-                            QMessageBox.information(
-                                None,
-                                self.util.dict_language[self.lang]["mgbox_error"],
-                                self.util.dict_language[self.lang]["mgbox_error_noinfo_period"]
-                            )
-                            self.can_plot = False
-                            return
+                    #self.axs[dy].set_xlim(self.start_date, self.start_date+timedelta(hours=24))
+                    self.axs[dy].set_xlim(day_datetime, day_datetime + timedelta(hours=24))
 
-                        self.axs[dy].set_ylabel(f'{plot_type} ({self.get_measure(plot_type)})')
-                        self.axs[dy].set_xlabel('UT')
-                        self.axs[dy].set_title(f'{self.current_date.day:02}/{self.current_date.month:02}/{self.current_date.year}')
-                        self.current_date += timedelta(days=1)
-                        self.axs[dy].legend()
+                    if self.filtred_values:
+                        self.axs[dy].set_ylim(min(self.filtred_values), max(self.filtred_values))
+                    else:
+                        QMessageBox.information(
+                            None,
+                            self.util.dict_language[self.lang]["mgbox_error"],
+                            self.util.dict_language[self.lang]["mgbox_error_noinfo_period"]
+                        )
+                        self.can_plot = False
+                        return
 
-                        if self.bold_text:
-                            self.axs[dy].xaxis.label.set_weight('bold')
-                            self.axs[dy].yaxis.label.set_weight('bold')
-                            self.axs[dy].title.set_weight('bold')
-                            for label in self.axs[dy].get_xticklabels() + self.axs[dy].get_yticklabels(): label.set_fontweight('bold')
+                    self.axs[dy].set_ylabel(f'{plot_type} ({self.get_measure(plot_type)})')
+                    self.axs[dy].set_xlabel('UT')
+                    self.axs[dy].set_title(f'{self.current_date.day:02}/{self.current_date.month:02}/{self.current_date.year}')
+                    self.current_date += timedelta(days=1)
+                    self.axs[dy].legend()
 
-                        if self.grid_graph: self.axs[dy].grid()
+                    if self.bold_text:
+                        self.axs[dy].xaxis.label.set_weight('bold')
+                        self.axs[dy].yaxis.label.set_weight('bold')
+                        self.axs[dy].title.set_weight('bold')
+                        for label in self.axs[dy].get_xticklabels() + self.axs[dy].get_yticklabels(): label.set_fontweight('bold')
+
+                    if self.grid_graph: self.axs[dy].grid()
 
                     self.fig.suptitle(f'{plot_type} {self.start_date.strftime("%d/%m/%Y")} - {final_date.strftime("%d/%m/%Y")}')
                     plt.tight_layout()

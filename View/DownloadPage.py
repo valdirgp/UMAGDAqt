@@ -72,9 +72,6 @@ class DownloadPage(QWidget):
         self.map_widget.set_station_map(self.longitude, self.latitude)
         self.map_widget.set_stationsname_map(self.all_locals)
 
-        self.map_widget.set_station_map(self.longitude, self.latitude)
-        self.map_widget.set_stationsname_map(self.all_locals)
-
         longitudes = np.linspace(-180, 180, 361)
         y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
         self.map_widget.ax.plot(longitudes, y_values, color='gray', transform=ccrs.PlateCarree())

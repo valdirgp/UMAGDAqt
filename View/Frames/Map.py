@@ -18,6 +18,20 @@ class Map(QWidget):
         self.text_annotations = []
         self.all_locals = []
 
+    #método novo para acompanhar o nome de acordo com zooms e movements
+    def update_annotations(self):
+        xlim = self.ax.get_xlim()
+        ylim = self.ax.get_ylim()
+
+        for i, coord in enumerate(self.all_locals):
+            text = self.text_annotations[i]
+            if xlim[0] <= coord['longitude'] <= xlim[1] and ylim[0] <= coord['latitude'] <= ylim[1]:
+                text.set_visible(True)
+            else:
+                text.set_visible(False)
+        self.canvas.draw_idle()
+
+
     # creates frame for to select stations
     def create_map(self):
         # Main layout for the map frame
@@ -46,7 +60,20 @@ class Map(QWidget):
 
         # Create the canvas and toolbar for PyQt5
         self.canvas = FigureCanvas(self.fig)
-        self.toolbar = CustomToolbar(self.canvas, self.map_frame, total_locals=self.all_locals)
+
+        # Conecta o evento de redesenho para atualizar os nomes
+        '''self.canvas.mpl_connect('draw_event', lambda event: self.update_annotations())
+        self.canvas.mpl_connect('button_release_event', lambda event: self.update_annotations())  # pan/zoom com mouse
+        self.ax.callbacks.connect('xlim_changed', lambda ax: self.update_annotations())
+        self.ax.callbacks.connect('ylim_changed', lambda ax: self.update_annotations())'''
+        self.ax.callbacks.connect('xlim_changed', lambda ax: self.update_annotations())
+        self.ax.callbacks.connect('ylim_changed', lambda ax: self.update_annotations())
+
+
+        #self.toolbar = CustomToolbar(self.canvas, self.map_frame, total_locals=self.all_locals)
+
+        self.toolbar = CustomToolbar(self.canvas, self.map_frame, map_instance=self)
+
 
         # Add toolbar and canvas to the layout
         layout.addWidget(self.toolbar)
@@ -65,6 +92,7 @@ class Map(QWidget):
         self.canvas.draw()
 
     # creates text in given coordinates in station_locals and its name
+    '''
     def set_stationsname_map(self, station_locals):
         for coord in station_locals:
             text = self.ax.annotate(
@@ -76,6 +104,23 @@ class Map(QWidget):
             )
             self.text_annotations.append(text)
         self.canvas.draw()
+    '''
+    def set_stationsname_map(self, station_locals):
+        self.all_locals = station_locals  # Salva os dados para uso posterior
+
+        for coord in station_locals:
+            text = self.ax.annotate(
+                text=coord['station'],
+                xy=(coord['longitude'], coord['latitude']),
+                xytext=(5, 5),
+                textcoords='offset points',
+                ha='right',
+                color='white',
+                bbox=dict(boxstyle="round,pad=0.2", fc="black", alpha=0.5)
+            )
+            self.text_annotations.append(text)
+        self.canvas.draw()
+
 
     # select all points from map
     def select_all_points(self):

@@ -18,6 +18,7 @@ def on_zoom_done(ax, tl):
             )
 
 class CustomToolbar(NavigationToolbar2QT):
+    '''
     def __init__(self, canvas, window, total_locals=None):
         super().__init__(canvas, window)
         self.total_locals = total_locals
@@ -36,4 +37,28 @@ class CustomToolbar(NavigationToolbar2QT):
         on_zoom_done(self.canvas.figure.gca(), self.total_locals)
 
     def forward(self):
+        super().forward()'''
+    
+    def __init__(self, canvas, window, map_instance=None):
+        super().__init__(canvas, window)
+        self.map_instance = map_instance
+
+    def home(self):
+        super().home()
+        if self.map_instance:
+            self.map_instance.update_annotations()
+
+    def release_zoom(self, event):
+        super().release_zoom(event)
+        if self.map_instance:
+            self.map_instance.update_annotations()
+
+    def back(self):
+        super().back()
+        if self.map_instance:
+            self.map_instance.update_annotations()
+
+    def forward(self):
         super().forward()
+        if self.map_instance:
+            self.map_instance.update_annotations()

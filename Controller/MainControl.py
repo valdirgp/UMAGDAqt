@@ -102,6 +102,7 @@ from General.util import Util
 from PyQt5.QtWidgets import (
     QMainWindow, QMenuBar, QMenu, QStackedWidget
 )
+from PyQt5.QtGui import QIcon
 
 
 class MainControl:
@@ -207,8 +208,9 @@ class MainControl:
         self.root.close()
 
         new_root = QMainWindow()
-        new_root.resize(800, 800)
+        new_root.resize(1920, 1080)
         new_root.showMaximized()
+        new_root.setWindowIcon(QIcon('General/images/univap.png'))
         app = MainControl(new_root)
         app.initialize_app()
         new_root.show()

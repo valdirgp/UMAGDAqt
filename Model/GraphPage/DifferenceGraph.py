@@ -5,6 +5,7 @@ import matplotlib.dates as mdates
 import re
 from datetime import datetime
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import QDate
 
 class DifferenceGraph(GraphsModule):
     def __init__(self, root, language):
@@ -130,10 +131,15 @@ class DifferenceGraph(GraphsModule):
         return averages
 
     # plot the given data
+    '''
     def add_plots(self, all_types):
         plt.close('all')
         self.fig, self.ax = plt.subplots()
         self.filtred_values = []
+        if isinstance(self.start_date, QDate):
+            self.start_date = self.start_date.toPyDate()
+        if isinstance(self.end_date, QDate):
+            self.end_date = self.end_date.toPyDate()
         difference = (self.end_date - self.start_date).days
         self.diff_data = {}
 
@@ -166,8 +172,64 @@ class DifferenceGraph(GraphsModule):
                 self.ax.plot(time, plot_values, label=slct_type)
             else:
                 self.ax.plot(time, plot_values, label=f'{self.min_station}-{self.sub_station} {slct_type}')
+    '''
+
+    def add_plots(self, all_types):
+        plt.close('all')
+        self.fig, self.ax = plt.subplots()
+        self.filtred_values = []
+        if isinstance(self.start_date, QDate):
+            self.start_date = self.start_date.toPyDate()
+        if isinstance(self.end_date, QDate):
+            self.end_date = self.end_date.toPyDate()
+        #difference = (self.end_date - self.start_date).days
+        self.diff_data = {}
+
+        # Calcula os dados de diferença por hora/minuto
+        for day, times in self.all_data[self.min_station].items():
+            date = {}
+            for time in times:
+                current_data = {}
+                for slct_type in all_types:
+                    if 'reference' not in slct_type:
+                        try:
+                            data = self.all_data[self.min_station][day][time][slct_type] - self.all_data[self.sub_station][day][time][slct_type]
+                        except Exception:
+                            data = None
+                    else:
+                        data = self.all_data[self.min_station][day][time][slct_type]
+                    current_data[slct_type] = data
+                date[time] = current_data
+            self.diff_data[day] = date
+
+        # Plota os dados com resolução por tempo (minuto a minuto)
+        for slct_type in all_types:
+            plot_values = []
+            time_axis = []
+
+            for day, times in self.diff_data.items():
+                for time_str, values in times.items():
+                    try:
+                        hour, minute = map(int, time_str.split(':'))
+                        dt = datetime.strptime(day, "%d/%m/%Y").replace(hour=hour, minute=minute)
+                        data = values[slct_type]
+                        if data is not None:
+                            plot_values.append(data)
+                            time_axis.append(dt)
+                            self.filtred_values.append(data)
+                    except Exception:
+                        continue
+
+            if time_axis and plot_values:
+                label = f'{self.min_station}-{self.sub_station} {slct_type}' if 'reference' not in slct_type else slct_type
+                self.ax.plot(time_axis, plot_values, label=label)
+
+        self.ax.legend()
+
+
 
     # configure graph specifications
+    '''
     def config_graph(self, plot_type, station):
         final_date = self.end_date - timedelta(days=1)
         timeday = [self.start_date + timedelta(days=i) for i in range((self.end_date - self.start_date).days+1)]
@@ -205,3 +267,48 @@ class DifferenceGraph(GraphsModule):
             self.ax.grid()
 
         self.fig.canvas.mpl_connect('button_press_event', lambda event: self.create_exporter_level_top(event, plot_type, is_difference=True))
+    '''
+
+    def config_graph(self, plot_type, station):
+        final_date = self.end_date - timedelta(days=1)
+
+        # Mostrar apenas dias no eixo X (não horas)
+        self.ax.xaxis.set_major_locator(mdates.DayLocator())
+        self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%d'))
+
+        self.ax.tick_params(axis='x', which='both', top=True, labeltop=False, bottom=True, labelbottom=True)
+        self.ax.tick_params(axis='y', which='both', right=True, labelright=False, left=True, labelleft=True)
+
+        self.ax.set_xlim(self.start_date, self.end_date)
+
+        if self.filtred_values:
+            self.ax.set_ylim(min(self.filtred_values), max(self.filtred_values))
+        else:
+            QMessageBox.information(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                self.util.dict_language[self.lang]["mgbox_error_noinfo_period"]
+            )
+            self.can_plot = False
+            return
+
+        self.ax.set_ylabel(f'{", ".join(plot_type)} ({self.get_measure(plot_type)})')
+        self.ax.set_xlabel('Dia')
+        self.ax.set_title(f'{station} {self.start_date.strftime("%d/%m/%Y")} - {final_date.strftime("%d/%m/%Y")}')
+        self.ax.legend()
+
+        if self.bold_text:
+            self.ax.xaxis.label.set_weight('bold')
+            self.ax.yaxis.label.set_weight('bold')
+            self.ax.title.set_weight('bold')
+            for label in self.ax.get_xticklabels() + self.ax.get_yticklabels():
+                label.set_fontweight('bold')
+
+        if self.grid_graph:
+            self.ax.grid()
+
+        self.fig.canvas.mpl_connect(
+            'button_press_event',
+            lambda event: self.create_exporter_level_top(event, plot_type, is_difference=True)
+        )
+
