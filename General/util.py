@@ -92,6 +92,10 @@ class Util():
 
                                     "check_bold": "Negrito",
                                     "check_grid": "Grades",
+
+                                    "download_complete": "Download concluído:",
+                                    "error_no_readable_data": "Erro no download (sem dados legíveis):",
+                                    "error_download": "Erro no download:"
                                     },
                             "en": {
                                     "title": "UMAGDA - Univap Magnetometer Data Analysis - FAPESP Project: 2022/14815-5 & 2024/05909-1",
@@ -177,6 +181,11 @@ class Util():
 
                                     "check_bold": "Bold",
                                     "check_grid": "Grids",
+
+                                    "msgbox_info": "Information",
+                                    "download_complete": "Download completed:",
+                                    "error_no_readable_data": "Download error (data not readable):",
+                                    "error_download": "Error during download:"
                                     }
                             }
         

@@ -9,10 +9,12 @@ from urllib import request
 import threading as mt
 import queue
 from PyQt5.QtWidgets import QMessageBox
+from General.util import Util
 
 class Intermagnet(DownloadModule):
     def __init__(self, language, root=None):
         super().__init__(language, root)
+        self.util = Util()
 
     # creates a list with all stations from the Intermagnet network
     def create_stationlist(self):
@@ -66,9 +68,10 @@ class Intermagnet(DownloadModule):
                 date += timedelta(days=1)
         for req in requests_list:
             self.requests_queue.put(req)
-        threads = [] 
+        threads = []
         for _ in range(max_threads):
             threads.append(mt.Thread(target=self.get_file))
+        self.responses.clear()
 
         self.create_progressbar('progbar_dwd_Intermagnet', total_downloads)
         for thread in threads:
@@ -81,6 +84,8 @@ class Intermagnet(DownloadModule):
         return requests
         
     # gets all the text
+    responses = []
+    responses.append("Intermagnet")
     def get_file(self):
         while not self.requests_queue.empty():
             request_item = self.requests_queue.get()
@@ -98,7 +103,12 @@ class Intermagnet(DownloadModule):
                         if re.search('Publication Date', line):
                             l = line.split()
                             if l[2] == '|':
-                                print(f'Sem dados: {request_item["station"].lower()}{request_item["date"].year}{request_item["date"].month:02}{request_item["date"].day:02}min.min')
+                                print(f'{self.util.dict_language[self.lang]["error_no_readable_data"]} {request_item["station"].lower()}{request_item["date"].year}{request_item["date"].month:02}{request_item["date"].day:02}min.min')
+                                self.responses.append(f"{self.util.dict_language[self.lang]["error_no_readable_data"]} {request_item['station'].lower()}{request_item['date'].year}{request_item['date'].month:02}{request_item['date'].day:02}min.min")
+                                self.progress_signal.emit(
+                                    f"{self.util.dict_language[self.lang]["error_no_readable_data"]} {request_item['station'].lower()}{request_item['date'].year}{request_item['date'].month:02}{request_item['date'].day:02}min.min",
+                                    self.responses
+                                )
                             else:
                                 data_exists = True
                             break
@@ -109,10 +119,22 @@ class Intermagnet(DownloadModule):
                         with open(file_path, 'w+', encoding='utf-8') as file:
                             for line in lines:
                                 file.write(line+'\n')
-                        print(f'Download concluído: {request_item["station"].lower()}{str(request_item["date"].year)}{request_item["date"].month:02}{request_item["date"].day:02}min.min')
+                        print(f'{self.util.dict_language[self.lang]["download_complete"]} {request_item["station"].lower()}{str(request_item["date"].year)}{request_item["date"].month:02}{request_item["date"].day:02}min.min')
+                        self.responses.append(f"{self.util.dict_language[self.lang]["download_complete"]} {request_item['station'].lower()}{request_item['date'].year}{request_item['date'].month:02}{request_item['date'].day:02}min.min")
+                        self.progress_signal.emit(
+                            f"{self.util.dict_language[self.lang]["download_complete"]} {request_item['station'].lower()}{request_item['date'].year}{request_item['date'].month:02}{request_item['date'].day:02}min.min",
+                            self.responses
+                        )
             except Exception as error:
-                print(f'Erro no download: {request_item["station"].lower()}{request_item["date"].year}{request_item["date"].month:02}{request_item["date"].day:02}min.min: {error}')
+                print(f'{self.util.dict_language[self.lang]["error_download"]} {request_item["station"].lower()}{request_item["date"].year}{request_item["date"].month:02}{request_item["date"].day:02}min.min: {error}')
+                self.responses.append(f"{self.util.dict_language[self.lang]["error_download"]} {request_item['station'].lower()}{request_item['date'].year}{request_item['date'].month:02}{request_item['date'].day:02}min.min ({error})")
+                self.progress_signal.emit(
+                    f"{self.util.dict_language[self.lang]["error_download"]} {request_item['station'].lower()}{request_item['date'].year}{request_item['date'].month:02}{request_item['date'].day:02}min.min ({error})",
+                    self.responses
+                )
+            '''
             finally:
                 #self.update_progressbar()
 
                 self.progress_signal.emit()   # <-- em vez de self.update_progressbar()
+            '''

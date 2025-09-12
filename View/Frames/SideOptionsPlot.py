@@ -116,6 +116,7 @@ class SideOptionsPlot(QWidget):
         self.options_frame = QFrame()
         self.options_layout = QVBoxLayout(self.options_frame)
         self.options_frame.setLayout(self.options_layout)
+        self.create_oneday_options()
         layout.addWidget(self.options_frame)
 
         # Calm days calendar

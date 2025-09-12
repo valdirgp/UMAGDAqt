@@ -15,7 +15,8 @@ class UmagdaApp(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon('General/images/univap.ico'))
     window = UmagdaApp()
-    window.setWindowIcon(QIcon('General/images/univap.png'))
+    window.setWindowIcon(QIcon('General/images/univap.ico'))
     window.showMaximized()
     sys.exit(app.exec_())

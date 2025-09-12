@@ -210,7 +210,7 @@ class MainControl:
         new_root = QMainWindow()
         new_root.resize(1920, 1080)
         new_root.showMaximized()
-        new_root.setWindowIcon(QIcon('General/images/univap.png'))
+        new_root.setWindowIcon(QIcon('General/images/univap.ico'))
         app = MainControl(new_root)
         app.initialize_app()
         new_root.show()

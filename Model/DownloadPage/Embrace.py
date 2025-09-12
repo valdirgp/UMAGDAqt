@@ -8,11 +8,12 @@ from urllib import request
 import threading as mt
 import queue
 from PyQt5.QtWidgets import QMessageBox
+from General.util import Util
 
 class Embrace(DownloadModule):
     def __init__(self, language, root=None):
         super().__init__(language, root)
-
+        self.util = Util()
     # creates a list with all stations from the Embrace network
     def create_stationlist(self):
         try:
@@ -67,6 +68,7 @@ class Embrace(DownloadModule):
         threads = []
         for _ in range(max_threads):
             threads.append(mt.Thread(target=self.get_file))
+        self.responses.clear()
         
         # download start with threading
         self.create_progressbar('progbar_dwd_Embrace', total_downloads)
@@ -82,6 +84,8 @@ class Embrace(DownloadModule):
         return requests
 
     # gets all the text from the embrace file
+    responses = []
+    responses.append("Embrace")
     def get_file(self):
         while not self.request_queue.empty():
             request_item = self.request_queue.get()
@@ -160,15 +164,31 @@ class Embrace(DownloadModule):
                         with open(file_path, 'w+', encoding='utf-8') as file:
                             for _, line  in enumerate(lines):
                                 file.write(line+'\n')
-                        print(f'Download concluído: {request_item["station"].lower()}{str(request_item["date"].year)}{request_item["date"].month:02}{request_item["date"].day:02}min.min')
+                        print(f'{self.util.dict_language[self.lang]["download_complete"]} {request_item["station"].lower()}{str(request_item["date"].year)}{request_item["date"].month:02}{request_item["date"].day:02}min.min')
+                        self.responses.append(f"{self.util.dict_language[self.lang]["download_complete"]} {request_item['station'].lower()}{request_item['date'].year}{request_item['date'].month:02}{request_item['date'].day:02}min.min")
+                        self.progress_signal.emit(
+                            f"{self.util.dict_language[self.lang]["download_complete"]} {request_item['station'].lower()}{request_item['date'].year}{request_item['date'].month:02}{request_item['date'].day:02}min.min",
+                            self.responses
+                        )
                     else:
-                        print(f'Erro no download (não é possível ler arquivo): {request_item["station"].lower()}{str(request_item["date"].year)}{request_item["date"].month:02}{request_item["date"].day:02}min.min')
+                        print(f'{self.util.dict_language[self.lang]["error_no_readable_data"]} {request_item["station"].lower()}{str(request_item["date"].year)}{request_item["date"].month:02}{request_item["date"].day:02}min.min')
+                        self.responses.append(f"{self.util.dict_language[self.lang]["error_no_readable_data"]} {request_item['station'].lower()}{request_item['date'].year}{request_item['date'].month:02}{request_item['date'].day:02}min.min")
+                        self.progress_signal.emit(
+                            f"{self.util.dict_language[self.lang]["error_no_readable_data"]} {request_item['station'].lower()}{request_item['date'].year}{request_item['date'].month:02}{request_item['date'].day:02}min.min",
+                            self.responses
+                        )
             except Exception as error:
-                print(f'Erro no download: {request_item["station"].lower()}{str(request_item["date"].year)}{request_item["date"].month:02}{request_item["date"].day:02}min.min: {error}')
-            finally:
+                print(f'{self.util.dict_language[self.lang]["error_download"]} {request_item["station"].lower()}{str(request_item["date"].year)}{request_item["date"].month:02}{request_item["date"].day:02}min.min: {error}')
+                self.responses.append(f"{self.util.dict_language[self.lang]["error_download"]} {request_item['station'].lower()}{request_item['date'].year}{request_item['date'].month:02}{request_item['date'].day:02}min.min ({error})")
+                self.progress_signal.emit(
+                    f"{self.util.dict_language[self.lang]["error_download"]} {request_item['station'].lower()}{request_item['date'].year}{request_item['date'].month:02}{request_item['date'].day:02}min.min ({error})",
+                    self.responses
+                )
+            '''finally:
                 #self.update_progressbar()
 
-                self.progress_signal.emit()   # <-- em vez de self.update_progressbar()
+                self.progress_signal.emit()   # <-- em vez de self.update_progressbar()'''
+        self.responses.clear()
 
     # insert a clean data into the list
     def insert_clean_data(self, text, counter, date, hh, mm):

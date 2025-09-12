@@ -151,7 +151,8 @@ import threading
 from PyQt5.QtCore import pyqtSignal, QObject
 
 class DownloadModule(QObject):
-    progress_signal = pyqtSignal()  # sem argumentos, cada arquivo concluído
+    #progress_signal = pyqtSignal()  # sem argumentos, cada arquivo concluído
+    progress_signal = pyqtSignal(str, object)  # agora envia mensagem
     def __init__(self, language, root=None):
         super().__init__()
         self.util = Util()
@@ -266,6 +267,7 @@ class DownloadModule(QObject):
             if percent >= 100:
                 self.progress_dialog.close()'''
     
+    '''
     def update_progressbar(self):
         if not hasattr(self, "progress_dialog"):
             return
@@ -277,6 +279,29 @@ class DownloadModule(QObject):
             self.progress_dialog.setLabelText(f"{base_text} {percent}%")
             if self.current_file >= self.total_downloads:
                 self.progress_dialog.close()
+    '''
+    def update_progressbar(self, message="", responses=[]):
+        if not hasattr(self, "progress_dialog"):
+            return
+        with self._lock:
+            self.current_file += 1
+            percent = int(self.current_file * 100 / self.total_downloads)
+            self.progress_dialog.setValue(percent)
+
+            base_text = self.util.dict_language[self.lang][self.progbar_dwd_type]
+            if message:
+                # mostra nome do arquivo + status dentro da barra
+                self.progress_dialog.setLabelText(f"{base_text} {percent}%\n{message}")
+            else:
+                self.progress_dialog.setLabelText(f"{base_text} {percent}%")
+
+            if self.current_file >= self.total_downloads:
+                self.progress_dialog.close()
+                from PyQt5.QtWidgets import QMessageBox
+                title = self.util.dict_language[self.lang]["msgbox_info"]
+                text = "\n".join(responses) if len(responses) > 1 else "Download concluído."
+
+                QMessageBox.information(None, title, text)
 
     def create_dict_path(self, station, year, network):
         dir_path = os.path.join(self.lcl_download, 'Magnetometer', network, year, station)
