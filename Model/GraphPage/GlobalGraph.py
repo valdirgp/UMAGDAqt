@@ -54,8 +54,8 @@ class GlobalGraph(GraphsModule):
             return
 
         # Adaptação para PyQt5: usar CustomPltOptions normalmente, sem tk
-        self.fig.canvas.manager.toolmanager.add_tool('Graph Info', CustomPltOptions, inform_graph=lambda: self.inform_graph(selected_types, avarage_types))
-        self.fig.canvas.manager.toolbar.add_tool('Graph Info', 'io')
+        #self.fig.canvas.manager.toolmanager.add_tool('Graph Info', CustomPltOptions, inform_graph=lambda: self.inform_graph(selected_types, avarage_types))
+        #self.fig.canvas.manager.toolbar.add_tool('Graph Info', 'io')
         plt.show()
 
     # add delta in dict if it was selected
@@ -125,7 +125,7 @@ class GlobalGraph(GraphsModule):
     def add_plots(self, slct_types):
         try:
             plt.close('all')
-            plt.rcParams['toolbar'] = 'toolmanager'
+            #plt.rcParams['toolbar'] = 'toolmanager'
             self.fig, self.ax = plt.subplots()
             self.filtred_values = []
 

@@ -97,6 +97,7 @@ from Controller.DownloadsControl import DownloadsControl
 from Controller.GraphPageControl import GraphControl
 from Controller.CalmDisturbPageControl import CalmDisturbControl
 from Controller.CalmPageControl import CalmControl
+from Controller.UniversalCDPageControl import UniversalCDPageControl
 from General.util import Util
 
 from PyQt5.QtWidgets import (
@@ -134,8 +135,11 @@ class MainControl:
             self.CalmDisturbPage = CalmDisturbControl(self.root, lang, magnetic_eq_coords)
             self.CalmDisturbPage.load_widgets()
 
-            self.CalmPage = CalmControl(self.root, lang)
+            self.CalmPage = CalmControl(self.root, lang, magnetic_eq_coords)
             self.CalmPage.load_widgets()
+
+            self.UniversalCDPage = UniversalCDPageControl(self.root, lang, magnetic_eq_coords)
+            self.UniversalCDPage.load_widgets()
 
             self.AboutPage = AboutPage(self.root, lang)
             self.AboutPage.load_page()
@@ -145,6 +149,7 @@ class MainControl:
             self.stack.addWidget(self.GraphPage.get_widget())
             self.stack.addWidget(self.CalmDisturbPage.get_widget())
             self.stack.addWidget(self.CalmPage.get_widget())
+            self.stack.addWidget(self.UniversalCDPage.get_widget())
 
             self.stack.addWidget(self.AboutPage)
 
@@ -155,6 +160,7 @@ class MainControl:
             func_menu.addAction(self.util.dict_language[lang]["menu_graph"], lambda: self.stack.setCurrentWidget(self.GraphPage.get_widget()))
             func_menu.addAction(self.util.dict_language[lang]['menu_cd'], lambda: self.stack.setCurrentWidget(self.CalmDisturbPage.get_widget()))
             func_menu.addAction(self.util.dict_language[lang]['menu_c'], lambda: self.stack.setCurrentWidget(self.CalmPage.get_widget()))
+            func_menu.addAction(self.util.dict_language[lang]['menu_ucd'], lambda: self.stack.setCurrentWidget(self.UniversalCDPage.get_widget()))
 
             #func_menu.addAction(self.util.dict_language[lang]["menu_about"], lambda: self.stack.setCurrentWidget(self.AboutPage))
 

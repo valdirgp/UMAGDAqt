@@ -1,8 +1,10 @@
 from View.Frames.SideOptionsCalm import SideOptionsCalm
 from View.Frames.Map import Map
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel
-import re
 from General.util import Util
+import re
+import cartopy.crs as ccrs
+import numpy as np
 
 class CalmPage(QWidget):
     def __init__(self, root, language, magnetic_eq_coords={"long":0, "lat":0, "dip":0}):
@@ -18,6 +20,22 @@ class CalmPage(QWidget):
         self.longitude = []
         self.latitude = []
         self.all_locals = []
+
+    def ensure_array(self, y, x):
+        """
+        Garante que y seja um array do mesmo tamanho que x.
+        Se y for um valor escalar, cria um array preenchido com esse valor.
+        Se y for None ou vazio, cria um array de zeros.
+        """
+        if y is None:
+            return np.zeros_like(x)
+        elif np.isscalar(y):
+            return np.full_like(x, y, dtype=float)
+        else:
+            y = np.array(y, dtype=float)
+            if y.shape != x.shape:
+                raise ValueError(f"y deve ter o mesmo tamanho que x. x:{x.shape}, y:{y.shape}")
+            return y
 
     def create_page_frames(self):
         # Cria o layout principal horizontal
@@ -48,18 +66,28 @@ class CalmPage(QWidget):
             self.magnetic_eq_coords['dip'],
             levels=[0], colors='gray'
         )'''
+
+        longitudes = np.linspace(-180, 180, 361)
+
+        # Se self.magnetic_eq_coords for um único valor, crie um array do mesmo tamanho
+        y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
+        
+        self.map_widget.ax.plot(longitudes, y_values, color='gray', transform=ccrs.PlateCarree())
+
         self.map_widget.fig.canvas.mpl_connect('button_press_event', self.map_on_click)
 
         # Adiciona frames ao layout principal
         main_layout.addWidget(self.side_options.frame_side_functions_calm)
         main_layout.addWidget(self.map_widget.map_frame)
 
+    '''
     def destroy_all_frames(self):
         # Destroi todos os frames existentes no root
         for child in self.root.findChildren(QWidget):
             if child is not self.root:
                 child.setParent(None)
-
+    '''
+                
     def get_downloaded_stations_location(self):
         # Cria lista com dicionários de nome, longitude e latitude das estações
         self.all_locals = []

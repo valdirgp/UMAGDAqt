@@ -55,8 +55,8 @@ class ManyGraphs(GraphsModule):
         if not self.can_plot:
             return
         
-        self.fig.canvas.manager.toolmanager.add_tool('Graph Info', CustomPltOptions, inform_graph= lambda: self.inform_graph(selected_types, avarage_types))
-        self.fig.canvas.manager.toolbar.add_tool('Graph Info', 'io')
+        #self.fig.canvas.manager.toolmanager.add_tool('Graph Info', CustomPltOptions, inform_graph= lambda: self.inform_graph(selected_types, avarage_types))
+        #self.fig.canvas.manager.toolbar.add_tool('Graph Info', 'io')
         plt.show()
 
     # Check if grid (columns x rows) matches the number of days in the range
@@ -104,7 +104,7 @@ class ManyGraphs(GraphsModule):
         try:
             final_date = self.end_date - timedelta(days=1)
             plt.close('all')
-            plt.rcParams['toolbar'] = 'toolmanager' # allows custom tools mode
+            #plt.rcParams['toolbar'] = 'toolmanager' # allows custom tools mode
             self.fig, axs = plt.subplots(number_rows, number_columns+1)
             self.axs = axs.flatten()
             self.filtred_values = []  

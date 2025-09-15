@@ -1,0 +1,155 @@
+from Model.Custom.CustomttkFrame import ScrollableFrame
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QListWidget, 
+    QAbstractItemView, QPushButton, QCheckBox, QDateEdit, QSizePolicy, 
+    QScrollBar, QFrame, QCalendarWidget
+)
+from PyQt5.QtCore import QDate
+import psutil
+from General.util import Util
+
+
+class SideOptionsUniversalCD(QWidget):
+    def __init__(self, root, language):
+        super().__init__(root)
+        self.util = Util()
+        self.window = root
+        self.lang = language
+
+        self.selected_calm_dates = []
+        self.selected_disturb_dates = []
+
+        self.combo_download_location = None
+        self.local_downloads_function = None
+
+    # Cria opções da aba Universal Calm/Disturb
+    def create_Ucalmdisturb_plot_options(self):
+        self.frame_side_functions_ucalmdisturb = ScrollableFrame(self.window, 255)
+        self.frame_side_functions_ucalmdisturb.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        self.frame_side_functions_ucalmdisturb.setMinimumWidth(255)
+        self.frame_side_functions_ucalmdisturb.setMaximumWidth(325)
+        #self.frame_side_functions_ucalmdisturb.setFixedWidth(255)
+        self.frame_side_functions_ucalmdisturb.setObjectName("SideOptionsUniversalCD")
+
+        layout = self.frame_side_functions_ucalmdisturb.inner_layout
+        layout.setContentsMargins(5, 5, 5, 5)
+        layout.setSpacing(8)
+
+        # Drive selection
+        lbl_drive = QLabel(self.util.dict_language[self.lang]['lbl_dr'])
+        layout.addWidget(lbl_drive)
+
+        self.combo_download_location = QComboBox()
+        self.populate_combo_local()
+        self.combo_download_location.currentIndexChanged.connect(self.change_local)
+        layout.addWidget(self.combo_download_location)
+
+        # Station selection
+        lbl_station = QLabel(self.util.dict_language[self.lang]['lbl_st'])
+        layout.addWidget(lbl_station)
+
+        self.list_all_stations = QListWidget()
+        self.list_all_stations.setSelectionMode(QAbstractItemView.SingleSelection)
+        layout.addWidget(self.list_all_stations)
+
+        self.scrollbar = QScrollBar()
+        self.list_all_stations.setVerticalScrollBar(self.scrollbar)
+
+        # Duration (start and end date)
+        lbl_duration = QLabel(self.util.dict_language[self.lang]['lbl_dur'])
+        layout.addWidget(lbl_duration)
+
+        lbl_initial_date = QLabel(self.util.dict_language[self.lang]['lbl_init_dt'])
+        layout.addWidget(lbl_initial_date)
+
+        self.startdate = QDateEdit()
+        self.startdate.setDisplayFormat('dd/MM/yyyy')
+        self.startdate.setCalendarPopup(True)
+        self.startdate.setDate(QDate.currentDate())
+        layout.addWidget(self.startdate)
+
+        lbl_final_date = QLabel(self.util.dict_language[self.lang]['lbl_fin_dt'])
+        layout.addWidget(lbl_final_date)
+
+        self.enddate = QDateEdit()
+        self.enddate.setDisplayFormat('dd/MM/yyyy')
+        self.enddate.setCalendarPopup(True)
+        self.enddate.setDate(QDate.currentDate())
+        layout.addWidget(self.enddate)
+
+        # Calm calendar
+        lbl_calm_date = QLabel(self.util.dict_language[self.lang]['lbl_calm'])
+        layout.addWidget(lbl_calm_date)
+
+        self.cal_calm = QCalendarWidget()
+        self.cal_calm.clicked.connect(lambda date: self.add_date(date, self.selected_calm_dates))
+        layout.addWidget(self.cal_calm)
+
+        # Disturb calendar
+        lbl_disturb_date = QLabel(self.util.dict_language[self.lang]['lbl_disturb'])
+        layout.addWidget(lbl_disturb_date)
+
+        self.cal_disturb = QCalendarWidget()
+        self.cal_disturb.clicked.connect(lambda date: self.add_date(date, self.selected_disturb_dates))
+        layout.addWidget(self.cal_disturb)
+
+        # Clear button
+        self.btn_clear_all = QPushButton(self.util.dict_language[self.lang]['btn_clr'])
+        self.btn_clear_all.clicked.connect(self.clean_all)
+        layout.addWidget(self.btn_clear_all)
+
+        # Data types checkboxes (H, X, Y, Z, D, F, I, G)
+        self.plot_checkboxes = {}
+        data_types = ["H", "X", "Y", "Z", "D", "F", "I", "G"]
+
+        for i in range(0, len(data_types), 2):
+            row_layout = QHBoxLayout()
+            for j in range(2):
+                if i + j < len(data_types):
+                    dtype = data_types[i + j]
+                    cb = QCheckBox(dtype)
+                    self.plot_checkboxes[dtype] = cb
+                    row_layout.addWidget(cb)
+            layout.addLayout(row_layout)
+
+        # Plot button
+        self.btn_plot_selected = QPushButton("Plot Selected")
+        layout.addWidget(self.btn_plot_selected)
+
+        self.frame_side_functions_ucalmdisturb.show()
+
+    # Adiciona ou remove uma data na lista
+    def add_date(self, qdate, list_type):
+        if qdate not in list_type:
+            list_type.append(qdate)
+        else:
+            list_type.remove(qdate)
+
+    # Limpa os calendários e listas
+    def clean_all(self):
+        self.selected_calm_dates.clear()
+        self.selected_disturb_dates.clear()
+        self.cal_calm.setSelectedDate(QDate.currentDate())
+        self.cal_disturb.setSelectedDate(QDate.currentDate())
+
+    # Preenche a lista de estações
+    def populate_list_options(self, listwidget, stations):
+        listwidget.clear()
+        for i in stations:
+            listwidget.addItem(i)
+
+    # Preenche combobox com os discos
+    def populate_combo_local(self):
+        combo_list = []
+        particoes = psutil.disk_partitions()
+        for particao in particoes:
+            combo_list.append(particao.device)
+        self.combo_download_location.clear()
+        self.combo_download_location.addItems(combo_list)
+        if combo_list:
+            self.combo_download_location.setCurrentIndex(0)
+
+    # Ao trocar o disco
+    def change_local(self, index):
+        if self.local_downloads_function:
+            self.local_downloads_function()

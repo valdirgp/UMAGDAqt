@@ -16,6 +16,7 @@ class Util():
                                     "menu_graph": "Gráficos",
                                     "menu_cd": "Gráficos Calmos e Perturbado",
                                     "menu_c": "Gráficos Calmos",
+                                    "menu_ucd": "Gráficos Calmos e Pertubado Universal",
                                     "menu_config": "Configurações",
                                     "menu_lang": "Idioma",
                                     "menu_en":"Inglês",
@@ -27,6 +28,7 @@ class Util():
                                     "lbl_st": "Estações",
                                     "lbl_dr": "Escolher Drive",
                                     "lbl_dur": "Duração",
+                                    "lbl_C_options": "Opções de Plotagem",
                                     "lbl_dt": "Data",
                                     "lbl_init_dt": "Data de Início",
                                     "lbl_fin_dt": "Data Final",
@@ -45,6 +47,25 @@ class Util():
                                     "lbl_graph_opts": "Opções de Gráfico",
                                     "lbl_minuend": "Minuendo",
                                     "lbl_subtracted": "Subtraendo",
+                                    "lbl_max_v": "Valor máximo",
+                                    "lbl_min_v": "Valor mínimo",
+                                    "lbl_no_data": "Sem Dados",
+                                    "lbl_err_plot": "Erro ao plotar",
+                                    "lbl_warn": "Lembrete",
+
+                                    "btn_slt": "Selecionar Todos",
+                                    "btn_clr": "Limpar Tudo",
+                                    "btn_dwd": "Confirmar Download",
+                                    "btn_readme": "Criar Arquivo Readme",
+                                    "btn_confirm": "Confirmar",
+                                    "btn_confirm_H": "Plotar valores de H(nT)",
+                                    "btn_confirm_Z": "Plotar valores de Z(nT)",
+                                    "btn_confirm_X": "Plotar valores de X",
+                                    "btn_confirm_Y": "Plotar valores de Y",
+                                    "btn_confirm_D": "Plotar valores de D",
+                                    "btn_confirm_F": "Plotar valores de F",
+                                    "btn_confirm_I": "Plotar valores de I",
+                                    "btn_confirm_G": "Plotar valores de G",
 
                                     "btn_slt": "Selecionar Todos",
                                     "btn_clr": "Limpar Tudo",
@@ -86,6 +107,8 @@ class Util():
                                     "mgbox_error_readme_embrace":"Não foi possível resgatar detalhes sobre embrace",
                                     "mgbox_error_readme_intermag":"Não foi possível resgatar detalhes sobre intermagnet",
                                     "mgbox_error_type":"Erro de tipo na estação",
+                                    "mgbox_err_plot": "Não foi possivel criar o gráfico, não há dados",
+                                    "mgbox_err_warn": "Por favor, escolha uma estação antes de plotar o gráfico.",
                                     
                                     "mgbox_success": "Sucesso",
                                     "mgbox_success_reqlc": "Pedido de licença gerado com sucesso",
@@ -105,6 +128,7 @@ class Util():
                                     "menu_graph": "Graphs",
                                     "menu_cd": "Calm and Disturb Graphs",
                                     "menu_c": "Calm Graphs",
+                                    "menu_ucd": "Universal Calm and Disturb Graphs",
                                     "menu_config": "Config",
                                     "menu_lang": "Language",
                                     "menu_en":"English",
@@ -116,6 +140,7 @@ class Util():
                                     "lbl_st": "Stations",
                                     "lbl_dr": "Choose Drive",
                                     "lbl_dur": "Duration",
+                                    "lbl_C_options": "Plot Options",
                                     "lbl_dt": "Date",
                                     "lbl_init_dt": "Initial Date",
                                     "lbl_fin_dt": "Final Date",
@@ -134,12 +159,26 @@ class Util():
                                     "lbl_graph_opts": "Graph Options",
                                     "lbl_minuend": "Minuend",
                                     "lbl_subtracted": "Subtracted",
+                                    "lbl_max_v": "Maximum value",
+                                    "lbl_min_v": "Minimum value",
+                                    "lbl_no_data": "No Data",
+                                    "lbl_err_plot": "Plot Error",
+                                    "lbl_warn": "Reminder",
 
                                     "btn_slt": "Select All",
                                     "btn_clr": "Clear All",
                                     "btn_dwd": "Confirm Download",
                                     "btn_readme": "Create Readme File",
                                     "btn_confirm": "Confirm",
+
+                                    "btn_confirm_H": "Plot H(nT) values",
+                                    "btn_confirm_Z": "Plot Z(nT) values",
+                                    "btn_confirm_X": "Plot X values",
+                                    "btn_confirm_Y": "Plot Y values",
+                                    "btn_confirm_D": "Plot D values",
+                                    "btn_confirm_F": "Plot F values",
+                                    "btn_confirm_I": "Plot I values",
+                                    "btn_confirm_G": "Plot G values",
 
                                     "combo_day": "Day(s)",
                                     "combo_month": "Month(s)",
@@ -175,6 +214,8 @@ class Util():
                                     "mgbox_error_readme_embrace":"Unable to retrieve details about embrace",
                                     "mgbox_error_readme_intermag":"Unable to retrieve details about intermagnet",
                                     "mgbox_error_type":"Type error in station",
+                                    "mgbox_err_plot": "Couldn't plot graph, no available data",
+                                    "mgbox_err_warn": "Please select a station before plotting the graph.",
                                     
                                     "mgbox_success": "Success",
                                     "mgbox_success_reqlc": "License request generated successfully",
@@ -245,4 +286,23 @@ class Util():
         #             break
         
         for long in range(-180, 181):
-            result = igrf_value(0.0, long, 0, self.ano)
+            result = igrf_value(0.0, long, 0, self.ano) 
+            dip.append(result[1] * -1)  # Inclinação magnética 
+        return dip
+    
+    '''def calculate_inclination(self):
+        self.ano = datetime.now().year
+        latitudes_equador_magnetico = []
+
+        for lon in range(-180, 181):  # 361 longitudes
+            lat_range = np.linspace(-90, 90, 543)
+
+            for lat in lat_range:
+                result = igrf_value(lat, lon, 0.0, self.ano)
+                inclination = result[1]  # Inclinação magnética
+
+                if abs(inclination) <= 0.5:
+                    latitudes_equador_magnetico.append(lat)
+                    break  # passa para a próxima longitude
+
+        return latitudes_equador_magnetico  # Só as latitudes!'''
