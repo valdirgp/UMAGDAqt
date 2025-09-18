@@ -24,8 +24,9 @@ class CalmDisturbModel(GraphsModule):
         self.lcl_downloaded = local_downloaded
         self.station = station
         self.data_with_stations = data_with_stations
-        self.selected_calm_dates = get_selected_calm_dates
-        self.selected_disturb_date = selected_disturb_date
+        #print(self.data_with_stations)
+        self.selected_calm_dates = get_selected_calm_dates #lista de datas
+        self.selected_disturb_date = selected_disturb_date #lista de datas
 
         # Validate dates
         self.start_date, self.end_date = self.format_dates(start, end)
@@ -59,20 +60,51 @@ class CalmDisturbModel(GraphsModule):
         calm_avgPstd = self.calculate_calm_averagePstd()
         calm_avgMstd = self.calculate_calm_averageMstd()
 
+        '''
         lista_legal = []
-        disturbed_date_data = self.get_data(self.selected_disturb_date, self.station, self.data_with_stations[f'{self.station}'][0])
+        for day in self.selected_disturb_date:
+            disturbed_date_data = self.get_data(day, self.station, self.data_with_stations[f'{self.station}'][0])
 
-        for _, disturb in enumerate(disturbed_date_data):
-            lista_legal.append(disturb['H'])
+            for _, disturb in enumerate(disturbed_date_data):
+                lista_legal.append(disturb['H'])
+        '''
 
-        time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages))]
+        #time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages))]
+        # Use o primeiro (ou único) dia perturbado como referência do eixo X
+        disturbed_day = self.selected_disturb_date[0]
 
+        # Se for date, converte para datetime na meia-noite
+        if isinstance(disturbed_day, datetime):
+            base_time = disturbed_day.replace(hour=0, minute=0, second=0, microsecond=0)
+        else:
+            base_time = datetime.combine(disturbed_day, datetime.min.time())
+
+        time = [base_time + timedelta(minutes=i) for i in range(len(calm_averages))]
+
+        
+        '''
         ax.plot(time, calm_averages, label='Calm Days', color='black', linewidth=2)
         ax.plot(time, calm_avgPstd, label='Calm Days avg + std dev', color='gray', linewidth=1)
         ax.plot(time, calm_avgMstd, label='Calm Days avg - std dev', color='gray', linewidth=1)
         ax.plot(time, lista_legal, label='Disturbed Day', color='red', linewidth=1.5)
+        '''
+
+        ax.plot(time, calm_averages, label='Calm Days', color='black', linewidth=2)
+        ax.plot(time, calm_avgPstd, label='Calm Days avg + std dev', color='gray', linewidth=1)
+        ax.plot(time, calm_avgMstd, label='Calm Days avg - std dev', color='gray', linewidth=1)
+
+        # Agora sim o dia perturbado encaixa no mesmo eixo
+        disturbed_date_data = self.get_data(disturbed_day, self.station, self.data_with_stations[f'{self.station}'][0])
+        lista_legal = [d['H'] for d in disturbed_date_data]
+        ax.plot(time, lista_legal, label=f'Disturbed Day {disturbed_day.strftime("%Y-%m-%d")}', color='red', linewidth=1.5)
 
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+
+        ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
+        ax.xaxis.set_minor_locator(mdates.MinuteLocator(interval=30))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+        fig.autofmt_xdate()
+
         ax.set_ylabel('H(nT)')
         ax.set_xlabel('Time')
         ax.set_title(f"Station: {self.station}")

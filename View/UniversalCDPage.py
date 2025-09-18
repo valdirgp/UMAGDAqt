@@ -69,6 +69,8 @@ class UniversalCDPage(QWidget):
         # conexão correta em PyQt5 (sem 'event' — itemSelectionChanged não entrega parâmetro)
         self.side_options.list_all_stations.itemSelectionChanged.connect(self.listbox_on_click)
 
+        #self.side_options.btn_plot_selected.clicked.connect(self.bind_plot_selected)
+
 
         self.map_widget.create_map()
         self.colors = ['red'] * len(self.all_locals)
@@ -237,10 +239,22 @@ class UniversalCDPage(QWidget):
         self.map_widget.ax.plot(longitudes, y_values, color='gray', transform=ccrs.PlateCarree())
 
         self.map_widget.canvas.draw()
+
+    def get_type_data(self):
+        selected_types = list()
+        if self.side_options.plot_checkboxes["H"].isChecked(): selected_types.append("H")
+        if self.side_options.plot_checkboxes["X"].isChecked(): selected_types.append("X")
+        if self.side_options.plot_checkboxes["Y"].isChecked(): selected_types.append("Y")
+        if self.side_options.plot_checkboxes["Z"].isChecked(): selected_types.append("Z")
+        if self.side_options.plot_checkboxes["D"].isChecked(): selected_types.append("D")
+        if self.side_options.plot_checkboxes["F"].isChecked(): selected_types.append("F")
+        if self.side_options.plot_checkboxes["I"].isChecked(): selected_types.append("I")
+        if self.side_options.plot_checkboxes["G"].isChecked(): selected_types.append("G")
+        return selected_types
         
 
     def bind_plot_selected(self, callback):
-        self.side_options.btn_plot_selected = callback
+        self.side_options.btn_plot_selected.clicked.connect(callback)
 
     
     def bind_search_stations_downloaded(self, callback):
@@ -252,32 +266,28 @@ class UniversalCDPage(QWidget):
 
 
     def get_start_date(self):
-        return self.side_options.startdate.get()
+        return self.side_options.startdate.date()
     
 
     def get_end_date(self):
-        return self.side_options.enddate.get()
+        return self.side_options.enddate.date()
     
 
     def get_selected_station(self):
-        selection = self.side_options.list_all_stations.curselection()
-        if not selection:
-            #messagebox.showinfo(self.util.dict_language[self.lang]["lbl_warn"], self.util.dict_language[self.lang]["mgbox_err_warn"])
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Warning)
-            msg.setWindowTitle(self.util.dict_language[self.lang]["lbl_warn"])
-            msg.setText(self.util.dict_language[self.lang]["mgbox_err_warn"])
-            return None
-        station = selection[0]
-        return self.side_options.list_all_stations.get(station)
+        selected_stations = set()
+        for i in range(self.side_options.list_all_stations.count()):
+            item = self.side_options.list_all_stations.item(i)
+            if item.isSelected():
+                selected_stations.add(item.text())
+        return list(selected_stations)
     
 
     def get_selected_calm_dates(self):
-        return self.selected_calm_dates
+        return self.side_options.selected_calm_dates
     
 
     def get_selected_disturb_dates(self):
-        return self.cal_disturb.selection_get()
+        return self.side_options.cal_disturb
     
     def get_local_download(self):
-        return self.combo_download_location.get()
+        return self.side_options.combo_download_location.currentText()

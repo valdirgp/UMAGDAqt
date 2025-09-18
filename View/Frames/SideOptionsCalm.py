@@ -86,8 +86,11 @@ class SideOptionsCalm(QWidget):
         layout.addWidget(self.btn_clear_all)
 
         # Confirm button
-        self.btn_plot_confirm = QPushButton(self.util.dict_language[self.lang]['btn_confirm'])
-        layout.addWidget(self.btn_plot_confirm)
+        self.btn_plot_confirm_H = QPushButton(self.util.dict_language[self.lang]['btn_confirm_H'])
+        layout.addWidget(self.btn_plot_confirm_H)
+
+        self.btn_plot_confirm_Z = QPushButton(self.util.dict_language[self.lang]['btn_confirm_Z'])
+        layout.addWidget(self.btn_plot_confirm_Z)
 
         #self.frame_side_functions_calm.inner_frame.setLayout(layout)
 

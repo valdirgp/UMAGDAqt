@@ -22,6 +22,8 @@ class SideOptionsUniversalCD(QWidget):
         self.combo_download_location = None
         self.local_downloads_function = None
 
+        self.btn_plot_selected_function = None
+
     # Cria opções da aba Universal Calm/Disturb
     def create_Ucalmdisturb_plot_options(self):
         self.frame_side_functions_ucalmdisturb = ScrollableFrame(self.window, 255)
@@ -113,7 +115,8 @@ class SideOptionsUniversalCD(QWidget):
             layout.addLayout(row_layout)
 
         # Plot button
-        self.btn_plot_selected = QPushButton("Plot Selected")
+        self.btn_plot_selected = QPushButton(self.util.dict_language[self.lang]['btn_confirm'])
+        
         layout.addWidget(self.btn_plot_selected)
 
         self.frame_side_functions_ucalmdisturb.show()

@@ -3,7 +3,8 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 #import tkinter as tk
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QDateEdit
+from PyQt5.QtCore import QDate
 
 import os
 import math
@@ -28,9 +29,22 @@ class UniversalCDModel(GraphsModule):
     def create_graphics_calm_distU_H(self, local_downloaded, start, end, station, data_with_stations, get_selected_calm_dates, selected_disturb_date):
         self.lcl_downloaded = local_downloaded
         self.station = station
+        # Garantir que data_with_stations seja um dicionário
+        if not isinstance(data_with_stations, dict):
+            raise TypeError(f"data_with_stations esperado como dict, mas recebeu {type(data_with_stations)}")
         self.data_with_stations = data_with_stations
         self.selected_calm_dates = get_selected_calm_dates
         self.selected_disturb_date = selected_disturb_date
+
+        print(f"type(station): {type(station)}, repr(station): {repr(station)}")
+
+
+        if isinstance(start, QDate):
+            start = start.toPyDate()
+
+        if isinstance(end, QDate):
+            end = end.toPyDate()
+
 
         # Validate dates
         self.start_date, self.end_date = self.format_dates(start, end)
@@ -188,11 +202,13 @@ class UniversalCDModel(GraphsModule):
             current_date += timedelta(days=1)
         return station_data
     
-    def show_no_data_message(self):
+    def show_no_data_message(self, key):
             #tk.messagebox.showinfo(self.util.dict_language[self.lang]["lbl_err_plot"], self.util.dict_language[self.lang]["mgbox_err_plot"])
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Error)
-            msg.setWindowTitle(self.util.dict_language[self.lang]["lbl_err_plot"], self.util.dict_language[self.lang]["mgbox_err_plot"])
+            QMessageBox.critical(
+                None,
+                self.util.dict_language[self.lang]["lbl_err_plot"],
+                self.util.dict_language[self.lang]["mgbox_err_plot"] + f": {key}"
+            )
     
     # Plot the given data
     def plot_calm_avg_H(self):
@@ -232,14 +248,15 @@ class UniversalCDModel(GraphsModule):
             plt.subplots_adjust(left=0.1)  # Ajuste do espaço entre o gráfico e a borda
             plt.show()
 
-        except KeyError:
-            self.show_no_data_message()
+        except KeyError as key:
+            self.show_no_data_message(key)
         except Exception as error:
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Error)
-            msg.setWindowTitle("Error")
-            msg.setText(f"Unexpected error while plotting: {error}")
+            QMessageBox.critical(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                error
+            )
 
     def plot_calm_avg_Z(self):
         # Plot the average of selected days with two lines for calm and disturbed days.
@@ -282,10 +299,11 @@ class UniversalCDModel(GraphsModule):
             self.show_no_data_message()
         except Exception as error:
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Error)
-            msg.setWindowTitle("Error")
-            msg.setText(f"Unexpected error while plotting: {error}")
+            QMessageBox.critical(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                error
+            )
 
     def plot_calm_avg_X(self): # Put a pop up warning for when there's no available data
         # Plot the average of selected days with two lines for calm and disturbed days.
@@ -328,10 +346,11 @@ class UniversalCDModel(GraphsModule):
             self.show_no_data_message()
         except Exception as error:
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Error)
-            msg.setWindowTitle("Error")
-            msg.setText(f"Unexpected error while plotting: {error}")
+            QMessageBox.critical(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                error
+            )
 
     def plot_calm_avg_Y(self): # Put a pop up warning when there's no available data
         # Plot the average of selected days with two lines for calm and disturbed days.
@@ -374,10 +393,11 @@ class UniversalCDModel(GraphsModule):
             self.show_no_data_message()
         except Exception as error:
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Error)
-            msg.setWindowTitle("Error")
-            msg.setText(f"Unexpected error while plotting: {error}")
+            QMessageBox.critical(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                error
+            )
 
     def plot_calm_avg_D(self):
         # Plot the average of selected days with two lines for calm and disturbed days.
@@ -420,10 +440,11 @@ class UniversalCDModel(GraphsModule):
             self.show_no_data_message()
         except Exception as error:
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Error)
-            msg.setWindowTitle("Error")
-            msg.setText(f"Unexpected error while plotting: {error}")
+            QMessageBox.critical(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                error
+            )
     
     def plot_calm_avg_F(self):
         # Plot the average of selected days with two lines for calm and disturbed days.
@@ -466,10 +487,11 @@ class UniversalCDModel(GraphsModule):
             self.show_no_data_message()
         except Exception as error:
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Error)
-            msg.setWindowTitle("Error")
-            msg.setText(f"Unexpected error while plotting: {error}")
+            QMessageBox.critical(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                error
+            )
 
     def plot_calm_avg_I(self):
         # Plot the average of selected days with two lines for calm and disturbed days.
@@ -512,10 +534,11 @@ class UniversalCDModel(GraphsModule):
             self.show_no_data_message()
         except Exception as error:
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Error)
-            msg.setWindowTitle("Error")
-            msg.setText(f"Unexpected error while plotting: {error}")
+            QMessageBox.critical(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                error
+            )
 
     def plot_calm_avg_G(self): # Put a pop up for when there's no available data
         # Plot the average of selected days with two lines for calm and disturbed days.
@@ -558,10 +581,11 @@ class UniversalCDModel(GraphsModule):
             self.show_no_data_message()
         except Exception as error: #If an error occurs, this message will appear alonside the type of error.
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Error)
-            msg.setWindowTitle("Error")
-            msg.setText(f"Unexpected error while plotting: {error}")
+            QMessageBox.critical(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                error
+            )
     
     def get_cal_datas(self, selected_dates): #Pega a data inicial e final, lista dos nomes das estações e os dados das estações
         data = []
@@ -583,7 +607,6 @@ class UniversalCDModel(GraphsModule):
                 calm_averages_H.append(average)
             except Exception:
                 calm_averages_H.append(None)
-
         return calm_averages_H
     
     # Average + Std Dev
@@ -1105,8 +1128,9 @@ class UniversalCDModel(GraphsModule):
             return data
         except Exception as error:
             #tk.messagebox.showinfo(self.util.dict_language[self.lang]["mgbox_error"], f'{self.util.dict_language[self.lang]["mgbox_error_info_ad"]}: {error}')
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Error)
-            msg.setWindowTitle(self.util.dict_language[self.lang]["mgbox_error"])
-            msg.setText(f'{self.util.dict_language[self.lang]["mgbox_error_info_ad"]}: {error}')
+            QMessageBox.critical(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                error
+            )
             return data

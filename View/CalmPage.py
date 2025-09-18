@@ -163,8 +163,11 @@ class CalmPage(QWidget):
         self.map_widget.set_stationsname_map(self.all_locals)
         self.map_widget.canvas.draw()
 
-    def bind_plot_graph(self, callback):
-        self.side_options.btn_plot_confirm.clicked.connect(callback)
+    def bind_plot_graph_H(self, callback):
+        self.side_options.btn_plot_confirm_H.clicked.connect(callback)
+
+    def bind_plot_graph_Z(self, callback):
+        self.side_options.btn_plot_confirm_Z.clicked.connect(callback)
 
     def bind_search_stations_downloaded(self, callback):
         self.downloaded_data_stations = callback

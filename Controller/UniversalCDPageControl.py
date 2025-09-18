@@ -13,17 +13,20 @@ class UniversalCDPageControl():
     # Creates graph frames for the window and binds plot functions to buttons
     def load_widgets(self):
         self.get_search_stations_downloaded()
+        self.config_page()
+        
+    
+    def config_page(self):
         self.Graphs.create_page_frames()
 
         self.Graphs.bind_local_downloaded(lambda: self.get_search_stations_downloaded_filtred(
                                         self.Graphs.get_local_download()
                                         ))
 
-        
-        self.Graphs.bind_plot_selected(lambda: self.plot_selected())
+        self.Graphs.bind_plot_selected(self.plot_selected)
 
     def plot_selected(self):
-        selected_types = [dtype for dtype, var in self.Graphs.plot_vars.items() if var.get()]
+        selected_types = [dtype for dtype in self.Graphs.get_type_data() if dtype is not None or ""]
         for dtype in selected_types:
             match dtype:
                 case "H":

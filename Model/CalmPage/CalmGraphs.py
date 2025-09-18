@@ -20,11 +20,19 @@ class CalmModel(GraphsModule):
         super().__init__(self.lang)
 
     # Creates one graph that has all data in a period of time
-    def create_graphics_calm(self, local_downloaded, start, end, station, data_with_stations, get_selected_calm_dates):
+    def create_graphics_calm(self, local_downloaded, start, end, station, data_with_stations, get_selected_calm_dates, type):
         self.lcl_downloaded = local_downloaded
         self.station = station
         self.data_with_stations = data_with_stations
         self.selected_calm_dates = get_selected_calm_dates
+        
+        if self.station is None or self.data_with_stations.get(self.station) is None:
+            QMessageBox.information(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                self.util.dict_language[self.lang]["mgbox_error_st"]
+            )
+            return
         
         # Validate dates
         self.start_date, self.end_date = self.format_dates(start, end)
@@ -36,8 +44,10 @@ class CalmModel(GraphsModule):
             return
 
         # Plot data
-        self.plot_calm_avg_H()
-        self.plot_calm_avg_Z()
+        if type == "H":
+            self.plot_calm_avg_H()
+        elif type == "Z":
+            self.plot_calm_avg_Z()
         
 
     # Collects data for the selected station within the date range
@@ -51,6 +61,7 @@ class CalmModel(GraphsModule):
             current_date += timedelta(days=1)
         return station_data
 
+    '''
     # Plot the given data using H(nT)
     def plot_calm_avg_H(self):
         plt.close("all")
@@ -76,7 +87,42 @@ class CalmModel(GraphsModule):
         fig.suptitle('Calm Days H(nT) Data')
         plt.subplots_adjust(left=0.1)
         plt.show()
+    '''
 
+    def plot_calm_avg_H(self):
+        plt.close("all")
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        calm_averages_H = self.calculate_calm_average_H()
+        calm_avgPstd_H = self.calculate_calm_averagePstd_H()
+        calm_avgMstd_H = self.calculate_calm_averageMstd_H()
+
+        # Garantir que o eixo X seja datetime contínuo
+        disturbed_day = self.selected_calm_dates[0]  # ou use qualquer dia de referência
+        base_time = datetime.combine(disturbed_day, datetime.min.time())
+        time = [base_time + timedelta(minutes=i) for i in range(len(calm_averages_H))]
+
+        ax.plot(time, calm_averages_H, label='Calm Days', color='black', linewidth=2)
+        ax.plot(time, calm_avgPstd_H, label='Calm Days avg + std dev', color='gray', linewidth=1)
+        ax.plot(time, calm_avgMstd_H, label='Calm Days avg - std dev', color='gray', linewidth=1)
+
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+        ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
+        ax.xaxis.set_minor_locator(mdates.MinuteLocator(interval=30))
+        fig.autofmt_xdate()
+
+        ax.set_ylabel('H(nT)')
+        ax.set_xlabel('Time')
+        ax.set_title(f"Station: {self.station}")
+        ax.grid(True)
+        ax.legend()
+        ax.set_xlim(time[0], time[-1])
+
+        fig.suptitle('Calm Days H(nT) Data')
+        plt.subplots_adjust(left=0.1)
+        plt.show()
+
+    '''    
     # Plot the given data using Z(nT)
     def plot_calm_avg_Z(self):
         plt.close("all")
@@ -102,7 +148,42 @@ class CalmModel(GraphsModule):
         fig.suptitle('Calm Days Z(nT) Data')
         plt.subplots_adjust(left=0.1)
         plt.show()
+    '''
 
+    def plot_calm_avg_Z(self):
+        plt.close("all")
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        calm_averages_Z = self.calculate_calm_average_Z()
+        calm_avgPstd_Z = self.calculate_calm_averagePstd_Z()
+        calm_avgMstd_Z = self.calculate_calm_averageMstd_Z()
+
+        # Garantir que o eixo X seja datetime contínuo
+        disturbed_day = self.selected_calm_dates[0]  # ou use qualquer dia de referência
+        base_time = datetime.combine(disturbed_day, datetime.min.time())
+        time = [base_time + timedelta(minutes=i) for i in range(len(calm_averages_Z))]
+
+        ax.plot(time, calm_averages_Z, label='Calm Days', color='black', linewidth=2)
+        ax.plot(time, calm_avgPstd_Z, label='Calm Days avg + std dev', color='gray', linewidth=1)
+        ax.plot(time, calm_avgMstd_Z, label='Calm Days avg - std dev', color='gray', linewidth=1)
+
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+        ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
+        ax.xaxis.set_minor_locator(mdates.MinuteLocator(interval=30))
+        fig.autofmt_xdate()
+
+        ax.set_ylabel('Z(nT)')
+        ax.set_xlabel('Time')
+        ax.set_title(f"Station: {self.station}")
+        ax.grid(True)
+        ax.legend()
+        ax.set_xlim(time[0], time[-1])
+
+        fig.suptitle('Calm Days Z(nT) Data')
+        plt.subplots_adjust(left=0.1)
+        plt.show()
+
+        
     # Pega a data inicial e final, lista dos nomes das estações e os dados das estações
     def get_cal_datas(self, selected_dates): 
         data = []

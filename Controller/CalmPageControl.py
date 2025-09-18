@@ -20,13 +20,24 @@ class CalmControl():
                                         ))
 
         # Bind the plot function to the confirm button using the correct callback setup
-        self.Graphs.bind_plot_graph(lambda: self.CModel.create_graphics_calm(
+        self.Graphs.bind_plot_graph_H(lambda: self.CModel.create_graphics_calm(
                                     self.Graphs.get_local_download(),
                                     self.Graphs.get_start_date(),
                                     self.Graphs.get_end_date(),
                                     self.Graphs.get_selected_station(),
                                     self.data_with_stations,
                                     self.Graphs.get_selected_calm_dates(),
+                                    "H"
+                                    ))
+        
+        self.Graphs.bind_plot_graph_Z(lambda: self.CModel.create_graphics_calm(
+                                    self.Graphs.get_local_download(),
+                                    self.Graphs.get_start_date(),
+                                    self.Graphs.get_end_date(),
+                                    self.Graphs.get_selected_station(),
+                                    self.data_with_stations,
+                                    self.Graphs.get_selected_calm_dates(),
+                                    "Z"
                                     ))
 
     # Gets all the downloaded stations
@@ -39,6 +50,8 @@ class CalmControl():
         downloaded_data_stations, self.data_with_stations = self.Model.search_stations_downloaded(drive)
         self.Graphs.bind_search_stations_downloaded(downloaded_data_stations)
         self.Graphs.update_data()
+
+        
 
     def get_widget(self):
         return self.Graphs
