@@ -10,14 +10,16 @@ import cartopy.crs as ccrs
 import numpy as np
 
 class UniversalCDPage(QWidget):
-    def __init__(self, root, language, magnetic_eq_coords):
+    def __init__(self, root, language, year, drive, magnetic_eq_coords):
         super().__init__(root)
         self.root = root
         self.lang = language
+        self.year = year
+        self.drive = drive
         self.magnetic_eq_coords = magnetic_eq_coords
 
         self.util = Util()
-        self.side_options = SideOptionsUniversalCD(self, self.lang)
+        self.side_options = SideOptionsUniversalCD(self, self.lang, self.year, self.drive)
         self.map_widget = Map(self)
         #SideOptionsUniversalCD.__init__(self, root, self.lang)
         #Map.__init__(self, root)
@@ -81,6 +83,7 @@ class UniversalCDPage(QWidget):
 
         y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
         self.map_widget.ax.plot(longitudes, y_values, color='gray', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values * 0, color='gray', transform=ccrs.PlateCarree())
 
         self.map_widget.fig.canvas.mpl_connect('button_press_event', self.map_on_click)
 

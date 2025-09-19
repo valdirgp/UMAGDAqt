@@ -21,6 +21,9 @@ class Util():
                                     "menu_lang": "Idioma",
                                     "menu_en":"Inglês",
                                     "menu_port":"Português",
+                                    "menu_year": "Ano",
+                                    "menu_drive": "Drive",
+                                    "menu_reset": "Reiniciar",
                                     "menu_about": "Sobre",
                                     "menu_initial": "Início",
                                     "menu_lc": "Criar Licença",
@@ -133,6 +136,9 @@ class Util():
                                     "menu_lang": "Language",
                                     "menu_en":"English",
                                     "menu_port":"Portuguese",
+                                    "menu_year": "Year",
+                                    "menu_drive": "Drive",
+                                    "menu_reset": "Restart",
                                     "menu_about": "About",
                                     "menu_initial": "Initial",
                                     "menu_lc": "Create License",
@@ -241,10 +247,14 @@ class Util():
         with open(self.resource_path("config.txt"), "r") as f:
             file = f.read()
             data_list = file.split()
-            return data_list[1]
+            if "lang:" in data_list:
+                idx = data_list.index("lang:")
+                return data_list[idx + 1]
+        return "en"
 
     # change language config according to given lang <------- will have to be changed for future configs
     def change_lang(self, lang):
+        '''
         with open(self.resource_path("config.txt"), "r") as f:
             file = f.read()
             data_list = file.split()
@@ -256,6 +266,73 @@ class Util():
                     f.write(f"{info} ")
                 else:
                     f.write(f"{info}\n")
+        '''
+        lines = []
+        with open(self.resource_path("config.txt"), "r") as f:
+            for line in f:
+                key, value = line.strip().split()
+                if key.strip() == "lang:":
+                    lines.append(f"lang: {lang}\n")
+                else:
+                    lines.append(line)
+
+        with open(self.resource_path("config.txt"), "w") as f:
+            f.writelines(lines)
+                    
+    def get_year_config(self):
+        with open(self.resource_path("config.txt"), "r") as f:
+            file = f.read()
+            data_list = file.split()
+            if "year:" in data_list:
+                idx = data_list.index("year:")
+                return int(data_list[idx + 1])
+        from datetime import datetime
+
+        ano_atual = datetime.now().year
+        return ano_atual
+    
+    def change_year(self, year):
+        lines = []
+        with open(self.resource_path("config.txt"), "r") as f:
+            for line in f:
+                key, value = line.strip().split()
+                if key.strip() == "year:":
+                    lines.append(f"year: {year}\n")
+                else:
+                    lines.append(line)
+
+        with open(self.resource_path("config.txt"), "w") as f:
+            f.writelines(lines)
+
+    def get_drive_config(self):
+        with open(self.resource_path("config.txt"), "r") as f:
+            file = f.read()
+            data_list = file.split()
+            if "drive:" in data_list:
+                idx = data_list.index("drive:")
+                return data_list[idx + 1]
+            
+        if os.name == "nt":  # Windows
+            # retorna o primeiro drive válido
+            for d in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+                path = f"{d}:\\"
+                if os.path.exists(path):
+                    return path
+                else:  # Linux/macOS
+                    return "/"  # normalmente sempre existe
+                
+    def change_drive(self, drive):
+        lines = []
+        with open(self.resource_path("config.txt"), "r") as f:
+            for line in f:
+                key, value = line.strip().split()
+                if key.strip() == "drive:":
+                    lines.append(f"drive: {drive}\n")
+                else:
+                    lines.append(line)
+
+        with open(self.resource_path("config.txt"), "w") as f:
+            f.writelines(lines)
 
     # creates an absolute path
     @staticmethod

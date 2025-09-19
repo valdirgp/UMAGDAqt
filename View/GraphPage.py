@@ -8,14 +8,16 @@ import numpy as np
 
 
 class GraphPage(QWidget):
-    def __init__(self, root, language, magnetic_eq_coords=0):
+    def __init__(self, root, language, year, drive, magnetic_eq_coords=0):
         super().__init__(root)
         self.root = root
         self.lang = language
+        self.year = year
+        self.drive = drive
         self.magnetic_eq_coords = magnetic_eq_coords
 
         self.util = Util()
-        self.side_options = SideOptionsPlot(self, self.lang)
+        self.side_options = SideOptionsPlot(self, self.lang, self.year, self.drive)
         self.map_widget = Map(self)
         self.downloaded_data_stations = []
         self.colors = []
@@ -74,6 +76,7 @@ class GraphPage(QWidget):
         y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
         
         self.map_widget.ax.plot(longitudes, y_values, color='gray', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values * 0, color='gray', transform=ccrs.PlateCarree())
 
         self.map_widget.fig.canvas.mpl_connect('button_press_event', self.map_on_click)
 

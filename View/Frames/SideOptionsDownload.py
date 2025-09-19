@@ -9,9 +9,11 @@ import psutil
 from General.util import Util
 
 class SideOptionsDownload(QWidget):
-    def __init__(self, root, language):
+    def __init__(self, root, language, year, drive):
         super().__init__(root)
         self.language = language
+        self.year = year
+        self.drive = drive
         self.util = Util()
         #self.page_frame = root
         self.options_frame = None
@@ -81,7 +83,9 @@ class SideOptionsDownload(QWidget):
         self.cal_initial_date = QDateEdit()
         self.cal_initial_date.setDisplayFormat('dd/MM/yyyy')
         self.cal_initial_date.setCalendarPopup(True)
-        self.cal_initial_date.setDate(QDate.currentDate())
+        hoje = QDate.currentDate()
+        data = QDate(self.year, hoje.month(), hoje.day())
+        self.cal_initial_date.setDate(data)
         layout.addWidget(self.cal_initial_date)
 
         # Confirm Download button
@@ -112,6 +116,9 @@ class SideOptionsDownload(QWidget):
         self.combo_download_location.addItems(combo_list)
         if combo_list:
             self.combo_download_location.setCurrentIndex(0)
+
+        index = self.combo_download_location.findText(self.drive)
+        self.combo_download_location.setCurrentIndex(index)
 
     # select all station's list
     def select_all_list(self):

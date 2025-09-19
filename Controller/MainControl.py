@@ -101,9 +101,10 @@ from Controller.UniversalCDPageControl import UniversalCDPageControl
 from General.util import Util
 
 from PyQt5.QtWidgets import (
-    QMainWindow, QMenuBar, QMenu, QStackedWidget
+    QMainWindow, QMenuBar, QMenu, QStackedWidget, QSpinBox, QWidgetAction, QComboBox
 )
 from PyQt5.QtGui import QIcon
+import psutil
 
 
 class MainControl:
@@ -116,6 +117,8 @@ class MainControl:
 
     def initialize_app(self):
         lang = self.util.get_language_config()
+        year = self.util.get_year_config()
+        drive = self.util.get_drive_config()
         self.root.setWindowTitle(self.util.dict_language[lang]["title"])
         self.License = License(lang)
         access_allow = self.License.verify_fisical_adress()
@@ -126,19 +129,19 @@ class MainControl:
         if access_allow:
             magnetic_eq_coords = self.util.calculate_inclination()
 
-            self.DownloadPage = DownloadsControl(self.root, lang, magnetic_eq_coords)
+            self.DownloadPage = DownloadsControl(self.root, lang, year, drive, magnetic_eq_coords)
             self.DownloadPage.load_widgets()
         
-            self.GraphPage = GraphControl(self.root, lang, magnetic_eq_coords)
+            self.GraphPage = GraphControl(self.root, lang, year, drive, magnetic_eq_coords)
             self.GraphPage.load_widgets()
 
-            self.CalmDisturbPage = CalmDisturbControl(self.root, lang, magnetic_eq_coords)
+            self.CalmDisturbPage = CalmDisturbControl(self.root, lang, year, drive, magnetic_eq_coords)
             self.CalmDisturbPage.load_widgets()
 
-            self.CalmPage = CalmControl(self.root, lang, magnetic_eq_coords)
+            self.CalmPage = CalmControl(self.root, lang, year, drive, magnetic_eq_coords)
             self.CalmPage.load_widgets()
 
-            self.UniversalCDPage = UniversalCDPageControl(self.root, lang, magnetic_eq_coords)
+            self.UniversalCDPage = UniversalCDPageControl(self.root, lang, year, drive, magnetic_eq_coords)
             self.UniversalCDPage.load_widgets()
 
             self.AboutPage = AboutPage(self.root, lang)
@@ -170,6 +173,49 @@ class MainControl:
             lang_menu.addAction(self.util.dict_language[lang]["menu_en"], lambda: self.reset("en"))
             lang_menu.addAction(self.util.dict_language[lang]["menu_port"], lambda: self.reset("br"))
             config_menu.addMenu(lang_menu)
+
+            year_menu = QMenu(self.util.dict_language[lang]["menu_year"], self.root)
+
+            # Campo de ano com setinhas
+            year_spin = QSpinBox()
+            year_spin.setRange(1900, 2100)   # limite mínimo e máximo
+            year_spin.setValue(year)         # valor inicial
+
+            # Criar um widgetAction para colocar o spinbox dentro do menu
+            year_action = QWidgetAction(self.root)
+            year_action.setDefaultWidget(year_spin)
+
+            year_menu.addAction(year_action)
+            config_menu.addMenu(year_menu)
+
+            # Exemplo: conectando a mudança de valor
+            # Exemplo: chamar função só quando perder o foco (ou Enter)
+            year_spin.editingFinished.connect(lambda: self.util.change_year(year_spin.value()))
+
+            drive_menu = QMenu(self.util.dict_language[lang]["menu_drive"], self.root)
+
+            # Criar combobox
+            drive_combo = QComboBox()
+
+            # Listar drives disponíveis
+            for part in psutil.disk_partitions(all=False):
+                drive_combo.addItem(part.device)  # exemplo: "C:\", "D:\"
+
+            index = drive_combo.findText(drive)
+            if index != -1:  # se encontrou
+                drive_combo.setCurrentIndex(index)
+
+            # Criar widgetAction para colocar dentro do menu
+            drive_action = QWidgetAction(self.root)
+            drive_action.setDefaultWidget(drive_combo)
+
+            drive_menu.addAction(drive_action)
+            config_menu.addMenu(drive_menu)
+
+            # Exemplo: ação ao trocar drive
+            drive_combo.currentTextChanged.connect(lambda: self.util.change_drive(drive_combo.currentText()))
+
+            config_menu.addAction(self.util.dict_language[lang]["menu_reset"], lambda: self.reset())
 
             menubar.addMenu(func_menu)
             menubar.addMenu(config_menu)
@@ -209,7 +255,8 @@ class MainControl:
         self.LicenseTopLevel.load_page()
         self.LicenseTopLevel.bind_get_new_user_info(self.License.create_lincense_request)
 
-    def reset(self, lang):
+    def reset(self, lang=""):
+        lang = self.util.get_language_config() if lang == "" else lang
         self.util.change_lang(lang)
         self.root.close()
 

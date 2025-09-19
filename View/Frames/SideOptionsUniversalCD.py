@@ -10,11 +10,13 @@ from General.util import Util
 
 
 class SideOptionsUniversalCD(QWidget):
-    def __init__(self, root, language):
+    def __init__(self, root, language, year, drive):
         super().__init__(root)
         self.util = Util()
         self.window = root
         self.lang = language
+        self.year = year
+        self.drive = drive
 
         self.selected_calm_dates = []
         self.selected_disturb_dates = []
@@ -67,7 +69,9 @@ class SideOptionsUniversalCD(QWidget):
         self.startdate = QDateEdit()
         self.startdate.setDisplayFormat('dd/MM/yyyy')
         self.startdate.setCalendarPopup(True)
-        self.startdate.setDate(QDate.currentDate())
+        hoje = QDate.currentDate()
+        data = QDate(self.year, hoje.month(), hoje.day())
+        self.startdate.setDate(data)
         layout.addWidget(self.startdate)
 
         lbl_final_date = QLabel(self.util.dict_language[self.lang]['lbl_fin_dt'])
@@ -76,15 +80,31 @@ class SideOptionsUniversalCD(QWidget):
         self.enddate = QDateEdit()
         self.enddate.setDisplayFormat('dd/MM/yyyy')
         self.enddate.setCalendarPopup(True)
-        self.enddate.setDate(QDate.currentDate())
+        hoje = QDate.currentDate()
+        data = QDate(self.year, hoje.month(), hoje.day())
+        self.enddate.setDate(data)
         layout.addWidget(self.enddate)
+
+        def sync_calendar_month_year(calendar, dateedit):
+            # Pega o dia atualmente selecionado no calendário
+            dia = calendar.selectedDate().day()
+            # Cria uma nova data com o ano/mês do QDateEdit, mantendo o dia atual do calendário
+            nova_data = QDate(dateedit.date().year(), dateedit.date().month(), dia)
+            calendar.setSelectedDate(nova_data)
 
         # Calm calendar
         lbl_calm_date = QLabel(self.util.dict_language[self.lang]['lbl_calm'])
         layout.addWidget(lbl_calm_date)
 
         self.cal_calm = QCalendarWidget()
+        hoje = QDate.currentDate()
+        data = QDate(self.year, hoje.month(), hoje.day())
+        self.cal_calm.setSelectedDate(data)
         self.cal_calm.clicked.connect(lambda date: self.add_date(date, self.selected_calm_dates))
+
+        # Conecta ao dateChanged do QDateEdit
+        self.startdate.dateChanged.connect(lambda new_date: sync_calendar_month_year(self.cal_calm, self.startdate))
+
         layout.addWidget(self.cal_calm)
 
         # Disturb calendar
@@ -92,7 +112,14 @@ class SideOptionsUniversalCD(QWidget):
         layout.addWidget(lbl_disturb_date)
 
         self.cal_disturb = QCalendarWidget()
+        hoje = QDate.currentDate()
+        data = QDate(self.year, hoje.month(), hoje.day())
+        self.cal_disturb.setSelectedDate(data)
         self.cal_disturb.clicked.connect(lambda date: self.add_date(date, self.selected_disturb_dates))
+        
+        # Conecta ao dateChanged do QDateEdit
+        self.startdate.dateChanged.connect(lambda new_date: sync_calendar_month_year(self.cal_disturb, self.startdate))
+        
         layout.addWidget(self.cal_disturb)
 
         # Clear button
@@ -151,6 +178,9 @@ class SideOptionsUniversalCD(QWidget):
         self.combo_download_location.addItems(combo_list)
         if combo_list:
             self.combo_download_location.setCurrentIndex(0)
+
+        index = self.combo_download_location.findText(self.drive)
+        self.combo_download_location.setCurrentIndex(index)
 
     # Ao trocar o disco
     def change_local(self, index):

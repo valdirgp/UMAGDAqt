@@ -9,6 +9,7 @@ import threading as mt
 import queue
 from PyQt5.QtWidgets import QMessageBox
 from General.util import Util
+import math
 
 class Embrace(DownloadModule):
     def __init__(self, language, root=None):
@@ -35,6 +36,46 @@ class Embrace(DownloadModule):
                 'Erro ao conectar-se com embrace'
             )
             return []
+
+    '''
+    def create_stationlist(self, filepath='readme_stations.txt'):
+        stations = []
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                next(f)  # pular cabeçalho
+                for line in f:
+                    if not line.strip():
+                        continue
+                    # separa por espaços, mas mantendo todos os elementos
+                    parts = line.strip().split()
+                    if len(parts) < 5:
+                        continue
+
+                    sigla = parts[0]
+                    if sigla == 'VSS':
+                        sigla = 'VSE'
+
+                    # longitude e latitude são sempre os últimos 3 valores
+                    lon = float(parts[-3])
+                    lat = float(parts[-2])
+                    # fonte = parts[-1]  # opcional
+
+                    # Dip aproximado
+                    dip = math.degrees(math.atan2(2 * math.tan(math.radians(lat)), 1))
+
+                    station_info = f"{sigla} ({lat:.3f}, {lon:.3f}, {dip:.2f})"
+                    stations.append(station_info)
+
+            return stations
+
+        except Exception as e:
+            QMessageBox.information(
+                self.root,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                f'Erro ao ler o arquivo de estações:\n{str(e)}'
+            )
+            return []
+    '''
     
     # gets information and control save data
     def initialize_download_Embrace(self, root, local_download, selected_stations, duration, duration_type, start_date):

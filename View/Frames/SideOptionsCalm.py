@@ -8,10 +8,12 @@ import psutil
 from General.util import Util
 
 class SideOptionsCalm(QWidget):
-    def __init__(self, root, language):
+    def __init__(self, root, language, year, drive):
         super().__init__(root)
         self.window = root
         self.lang = language
+        self.year = year
+        self.drive = drive
         self.util = Util()
         self.selected_calm_dates = []
 
@@ -59,7 +61,9 @@ class SideOptionsCalm(QWidget):
         self.startdate = QDateEdit()
         self.startdate.setDisplayFormat('dd/MM/yyyy')
         self.startdate.setCalendarPopup(True)
-        self.startdate.setDate(QDate.currentDate())
+        hoje = QDate.currentDate()
+        data = QDate(self.year, hoje.month(), hoje.day())
+        self.startdate.setDate(data)
         layout.addWidget(self.startdate)
 
         # Final date
@@ -68,16 +72,32 @@ class SideOptionsCalm(QWidget):
         self.enddate = QDateEdit()
         self.enddate.setDisplayFormat('dd/MM/yyyy')
         self.enddate.setCalendarPopup(True)
-        self.enddate.setDate(QDate.currentDate())
+        hoje = QDate.currentDate()
+        data = QDate(self.year, hoje.month(), hoje.day())
+        self.enddate.setDate(data)
         layout.addWidget(self.enddate)
+
+        def sync_calendar_month_year(calendar, dateedit):
+            # Pega o dia atualmente selecionado no calendário
+            dia = calendar.selectedDate().day()
+            # Cria uma nova data com o ano/mês do QDateEdit, mantendo o dia atual do calendário
+            nova_data = QDate(dateedit.date().year(), dateedit.date().month(), dia)
+            calendar.setSelectedDate(nova_data)
 
         # Calm days calendar
         lbl_calm_date = QLabel(self.util.dict_language[self.lang]['lbl_calm'])
         layout.addWidget(lbl_calm_date)
         self.cal_calm = QCalendarWidget()
         self.cal_calm.setGridVisible(True)
+        hoje = QDate.currentDate()
+        data = QDate(self.year, hoje.month(), hoje.day())
+        self.cal_calm.setSelectedDate(data)
         self.cal_calm.selectionChanged.connect(lambda: self.add_date(self.cal_calm, self.selected_calm_dates))
         self.cal_calm.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        # Conecta ao dateChanged do QDateEdit
+        self.startdate.dateChanged.connect(lambda new_date: sync_calendar_month_year(self.cal_calm, self.startdate))
+
         layout.addWidget(self.cal_calm)
 
         # Clear all button
@@ -127,6 +147,9 @@ class SideOptionsCalm(QWidget):
             combo_list.append(particao.device)
         self.combo_download_location.clear()
         self.combo_download_location.addItems(combo_list)
+
+        index = self.combo_download_location.findText(self.drive)
+        self.combo_download_location.setCurrentIndex(index)
 
     # Update all info came from the chosen drive 
     def change_local(self, index):

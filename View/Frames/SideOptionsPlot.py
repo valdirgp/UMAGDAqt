@@ -8,11 +8,13 @@ import psutil
 from General.util import Util
 
 class SideOptionsPlot(QWidget):
-    def __init__(self, root, language):
+    def __init__(self, root, language, year, drive):
         super().__init__(root)
         self.util = Util()
         self.window = root
         self.language = language
+        self.year = year
+        self.drive = drive
         self.selected_dates = []
 
         self.btn_singleday_function = None
@@ -125,7 +127,9 @@ class SideOptionsPlot(QWidget):
         self.cal_calm = QDateEdit()
         self.cal_calm.setDisplayFormat('dd/MM/yyyy')
         self.cal_calm.setCalendarPopup(True)
-        self.cal_calm.setDate(QDate.currentDate())
+        hoje = QDate.currentDate()
+        data = QDate(self.year, hoje.month(), hoje.day())
+        self.cal_calm.setDate(data)
         layout.addWidget(self.cal_calm)
 
         #self.frame_side_functions.inner_frame.setLayout(layout)
@@ -140,7 +144,9 @@ class SideOptionsPlot(QWidget):
         self.date = QDateEdit()
         self.date.setDisplayFormat('dd/MM/yyyy')
         self.date.setCalendarPopup(True)
-        self.date.setDate(QDate.currentDate())
+        hoje = QDate.currentDate()
+        data = QDate(self.year, hoje.month(), hoje.day())
+        self.date.setDate(data)
         self.options_layout.addWidget(self.date)
         self.btn_singleday_confirm = QPushButton(self.util.dict_language[self.language]['btn_confirm'])
         if self.btn_singleday_function:
@@ -155,7 +161,9 @@ class SideOptionsPlot(QWidget):
         self.startdate = QDateEdit()
         self.startdate.setDisplayFormat('dd/MM/yyyy')
         self.startdate.setCalendarPopup(True)
-        self.startdate.setDate(QDate.currentDate())
+        hoje = QDate.currentDate()
+        data = QDate(self.year, hoje.month(), hoje.day())
+        self.startdate.setDate(data)
         self.options_layout.addWidget(self.startdate)
 
         lbl_final_date = QLabel(self.util.dict_language[self.language]['lbl_fin_dt'])
@@ -163,7 +171,9 @@ class SideOptionsPlot(QWidget):
         self.enddate = QDateEdit()
         self.enddate.setDisplayFormat('dd/MM/yyyy')
         self.enddate.setCalendarPopup(True)
-        self.enddate.setDate(QDate.currentDate())
+        hoje = QDate.currentDate()
+        data = QDate(self.year, hoje.month(), hoje.day())
+        self.enddate.setDate(data)
         self.options_layout.addWidget(self.enddate)
 
         self.btn_globaldays_confirm = QPushButton(self.util.dict_language[self.language]['btn_confirm'])
@@ -179,7 +189,9 @@ class SideOptionsPlot(QWidget):
         self.startdate = QDateEdit()
         self.startdate.setDisplayFormat('dd/MM/yyyy')
         self.startdate.setCalendarPopup(True)
-        self.startdate.setDate(QDate.currentDate())
+        hoje = QDate.currentDate()
+        data = QDate(self.year, hoje.month(), hoje.day())
+        self.startdate.setDate(data)
         self.options_layout.addWidget(self.startdate)
 
         lbl_final_date = QLabel(self.util.dict_language[self.language]['lbl_fin_dt'])
@@ -187,7 +199,9 @@ class SideOptionsPlot(QWidget):
         self.enddate = QDateEdit()
         self.enddate.setDisplayFormat('dd/MM/yyyy')
         self.enddate.setCalendarPopup(True)
-        self.enddate.setDate(QDate.currentDate())
+        hoje = QDate.currentDate()
+        data = QDate(self.year, hoje.month(), hoje.day())
+        self.enddate.setDate(data)
         self.options_layout.addWidget(self.enddate)
 
         lbl_columns = QLabel(self.util.dict_language[self.language]['lbl_colum'])
@@ -261,6 +275,9 @@ class SideOptionsPlot(QWidget):
         self.combo_download_location.addItems(combo_list)
         if combo_list:
             self.combo_download_location.setCurrentIndex(0)
+
+        index = self.combo_download_location.findText(self.drive)
+        self.combo_download_location.setCurrentIndex(index)
 
     # select all station's list
     def select_all_list(self):

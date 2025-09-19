@@ -7,10 +7,12 @@ from Model.GraphPage.DifferenceGraph import DifferenceGraph
 from View.GraphPage import GraphPage
 
 class GraphControl():
-    def __init__(self, root, language, magnetic_eq_coords=0):
+    def __init__(self, root, language, year, drive, magnetic_eq_coords=0):
         self.root = root
         self.lang = language
-        self.Graphs = GraphPage(root, self.lang, magnetic_eq_coords)
+        self.year = year
+        self.drive = drive
+        self.Graphs = GraphPage(root, self.lang, self.year, self.drive, magnetic_eq_coords)
         self.Module = GraphsModule(self.lang)
         self.SingleModule = SingleGraph(self.root, self.lang)
         self.GlobalModule = GlobalGraph(self.root, self.lang)

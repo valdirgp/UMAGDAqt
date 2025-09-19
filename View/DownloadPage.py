@@ -8,10 +8,12 @@ import numpy as np
 
 
 class DownloadPage(QWidget):
-    def __init__(self, root, language, magnetic_eq_coords):
+    def __init__(self, root, language, year, drive, magnetic_eq_coords):
         super().__init__(root)
         self.root = root
         self.lang = language
+        self.year = year
+        self.drive = drive
         self.magnetic_eq_coords = magnetic_eq_coords
 
         self.selected_listbox = []
@@ -19,7 +21,7 @@ class DownloadPage(QWidget):
         self.colors = []
 
         self.util = Util()
-        self.side_options = SideOptionsDownload(self, self.lang)  # importante: agora passa "self"
+        self.side_options = SideOptionsDownload(self, self.lang, self.year, self.drive)  # importante: agora passa "self"
         self.map_widget = Map(self)                               # idem
         self.embrace_stations = []
         self.intermagnet_stations = []
@@ -75,6 +77,7 @@ class DownloadPage(QWidget):
         longitudes = np.linspace(-180, 180, 361)
         y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
         self.map_widget.ax.plot(longitudes, y_values, color='gray', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values * 0, color='gray', transform=ccrs.PlateCarree())
 
         # se magnetic_eq_coords for escalar, converta para array do mesmo tamanho
         '''if np.isscalar(self.magnetic_eq_coords):

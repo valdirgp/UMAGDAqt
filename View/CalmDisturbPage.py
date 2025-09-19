@@ -8,14 +8,16 @@ import cartopy.crs as ccrs
 import numpy as np
 
 class CalmDisturbPage(QWidget):
-    def __init__(self, root, language, magnetic_eq_coords={"long":0, "lat":0, "dip":0}):
+    def __init__(self, root, language, year, drive, magnetic_eq_coords={"long":0, "lat":0, "dip":0}):
         super().__init__(root)
         self.root = root
         self.lang = language
+        self.year = year
+        self.drive = drive
         self.magnetic_eq_coords = magnetic_eq_coords
         self.util = Util()
         # Composição: instanciando componentes ao invés de herdar
-        self.side_options = SideOptionsCalmDisturb(self, self.lang)
+        self.side_options = SideOptionsCalmDisturb(self, self.lang, self.year, self.drive)
         self.map_widget = Map(self)
         self.downloaded_data_stations = []
         self.longitude = []
@@ -75,6 +77,7 @@ class CalmDisturbPage(QWidget):
         y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
         
         self.map_widget.ax.plot(longitudes, y_values, color='gray', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values * 0, color='gray', transform=ccrs.PlateCarree())
 
         self.map_widget.fig.canvas.mpl_connect('button_press_event', self.map_on_click)
 

@@ -69,10 +69,12 @@ from View.DownloadPage import DownloadPage
 from Model.DownloadPage.DownloadThread import DownloadThread
 
 class DownloadsControl:
-    def __init__(self, root, language, magnetic_eq_coords=0):
+    def __init__(self, root, language, year, drive, magnetic_eq_coords=0):
         self.root = root
         self.lang = language
-        self.DownloadPage = DownloadPage(self.root, self.lang, magnetic_eq_coords)
+        self.year = year
+        self.drive = drive
+        self.DownloadPage = DownloadPage(self.root, self.lang, self.year, self.drive, magnetic_eq_coords)
         self.Module = DownloadModule(self.lang, self.root)
         self.Embrace = Embrace(self.lang, self.root)
         self.Intermagnet = Intermagnet(self.lang, self.root)
