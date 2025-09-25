@@ -4,7 +4,8 @@ import os, sys
 
 from datetime import datetime
 import numpy as np
-from pyIGRF import igrf_value 
+from pyIGRF import igrf_value
+import math
 
 class Util():
     def __init__(self):
@@ -28,7 +29,7 @@ class Util():
                                     "menu_initial": "Início",
                                     "menu_lc": "Criar Licença",
 
-                                    "lbl_st": "Estações",
+                                    "lbl_st": "Estações (lat, long, dip)",
                                     "lbl_dr": "Escolher Drive",
                                     "lbl_dur": "Duração",
                                     "lbl_C_options": "Opções de Plotagem",
@@ -143,7 +144,7 @@ class Util():
                                     "menu_initial": "Initial",
                                     "menu_lc": "Create License",
 
-                                    "lbl_st": "Stations",
+                                    "lbl_st": "Stations (lat, long, dip)",
                                     "lbl_dr": "Choose Drive",
                                     "lbl_dur": "Duration",
                                     "lbl_C_options": "Plot Options",
@@ -351,8 +352,8 @@ class Util():
             widget.setParent(None)
 
     # calcula o equador magnético baseado na longitude e latitude fornecida
-    def calculate_inclination(self):
-        self.ano = datetime.now().year
+    def calculate_inclination(self, ano):
+        self.ano = ano
         dip = []
         #for long in range(-180, 181): 
         #     lat_range = np.linspace(-90, 90, 543)
@@ -363,8 +364,8 @@ class Util():
         #             break
         
         for long in range(-180, 181):
-            result = igrf_value(0.0, long, 0, self.ano) 
-            dip.append(result[1] * -1)  # Inclinação magnética 
+            result = igrf_value(0.0, long, 300, self.ano) 
+            dip.append(-math.degrees(math.atan((math.tan(math.radians(result[1]))/2))))  # Inclinação magnética 
         return dip
     
     '''def calculate_inclination(self):

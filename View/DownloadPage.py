@@ -76,8 +76,8 @@ class DownloadPage(QWidget):
 
         longitudes = np.linspace(-180, 180, 361)
         y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
-        self.map_widget.ax.plot(longitudes, y_values, color='gray', transform=ccrs.PlateCarree())
-        self.map_widget.ax.plot(longitudes, y_values * 0, color='gray', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values, color='#4B4B4B', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values * 0, color='#7A7A7A', transform=ccrs.PlateCarree())
 
         # se magnetic_eq_coords for escalar, converta para array do mesmo tamanho
         '''if np.isscalar(self.magnetic_eq_coords):
@@ -111,7 +111,7 @@ class DownloadPage(QWidget):
         self.longitude = []
         self.latitude = []
 
-        try:
+        '''try:
             with open('readme_stations.txt','r') as file: 
                 file_lines = file.read().split('\n')[1:-1]
                 for line in file_lines:
@@ -128,13 +128,34 @@ class DownloadPage(QWidget):
                             self.all_locals.append({'station': station_info[0], 'longitude': long, 'latitude': lat})
                     except Exception as error:
                         print(error)
+                print(self.all_locals)
         except Exception:
             warning = QLabel(self.util.dict_language[self.lang]['lbl_noreadme'])
-            self.side_options.options_frame.inner_frame.layout().addWidget(warning)
-
+            self.side_options.options_frame.inner_frame.layout().addWidget(warning)'''
+        
+        for i in range(self.side_options.list_all_stations.count()):
+            item = self.side_options.list_all_stations.item(i)
+            
+            text = item.text()
+            # Regex para capturar SIGLA, latitude, longitude e dip
+            match = re.match(r'^([A-Z]{3}) \(([-\d.]+), ([-\d.]+), ([-\d.]+)\)', text)
+            if match:
+                sigla = match.group(1)
+                lat = float(match.group(2))
+                lon = float(match.group(3))
+                
+                self.latitude.append(lat)
+                self.longitude.append(lon)
+                self.all_locals.append({'station': sigla, 'latitude': lat, 'longitude': lon})
+            
     # change map's status when listbox is selected
     def listbox_on_click(self):
-        items_from_list = [self.side_options.list_all_stations.item(i).text() for i in range(self.side_options.list_all_stations.count())]
+        """items_from_list = [self.side_options.list_all_stations.item(i).text() for i in range(self.side_options.list_all_stations.count())]
+        '''items_from_list = [
+                                re.match(r'^([A-Z]{3})', self.side_options.list_all_stations.item(i).text()).group(1)
+                                for i in range(self.side_options.list_all_stations.count())
+                        ]'''
+
         selected_indexes = [i for i in range(self.side_options.list_all_stations.count()) if self.side_options.list_all_stations.item(i).isSelected()]
         self.colors = ['red'] * len(self.all_locals)
         for i, local in enumerate(self.all_locals):
@@ -146,7 +167,22 @@ class DownloadPage(QWidget):
                 continue
         if hasattr(self.map_widget, 'scart'):
             self.map_widget.scart.set_facecolors(self.colors)
-            self.map_widget.canvas.draw()
+            self.map_widget.canvas.draw()"""
+        
+        # Altera status do mapa quando a lista é selecionada
+        selected_items = [item.text() for item in self.side_options.list_all_stations.selectedItems()]
+        '''for i, local in enumerate(self.all_locals):
+            if local['station'] in selected_items:
+                self.map_widget.colors[i] = 'lightgreen'
+            else:
+                self.map_widget.colors[i] = 'red'''
+        for i, local in enumerate(self.all_locals):
+            if any(item.startswith(f"{local['station']} ") for item in selected_items):
+                self.map_widget.colors[i] = 'lightgreen'
+            else:
+                self.map_widget.colors[i] = 'red'
+        self.map_widget.scart.set_facecolors(self.map_widget.colors)
+        self.map_widget.canvas.draw()
 
     # change map's status and listbox's status when map's button is selected
     def map_on_click(self, event):
@@ -170,11 +206,16 @@ class DownloadPage(QWidget):
                     except ValueError:
                         continue'''
         
-        from math import hypot
+        """from math import hypot
 
         if event.inaxes is not None:
             selected_longitude, selected_latitude = event.xdata, event.ydata
-            items_from_list = [self.side_options.list_all_stations.item(i).text() for i in range(self.side_options.list_all_stations.count())]
+            #items_from_list = [self.side_options.list_all_stations.item(i).text() for i in range(self.side_options.list_all_stations.count())]
+            items_from_list = [
+                                re.match(r'^([A-Z]{3})', self.side_options.list_all_stations.item(i).text()).group(1)
+                                for i in range(self.side_options.list_all_stations.count())
+                            ]
+
             # calcula a distância euclidiana em graus e encontra o ponto mais próximo
             distances = [
                 (i, hypot(selected_longitude - local['longitude'], selected_latitude - local['latitude']))
@@ -201,7 +242,25 @@ class DownloadPage(QWidget):
                         self.map_widget.scart.set_facecolors(self.colors)
                         self.map_widget.canvas.draw()
                 except ValueError:
-                    pass
+                    pass"""
+        
+        # Altera status do mapa e da lista quando um ponto do mapa é clicado
+        if event.inaxes is not None:
+            selected_longitude, selected_latitude = event.xdata, event.ydata
+            for i, local in enumerate(self.all_locals):
+                if abs(selected_longitude - local['longitude']) < 1.0 and abs(selected_latitude - local['latitude']) < 1.0:
+                    items = [self.side_options.list_all_stations.item(j).text() for j in range(self.side_options.list_all_stations.count())]
+                    #selection = items.index(local['station'])
+                    selection = next(i for i, item in enumerate(items) if item.startswith(f"{local['station']} "))
+                    item = self.side_options.list_all_stations.item(selection)
+                    if self.map_widget.colors[i] == 'red':
+                        item.setSelected(True)
+                        self.map_widget.colors[i] = 'lightgreen'
+                    else:
+                        item.setSelected(False)
+                        self.map_widget.colors[i] = 'red'
+                    self.map_widget.scart.set_facecolors(self.map_widget.colors)
+                    self.map_widget.canvas.draw()
 
     def set_embrace_options(self, callback):
         self.embrace_stations = callback
@@ -221,14 +280,25 @@ class DownloadPage(QWidget):
     def get_local_download(self):
         return self.side_options.combo_download_location.currentText()
 
+
     def get_stations_selected(self):
         selected_stations = set()
         for i in range(self.side_options.list_all_stations.count()):
             item = self.side_options.list_all_stations.item(i)
             if item.isSelected():
-                selected_stations.add(item.text())
+                selected_stations.add((item.text())[0].split())
         return list(selected_stations)
 
+    '''def get_stations_selected(self):
+        selected_stations = set()
+        for i in range(self.side_options.list_all_stations.count()):
+            item = self.side_options.list_all_stations.item(i)
+            if item.isSelected():
+                # extrai apenas o código da estação (os 3 primeiros caracteres)
+                code = item.text()[:3]
+                selected_stations.add(code)
+        return list(selected_stations)'''
+        
     def get_duration_chosen(self):
         return self.side_options.ent_durationchosen.text()
 

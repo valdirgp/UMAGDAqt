@@ -10,12 +10,14 @@ import queue
 from PyQt5.QtWidgets import QMessageBox
 from General.util import Util
 import math
+from pyIGRF import igrf_value
 
 class Embrace(DownloadModule):
     def __init__(self, language, root=None):
         super().__init__(language, root)
         self.util = Util()
     # creates a list with all stations from the Embrace network
+    '''
     def create_stationlist(self):
         try:
             response = requests.get('https://embracedata.inpe.br/magnetometer/', timeout=15, verify=False)
@@ -38,44 +40,57 @@ class Embrace(DownloadModule):
             return []
 
     '''
-    def create_stationlist(self, filepath='readme_stations.txt'):
+
+    def obter_coordenadas_estacoes_embrace(self):
+        """
+        Lê todas as estações EMBRACE a partir do readme oficial.
+        """
+        url = 'https://embracedata.inpe.br/magnetometer/readme_magnetometer.txt'
+        estacoes = {}
+        try:
+            with requests.get(url, timeout=15, verify=False) as response:
+                text = response.text
+                for line in text.splitlines():
+                    # Ignora linhas vazias ou comentários
+                    if not line.strip() or line.startswith('#') or line.startswith('For'):
+                        continue
+                    parts = line.split()
+                    if len(parts) < 3:
+                        continue
+
+                    try:
+                        # Supondo que o formato seja: LATITUDE LONGITUDE CODIGO
+                        longitude = float(parts[0].replace(',', '.'))
+                        latitude = float(parts[1].replace(',', '.'))
+                        codigo = parts[2].upper()
+                        codigo = 'VSE' if codigo == 'VSS' else codigo
+                        estacoes[codigo] = {'latitude': latitude, 'longitude': longitude}
+                    except ValueError:
+                        # Linha que não contém números válidos, ignora
+                        continue
+            return estacoes
+        except Exception as e:
+            print(f"Erro ao obter estações EMBRACE: {e}")
+            return {}
+
+    def create_stationlist(self, ano):
+        self.ano = ano
         stations = []
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                next(f)  # pular cabeçalho
-                for line in f:
-                    if not line.strip():
-                        continue
-                    # separa por espaços, mas mantendo todos os elementos
-                    parts = line.strip().split()
-                    if len(parts) < 5:
-                        continue
-
-                    sigla = parts[0]
-                    if sigla == 'VSS':
-                        sigla = 'VSE'
-
-                    # longitude e latitude são sempre os últimos 3 valores
-                    lon = float(parts[-3])
-                    lat = float(parts[-2])
-                    # fonte = parts[-1]  # opcional
-
-                    # Dip aproximado
-                    dip = math.degrees(math.atan2(2 * math.tan(math.radians(lat)), 1))
-
-                    station_info = f"{sigla} ({lat:.3f}, {lon:.3f}, {dip:.2f})"
-                    stations.append(station_info)
-
+            estacoes = self.obter_coordenadas_estacoes_embrace()
+            for codigo, coords in estacoes.items():
+                result = igrf_value(coords['latitude'], coords['longitude'], 300, self.ano)
+                dip = -math.degrees(math.atan((math.tan(math.radians(result[1]))/2)))
+                stations.append(f'{codigo} ({coords["latitude"]:.5f}, {coords["longitude"]:.5f}, {dip:.5f})')
             return stations
-
         except Exception as e:
             QMessageBox.information(
                 self.root,
                 self.util.dict_language[self.lang]["mgbox_error"],
-                f'Erro ao ler o arquivo de estações:\n{str(e)}'
+                f'Erro ao conectar-se com EMBRACE: {e}'
             )
             return []
-    '''
+
     
     # gets information and control save data
     def initialize_download_Embrace(self, root, local_download, selected_stations, duration, duration_type, start_date):

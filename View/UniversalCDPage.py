@@ -24,6 +24,12 @@ class UniversalCDPage(QWidget):
         #SideOptionsUniversalCD.__init__(self, root, self.lang)
         #Map.__init__(self, root)
 
+        self.downloaded_data_stations = []
+        self.colors = []
+        self.all_locals = []
+        self.longitude = []
+        self.latitude = []
+
     def ensure_array(self, y, x):
         """
         Garante que y seja um array do mesmo tamanho que x.
@@ -63,7 +69,6 @@ class UniversalCDPage(QWidget):
         '''
         # corrigido: usa o QListWidget que pertence a self.side_options e sinal do Qt
         self.side_options.create_Ucalmdisturb_plot_options()
-        self.get_downloaded_stations_location()
 
         # preenche o QListWidget que está em self.side_options
         self.side_options.populate_list_options(self.side_options.list_all_stations, self.downloaded_data_stations)
@@ -74,6 +79,7 @@ class UniversalCDPage(QWidget):
         #self.side_options.btn_plot_selected.clicked.connect(self.bind_plot_selected)
 
 
+        self.get_downloaded_stations_location()
         self.map_widget.create_map()
         self.colors = ['red'] * len(self.all_locals)
         self.map_widget.set_station_map(self.longitude, self.latitude)
@@ -109,7 +115,7 @@ class UniversalCDPage(QWidget):
         self.longitude = []
         self.latitude = []
 
-        try:
+        '''try:
             with open('readme_stations.txt','r') as file: 
                 file_lines = file.read().split('\n')[1:-1]
                 for line in file_lines:
@@ -143,33 +149,40 @@ class UniversalCDPage(QWidget):
 
                 self.lbl_warning_message = QLabel(self.util.dict_language[self.lang]['lbl_noreadme'], frame.inner_frame)
                 # (row=17, col=0, rowspan=1, colspan=2) equivalente ao columnspan=2 do Tk
-                frame.inner_layout.addWidget(self.lbl_warning_message, 17, 0, 1, 2)
+                frame.inner_layout.addWidget(self.lbl_warning_message, 17, 0, 1, 2)'''
+        
+        for i in range(self.side_options.list_all_stations.count()):
+            item = self.side_options.list_all_stations.item(i)
+            
+            text = item.text()
+            # Regex para capturar SIGLA, latitude, longitude e dip
+            match = re.match(r'^([A-Z]{3}) \(([-\d.]+), ([-\d.]+), ([-\d.]+)\)', text)
+            if match:
+                sigla = match.group(1)
+                lat = float(match.group(2))
+                lon = float(match.group(3))
+                
+                self.latitude.append(lat)
+                self.longitude.append(lon)
+                self.all_locals.append({'station': sigla, 'latitude': lat, 'longitude': lon})
+
 
 
     def listbox_on_click(self):
-        # Change map's status when listbox is selected
-        items_from_list = [self.side_options.list_all_stations.item(i).text() for i in range(self.side_options.list_all_stations.count())]
+        # Altera status do mapa quando a lista é selecionada
+        selected_items = [item.text() for item in self.side_options.list_all_stations.selectedItems()]
         '''for i, local in enumerate(self.all_locals):
-            selection = itens_from_list.index(local['station'])
-            if self.colors[i] == 'red' and selection in event.widget.curselection():
-                self.colors[i] = 'lightgreen'
-            elif self.colors[i] == 'lightgreen' and selection not in event.widget.curselection():
-                self.colors[i] = 'red'
-
-        self.scart.set_facecolors(self.colors)
-        self.canvas.draw()'''
-        selected_indexes = [i for i in range(self.side_options.list_all_stations.count()) if self.side_options.list_all_stations.item(i).isSelected()]
-        self.colors = ['red'] * len(self.all_locals)
+            if local['station'] in selected_items:
+                self.map_widget.colors[i] = 'lightgreen'
+            else:
+                self.map_widget.colors[i] = 'red'''
         for i, local in enumerate(self.all_locals):
-            try:
-                selection = items_from_list.index(local['station'])
-                if selection in selected_indexes:
-                    self.colors[i] = 'lightgreen'
-            except ValueError:
-                continue
-        if hasattr(self.map_widget, 'scart'):
-            self.map_widget.scart.set_facecolors(self.colors)
-            self.map_widget.canvas.draw()
+            if any(item.startswith(f"{local['station']} ") for item in selected_items):
+                self.map_widget.colors[i] = 'lightgreen'
+            else:
+                self.map_widget.colors[i] = 'red'
+        self.map_widget.scart.set_facecolors(self.map_widget.colors)
+        self.map_widget.canvas.draw()
         
 
 
@@ -191,25 +204,23 @@ class UniversalCDPage(QWidget):
 
                     self.scart.set_facecolors(self.colors)
                     self.canvas.draw()'''
+        # Altera status do mapa e da lista quando um ponto do mapa é clicado
         if event.inaxes is not None:
             selected_longitude, selected_latitude = event.xdata, event.ydata
-            items_from_list = [self.side_options.list_all_stations.item(i).text() for i in range(self.side_options.list_all_stations.count())]
             for i, local in enumerate(self.all_locals):
                 if abs(selected_longitude - local['longitude']) < 1.0 and abs(selected_latitude - local['latitude']) < 1.0:
-                    try:
-                        selection = items_from_list.index(local['station'])
-                        item = self.side_options.list_all_stations.item(selection)
-                        if self.colors[i] == 'red':
-                            item.setSelected(True)
-                            self.colors[i] = 'lightgreen'
-                        else:
-                            item.setSelected(False)
-                            self.colors[i] = 'red'
-                        if hasattr(self.map_widget, 'scart'):
-                            self.map_widget.scart.set_facecolors(self.colors)
-                            self.map_widget.canvas.draw()
-                    except ValueError:
-                        continue
+                    items = [self.side_options.list_all_stations.item(j).text() for j in range(self.side_options.list_all_stations.count())]
+                    #selection = items.index(local['station'])
+                    selection = next(i for i, item in enumerate(items) if item.startswith(f"{local['station']} "))
+                    item = self.side_options.list_all_stations.item(selection)
+                    if self.map_widget.colors[i] == 'red':
+                        item.setSelected(True)
+                        self.map_widget.colors[i] = 'lightgreen'
+                    else:
+                        item.setSelected(False)
+                        self.map_widget.colors[i] = 'red'
+                    self.map_widget.scart.set_facecolors(self.map_widget.colors)
+                    self.map_widget.canvas.draw()
 
 
     def can_be_number(self, number):

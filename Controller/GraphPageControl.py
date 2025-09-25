@@ -32,14 +32,16 @@ class GraphControl():
 
     # gets all the downloaded stations
     def get_search_stations_downloaded(self):
-        downloaded_data_stations, self.data_with_stations = self.Module.search_stations_downloaded()
+        downloaded_data_stations, self.data_with_stations = self.Module.search_stations_downloaded(self.year)
         self.Graphs.bind_search_stations_downloaded(downloaded_data_stations)
+        #self.Graphs.bind_search_stations_downloaded(self.data_with_stations)
         self.Graphs.create_page_frames()
 
     # gets info and update downloaded data available
     def get_search_stations_downloaded_filtred(self, drive):
-        downloaded_data_stations, self.data_with_stations = self.Module.search_stations_downloaded(drive)
+        downloaded_data_stations, self.data_with_stations = self.Module.search_stations_downloaded(self.year, drive)
         self.Graphs.bind_search_stations_downloaded(downloaded_data_stations)
+        #self.Graphs.bind_search_stations_downloaded(self.data_with_stations)
         self.Graphs.update_data()
 
     # call graphs creation

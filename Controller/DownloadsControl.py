@@ -67,6 +67,7 @@ from Model.DownloadPage.Intermagnet import Intermagnet
 from Model.DownloadPage.Readme import Readme
 from View.DownloadPage import DownloadPage
 from Model.DownloadPage.DownloadThread import DownloadThread
+import re
 
 class DownloadsControl:
     def __init__(self, root, language, year, drive, magnetic_eq_coords=0):
@@ -80,8 +81,8 @@ class DownloadsControl:
         self.Intermagnet = Intermagnet(self.lang, self.root)
         self.Readme = Readme(self.lang)
 
-        self.embrace_stations = self.Embrace.create_stationlist()
-        self.intermagnet_stations = self.Intermagnet.create_stationlist()
+        self.embrace_stations = self.Embrace.create_stationlist(year)
+        self.intermagnet_stations = self.Intermagnet.create_stationlist(year)
 
     def load_widgets(self):
         self.DownloadPage.set_embrace_options(self.embrace_stations)

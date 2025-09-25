@@ -11,6 +11,8 @@ import queue
 from PyQt5.QtWidgets import QMessageBox
 from General.util import Util
 import math
+from pyIGRF import igrf_value
+from concurrent.futures import ThreadPoolExecutor
 
 class Intermagnet(DownloadModule):
     def __init__(self, language, root=None):
@@ -18,13 +20,14 @@ class Intermagnet(DownloadModule):
         self.util = Util()
 
     # creates a list with all stations from the Intermagnet network
-    def create_stationlist(self):
+    '''def create_stationlist(self):
         try:
             response = requests.get(
                 'https://imag-data.bgs.ac.uk/GIN_V1/GINForms2?observatoryIagaCode=AAE&publicationState=Best+available&dataStartDate=2024-06-09&dataDuration=1&submitValue=Bulk+Download+...&request=DataView&samplesPerDay=minute',
                 timeout=15,
                 verify=False)
             soup = BeautifulSoup(response.content, 'html.parser')
+            print(response.content)
             options = soup.find_all('option')
             stations = list()
             for option in options:
@@ -38,49 +41,157 @@ class Intermagnet(DownloadModule):
                 self.root,
                 self.util.dict_language[self.lang]["mgbox_error"], 
                 'Erro ao conectar-se com intermagnet')
-            return []
+            return []'''
     
-    '''
-    def create_stationlist(self, filepath='readme_stations.txt'):
-        stations = []
+    '''def obter_coordenadas_estacoes(self, station):
+        url = 'https://imag-data.bgs.ac.uk/GIN_V1/GINForms2?observatoryIagaCode=AAE&publicationState=Best+available&dataStartDate=2024-06-09&dataDuration=1&samplesPerDay=minute&submitValue=Observatory+Details&request=DataView'
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        # Encontrar a tabela com as informações das estações
+        tabela = soup.find('table')
+        linhas = tabela.find_all('tr')[1:]  # Ignorar o cabeçalho
+
+        estacoes = {}
+        for linha in linhas:
+            colunas = linha.find_all('td')
+            if len(colunas) > 4:  # Verificar se a linha contém dados suficientes
+                codigo = colunas[0].text.strip()
+                if codigo.upper() != station.upper(): continue
+                nome = colunas[1].text.strip()
+                pais = colunas[2].text.strip()
+                latitude = float(colunas[3].text.strip())
+                longitude = float(colunas[4].text.strip())
+                elevacao = colunas[5].text.strip()
+
+                estacoes = {
+                    'codigo': codigo.upper(),
+                    'latitude': latitude,
+                    'longitude': longitude,
+                }
+
+                break
+
+        return estacoes
+        
+    def create_stationlist(self, ano):
+        self.ano = ano
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                next(f)  # pular cabeçalho
-                for line in f:
-                    if not line.strip():
-                        continue
-                    parts = line.strip().split()
-                    if len(parts) < 5:
-                        continue
+            with requests.get(
+                'https://imag-data.bgs.ac.uk/GIN_V1/GINForms2?observatoryIagaCode=AAE&publicationState=Best+available&dataStartDate=2024-06-09&dataDuration=1&submitValue=Bulk+Download+...&request=DataView&samplesPerDay=minute',
+                timeout=15,
+                verify=False) as response:
 
-                    source = parts[-1].upper()
-                    if source != 'INTERMAGNET':
-                        continue  # só pega Intermagnet
+                soup = BeautifulSoup(response.content, 'html.parser')
+                options = soup.find_all('option')
+                stations = list()
+                self.longitude = []
+                self.latitude = []
+                self.dip = []
 
-                    sigla = parts[0].upper()
-                    if sigla == 'VSS':
-                        sigla = 'VSI'  # ajuste específico do seu programa
+                for option in options:
+                    station = option.get('value')
+                    if len(station) == 3 and station.isalpha():
+                        station = 'VSI' if station.upper() == 'VSS' else station
+                        
+                        stations.append(station.upper())
+            print(len(stations))
+            for i in range (0, len(stations)):
+                estacoes = self.obter_coordenadas_estacoes(stations[i])
 
-                    # longitude e latitude sempre os últimos 3 valores
-                    lon = float(parts[-3])
-                    lat = float(parts[-2])
+                result = igrf_value(estacoes["latitude"], estacoes["longitude"], 300, self.ano) 
+                dip = -math.degrees(math.atan((math.tan(math.radians(result[1]))/2)))  # Inclinação magnética
 
-                    # Dip aproximado
-                    dip = math.degrees(math.atan2(2 * math.tan(math.radians(lat)), 1))
-
-                    station_info = f"{sigla} ({lat:.3f}, {lon:.3f}, {dip:.2f})"
-                    stations.append(station_info)
-
+                stations[i] = (f'{estacoes["codigo"]} ({estacoes["latitude"]}, {estacoes["longitude"]}, {dip})')
             return stations
+                            
+        except Exception:
+            QMessageBox.information(
+                self.root,
+                self.util.dict_language[self.lang]["mgbox_error"], 
+                'Erro ao conectar-se com intermagnet')
+            return []'''
+    
+    def obter_coordenadas_estacoes(self, station):
+        try:
+            url = 'https://imag-data.bgs.ac.uk/GIN_V1/GINForms2?observatoryIagaCode=AAE&publicationState=Best+available&dataStartDate=2024-06-09&dataDuration=1&samplesPerDay=minute&submitValue=Observatory+Details&request=DataView'
+            response = requests.get(url, timeout=15)
+            soup = BeautifulSoup(response.content, 'html.parser')
+
+            tabela = soup.find('table')
+            linhas = tabela.find_all('tr')[1:]  # Ignorar o cabeçalho
+
+            for linha in linhas:
+                colunas = linha.find_all('td')
+                if len(colunas) > 4:
+                    codigo = colunas[0].text.strip()
+                    if codigo.upper() != station.upper():
+                        continue
+                    latitude = float(colunas[3].text.strip())
+                    longitude = float(colunas[4].text.strip())
+                    return {
+                        'codigo': codigo.upper(),
+                        'latitude': latitude,
+                        'longitude': longitude
+                    }
+        except Exception as e:
+            print(f"Erro ao obter coordenadas da estação {station}: {e}")
+        return None  # Retorna None se falhar
+
+
+    def create_stationlist(self, ano):
+        self.ano = ano
+        try:
+            # 1. Obter lista de estações do site
+            response = requests.get(
+                'https://imag-data.bgs.ac.uk/GIN_V1/GINForms2?observatoryIagaCode=AAE&publicationState=Best+available&dataStartDate=2024-06-09&dataDuration=1&submitValue=Bulk+Download+...&request=DataView&samplesPerDay=minute',
+                timeout=15, verify=False
+            )
+            soup = BeautifulSoup(response.content, 'html.parser')
+            options = soup.find_all('option')
+
+            stations = []
+            for option in options:
+                station = option.get('value')
+                if len(station) == 3 and station.isalpha():
+                    station = 'VSI' if station.upper() == 'VSS' else station
+                    stations.append(station.upper())
+
+            # Inicializa listas para coordenadas e dip
+            self.latitude = []
+            self.longitude = []
+            self.dip = []
+
+            # 2. Função para processar cada estação em paralelo
+            def process_station(station):
+                estacoes = self.obter_coordenadas_estacoes(station)
+                if estacoes is None:
+                    return None
+                result = igrf_value(estacoes["latitude"], estacoes["longitude"], 300, self.ano)
+                dip = -math.degrees(math.atan((math.tan(math.radians(result[1])) / 2)))
+
+                # Salva coordenadas e dip
+                self.latitude.append(estacoes["latitude"])
+                self.longitude.append(estacoes["longitude"])
+                self.dip.append(dip)
+
+                return f'{estacoes["codigo"]} ({estacoes["latitude"]:.5f}, {estacoes["longitude"]:.5f}, {dip:.5f})'
+
+            # 3. Executa threads
+            from concurrent.futures import ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                results = list(executor.map(process_station, stations))
+
+            # 4. Retorna apenas os resultados válidos
+            return [r for r in results if r is not None]
 
         except Exception as e:
             QMessageBox.information(
                 self.root,
                 self.util.dict_language[self.lang]["mgbox_error"],
-                f'Erro ao ler o arquivo de estações:\n{str(e)}'
+                f'Erro ao conectar-se com Intermagnet: {e}'
             )
             return []
-    '''
 
             
     # gets information and control save data

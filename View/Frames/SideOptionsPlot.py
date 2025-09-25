@@ -1,9 +1,9 @@
 from Model.Custom.CustomttkFrame import ScrollableFrame
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QListWidget, QAbstractItemView,
-    QPushButton, QCheckBox, QDateEdit, QSizePolicy, QScrollBar, QFrame
+    QPushButton, QCheckBox, QDateEdit, QSizePolicy, QScrollBar, QFrame, QListWidgetItem
 )
-from PyQt5.QtCore import QDate
+from PyQt5.QtCore import QDate, Qt
 import psutil
 from General.util import Util
 
@@ -262,8 +262,13 @@ class SideOptionsPlot(QWidget):
     # fill a listbox with the given data
     def populate_list_options(self, listwidget, stations):
         listwidget.clear()
-        for i in stations:
-            listwidget.addItem(i)
+        for st in stations:
+            codigo = st.split()[0]   # pega só o código da estação (ex: "ARA")
+            texto  = st              # texto completo (ex: "ARA (lat, lon, dip)")
+
+            item = QListWidgetItem(texto)   # o que aparece na lista
+            item.setData(Qt.UserRole, codigo)  # dado "oculto", só o código
+            listwidget.addItem(item)
 
     # fill combobox that is chooses path
     def populate_combo_local(self):

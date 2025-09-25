@@ -127,7 +127,7 @@ class MainControl:
         self.root.setMenuBar(menubar)
 
         if access_allow:
-            magnetic_eq_coords = self.util.calculate_inclination()
+            magnetic_eq_coords = self.util.calculate_inclination(year)
 
             self.DownloadPage = DownloadsControl(self.root, lang, year, drive, magnetic_eq_coords)
             self.DownloadPage.load_widgets()

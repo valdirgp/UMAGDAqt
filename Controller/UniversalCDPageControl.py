@@ -114,12 +114,12 @@ class UniversalCDPageControl():
 
     # gets all the downloaded stations
     def get_search_stations_downloaded(self):
-        downloaded_data_stations, self.data_with_stations = self.Model.search_stations_downloaded()
+        downloaded_data_stations, self.data_with_stations = self.Model.search_stations_downloaded(self.year)
         self.Graphs.bind_search_stations_downloaded(downloaded_data_stations)
 
     
     def get_search_stations_downloaded_filtred(self, drive):
-        downloaded_data_stations, self.data_with_stations = self.Model.search_stations_downloaded(drive)
+        downloaded_data_stations, self.data_with_stations = self.Model.search_stations_downloaded(self.year, drive)
         self.Graphs.bind_search_stations_downloaded(downloaded_data_stations)
         self.Graphs.update_data()
 

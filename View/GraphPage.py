@@ -1,6 +1,7 @@
 from View.Frames.SideOptionsPlot import SideOptionsPlot
 from View.Frames.Map import Map
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel
+from PyQt5.QtCore import Qt
 import re
 from General.util import Util
 import cartopy.crs as ccrs
@@ -99,6 +100,7 @@ class GraphPage(QWidget):
         self.longitude = []
         self.latitude = []
 
+        """
         try:
             with open('readme_stations.txt','r') as file: 
                 file_lines = file.read().split('\n')[1:-1]
@@ -117,9 +119,26 @@ class GraphPage(QWidget):
         except Exception:
             warning = QLabel(self.util.dict_language[self.lang]['lbl_noreadme'])
             self.side_options.frame_side_functions.inner_frame.layout().addWidget(warning)
+        """
+        
+        for i in range(self.side_options.list_all_stations.count()):
+            item = self.side_options.list_all_stations.item(i)
+            
+            text = item.text()
+            # Regex para capturar SIGLA, latitude, longitude e dip
+            match = re.match(r'^([A-Z]{3}) \(([-\d.]+), ([-\d.]+), ([-\d.]+)\)', text)
+            if match:
+                sigla = match.group(1)
+                lat = float(match.group(2))
+                lon = float(match.group(3))
+                
+                self.latitude.append(lat)
+                self.longitude.append(lon)
+                self.all_locals.append({'station': sigla, 'latitude': lat, 'longitude': lon})
 
     # change map's status when listbox is selected
     def listbox_on_click(self):
+        '''
         items_from_list = [self.side_options.list_all_stations.item(i).text() for i in range(self.side_options.list_all_stations.count())]
         selected_indexes = [i for i in range(self.side_options.list_all_stations.count()) if self.side_options.list_all_stations.item(i).isSelected()]
         self.colors = ['red'] * len(self.all_locals)
@@ -133,9 +152,25 @@ class GraphPage(QWidget):
         if hasattr(self.map_widget, 'scart'):
             self.map_widget.scart.set_facecolors(self.colors)
             self.map_widget.canvas.draw()
+        '''
+        # Altera status do mapa quando a lista é selecionada
+        selected_items = [item.text() for item in self.side_options.list_all_stations.selectedItems()]
+        '''for i, local in enumerate(self.all_locals):
+            if local['station'] in selected_items:
+                self.map_widget.colors[i] = 'lightgreen'
+            else:
+                self.map_widget.colors[i] = 'red'''
+        for i, local in enumerate(self.all_locals):
+            if any(item.startswith(f"{local['station']} ") for item in selected_items):
+                self.map_widget.colors[i] = 'lightgreen'
+            else:
+                self.map_widget.colors[i] = 'red'
+        self.map_widget.scart.set_facecolors(self.map_widget.colors)
+        self.map_widget.canvas.draw()
 
     # change map's status and listbox's status when map's button is selected
     def map_on_click(self, event):
+        '''
         if event.inaxes is not None:
             selected_longitude, selected_latitude = event.xdata, event.ydata
             items_from_list = [self.side_options.list_all_stations.item(i).text() for i in range(self.side_options.list_all_stations.count())]
@@ -155,6 +190,25 @@ class GraphPage(QWidget):
                             self.map_widget.canvas.draw()
                     except ValueError:
                         continue
+        '''
+
+        # Altera status do mapa e da lista quando um ponto do mapa é clicado
+        if event.inaxes is not None:
+            selected_longitude, selected_latitude = event.xdata, event.ydata
+            for i, local in enumerate(self.all_locals):
+                if abs(selected_longitude - local['longitude']) < 1.0 and abs(selected_latitude - local['latitude']) < 1.0:
+                    items = [self.side_options.list_all_stations.item(j).text() for j in range(self.side_options.list_all_stations.count())]
+                    #selection = items.index(local['station'])
+                    selection = next(i for i, item in enumerate(items) if item.startswith(f"{local['station']} "))
+                    item = self.side_options.list_all_stations.item(selection)
+                    if self.map_widget.colors[i] == 'red':
+                        item.setSelected(True)
+                        self.map_widget.colors[i] = 'lightgreen'
+                    else:
+                        item.setSelected(False)
+                        self.map_widget.colors[i] = 'red'
+                    self.map_widget.scart.set_facecolors(self.map_widget.colors)
+                    self.map_widget.canvas.draw()
 
     # update all appearing widgets
     def update_data(self):
@@ -207,7 +261,8 @@ class GraphPage(QWidget):
         for i in range(self.side_options.list_all_stations.count()):
             item = self.side_options.list_all_stations.item(i)
             if item.isSelected():
-                selected_stations.add(item.text())
+                #selected_stations.add(item.text())
+                selected_stations.add(item.data(Qt.UserRole))
         return list(selected_stations)
     
     def get_minuend_station_selected(self):

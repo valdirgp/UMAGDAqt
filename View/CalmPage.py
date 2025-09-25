@@ -19,6 +19,7 @@ class CalmPage(QWidget):
         self.side_options = SideOptionsCalm(self, self.lang, self.year, self.drive)
         self.map_widget = Map(self)
         self.downloaded_data_stations = []
+        self.colors = []
         self.longitude = []
         self.latitude = []
         self.all_locals = []
@@ -54,12 +55,13 @@ class CalmPage(QWidget):
 
         # Lado esquerdo: opções
         self.side_options.create_calm_plot_options()
-        self.get_downloaded_stations_location()
         self.side_options.populate_list_options(self.side_options.list_all_stations, self.downloaded_data_stations)
         self.side_options.list_all_stations.itemSelectionChanged.connect(self.listbox_on_click)
 
+        self.get_downloaded_stations_location()
         # Lado direito: mapa
         self.map_widget.create_map()
+        self.colors = ['red'] * len(self.all_locals)
         self.map_widget.set_station_map(self.longitude, self.latitude)
         self.map_widget.set_stationsname_map(self.all_locals)
         '''self.map_widget.ax.contour(
@@ -97,6 +99,7 @@ class CalmPage(QWidget):
         self.longitude = []
         self.latitude = []
 
+        '''
         try:
             with open('readme_stations.txt', 'r') as file:
                 file_lines = file.read().split('\n')[1:-1]
@@ -113,12 +116,33 @@ class CalmPage(QWidget):
         except Exception:
             warning = QLabel(self.util.dict_language[self.lang]['lbl_noreadme'])
             self.side_options.frame_side_functions_calm.inner_layout.addWidget(warning)
+        '''
+
+        for i in range(self.side_options.list_all_stations.count()):
+            item = self.side_options.list_all_stations.item(i)
+            
+            text = item.text()
+            # Regex para capturar SIGLA, latitude, longitude e dip
+            match = re.match(r'^([A-Z]{3}) \(([-\d.]+), ([-\d.]+), ([-\d.]+)\)', text)
+            if match:
+                sigla = match.group(1)
+                lat = float(match.group(2))
+                lon = float(match.group(3))
+                
+                self.latitude.append(lat)
+                self.longitude.append(lon)
+                self.all_locals.append({'station': sigla, 'latitude': lat, 'longitude': lon})
 
     def listbox_on_click(self):
         # Altera status do mapa quando a lista é selecionada
         selected_items = [item.text() for item in self.side_options.list_all_stations.selectedItems()]
-        for i, local in enumerate(self.all_locals):
+        '''for i, local in enumerate(self.all_locals):
             if local['station'] in selected_items:
+                self.map_widget.colors[i] = 'lightgreen'
+            else:
+                self.map_widget.colors[i] = 'red'''
+        for i, local in enumerate(self.all_locals):
+            if any(item.startswith(f"{local['station']} ") for item in selected_items):
                 self.map_widget.colors[i] = 'lightgreen'
             else:
                 self.map_widget.colors[i] = 'red'
@@ -132,7 +156,8 @@ class CalmPage(QWidget):
             for i, local in enumerate(self.all_locals):
                 if abs(selected_longitude - local['longitude']) < 1.0 and abs(selected_latitude - local['latitude']) < 1.0:
                     items = [self.side_options.list_all_stations.item(j).text() for j in range(self.side_options.list_all_stations.count())]
-                    selection = items.index(local['station'])
+                    #selection = items.index(local['station'])
+                    selection = next(i for i, item in enumerate(items) if item.startswith(f"{local['station']} "))
                     item = self.side_options.list_all_stations.item(selection)
                     if self.map_widget.colors[i] == 'red':
                         item.setSelected(True)

@@ -20,6 +20,7 @@ class CalmDisturbPage(QWidget):
         self.side_options = SideOptionsCalmDisturb(self, self.lang, self.year, self.drive)
         self.map_widget = Map(self)
         self.downloaded_data_stations = []
+        self.colors = []
         self.longitude = []
         self.latitude = []
         self.all_locals = []
@@ -56,11 +57,11 @@ class CalmDisturbPage(QWidget):
 
         # Lado esquerdo: opções
         self.side_options.create_calmdisturb_plot_options()
-        self.get_downloaded_stations_location()
         self.side_options.populate_list_options(self.side_options.list_all_stations, self.downloaded_data_stations)
         self.side_options.list_all_stations.itemSelectionChanged.connect(self.listbox_on_click)
 
         # Lado direito: mapa
+        self.get_downloaded_stations_location()
         self.map_widget.create_map()
         self.map_widget.set_station_map(self.longitude, self.latitude)
         self.map_widget.set_stationsname_map(self.all_locals)
@@ -100,7 +101,7 @@ class CalmDisturbPage(QWidget):
         self.longitude = []
         self.latitude = []
 
-        try:
+        '''try:
             with open('readme_stations.txt', 'r') as file:
                 file_lines = file.read().split('\n')[1:-1]
                 for line in file_lines:
@@ -117,14 +118,34 @@ class CalmDisturbPage(QWidget):
             #warning = QLabel(self.util.dict_language[self.lang]['lbl_noreadme'])
             #self.side_options.frame_side_functions_calmdisturb.inner_frame.layout().addWidget(warning)
             warning = QLabel(self.util.dict_language[self.lang]['lbl_noreadme'])
-            self.side_options.frame_side_functions_calmdisturb.inner_layout.addWidget(warning)
+            self.side_options.frame_side_functions_calmdisturb.inner_layout.addWidget(warning)'''
+        
+        for i in range(self.side_options.list_all_stations.count()):
+            item = self.side_options.list_all_stations.item(i)
+            
+            text = item.text()
+            # Regex para capturar SIGLA, latitude, longitude e dip
+            match = re.match(r'^([A-Z]{3}) \(([-\d.]+), ([-\d.]+), ([-\d.]+)\)', text)
+            if match:
+                sigla = match.group(1)
+                lat = float(match.group(2))
+                lon = float(match.group(3))
+                
+                self.latitude.append(lat)
+                self.longitude.append(lon)
+                self.all_locals.append({'station': sigla, 'latitude': lat, 'longitude': lon})
 
 
     def listbox_on_click(self):
-        '''change map's status when listbox is selected'''
+        # Altera status do mapa quando a lista é selecionada
         selected_items = [item.text() for item in self.side_options.list_all_stations.selectedItems()]
-        for i, local in enumerate(self.all_locals):
+        '''for i, local in enumerate(self.all_locals):
             if local['station'] in selected_items:
+                self.map_widget.colors[i] = 'lightgreen'
+            else:
+                self.map_widget.colors[i] = 'red'''
+        for i, local in enumerate(self.all_locals):
+            if any(item.startswith(f"{local['station']} ") for item in selected_items):
                 self.map_widget.colors[i] = 'lightgreen'
             else:
                 self.map_widget.colors[i] = 'red'
@@ -132,13 +153,14 @@ class CalmDisturbPage(QWidget):
         self.map_widget.canvas.draw()
 
     def map_on_click(self, event):
-        '''change map's status and listbox's status when map's button is selected'''
+        # Altera status do mapa e da lista quando um ponto do mapa é clicado
         if event.inaxes is not None:
             selected_longitude, selected_latitude = event.xdata, event.ydata
             for i, local in enumerate(self.all_locals):
                 if abs(selected_longitude - local['longitude']) < 1.0 and abs(selected_latitude - local['latitude']) < 1.0:
                     items = [self.side_options.list_all_stations.item(j).text() for j in range(self.side_options.list_all_stations.count())]
-                    selection = items.index(local['station'])
+                    #selection = items.index(local['station'])
+                    selection = next(i for i, item in enumerate(items) if item.startswith(f"{local['station']} "))
                     item = self.side_options.list_all_stations.item(selection)
                     if self.map_widget.colors[i] == 'red':
                         item.setSelected(True)

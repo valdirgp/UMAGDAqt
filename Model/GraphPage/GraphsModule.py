@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
     QMessageBox, QDialog, QVBoxLayout, QLabel, QCheckBox, QPushButton, QFileDialog, QWidget
 )
 from PyQt5.QtCore import Qt, QDate
+from pyIGRF import igrf_value
 
 class GraphsModule():
     def __init__(self, language):
@@ -23,7 +24,7 @@ class GraphsModule():
         self.util = Util()
 
     # Searches for downloaded stations from EMBRACE and INTERMAGNET data folders
-    def search_stations_downloaded(self, drive_location="C:\\"):
+    def search_stations_downloaded(self, year, drive_location="C:\\"):
         current_year = datetime.now().year
         main_downloaded_stations = set()
         data_with_stations = {}
@@ -74,6 +75,11 @@ class GraphsModule():
                         print('erro adquirindo dados do readme', error)
                         
         main_downloaded_stations = sorted(list(main_downloaded_stations), key=str.lower)
+
+        for i in range(0, len(main_downloaded_stations)):
+            result = igrf_value(data_with_stations[main_downloaded_stations[i]][2], data_with_stations[main_downloaded_stations[i]][1], 300, year)
+            dip = -math.degrees(math.atan((math.tan(math.radians(result[1]))/2)))
+            main_downloaded_stations[i] = f"{main_downloaded_stations[i]} ({data_with_stations[main_downloaded_stations[i]][2]:.5f}, {data_with_stations[main_downloaded_stations[i]][1]:.5f}, {dip:.5f})"
         return main_downloaded_stations, data_with_stations
     
     # Retrieves the data for a given station and date from the corresponding file
@@ -203,6 +209,7 @@ class GraphsModule():
         all_data = {}
 
         for station in self.stations:
+            station = station.split()[0]
             # Converter apenas se for QDate
             if isinstance(self.start_date, QDate):
                 current_date = self.start_date.toPyDate()
@@ -224,6 +231,7 @@ class GraphsModule():
     # collects data from all dates selected
     def get_especific_dates(self, selected_dates, station):   
         station_data = {}
+        station = station.split()[0]
         for date in selected_dates:
             data = self.get_data(date, station, self.data_with_stations[f'{station}'][0])
             station_data.update(data)
@@ -234,6 +242,7 @@ class GraphsModule():
         # gets data to search midnight average 
         days_data = {}
         for station in self.stations:
+            station = station.split()[0]
             dates = []
             for date in self.slct_dates:
                 dt = datetime.combine(date, datetime.min.time()) + timedelta(hours=self.data_with_stations[station][3], minutes=self.data_with_stations[station][4])
@@ -245,6 +254,7 @@ class GraphsModule():
         delta = []
         self.info_time = {}
         for station in self.stations:
+            station = station.split()[0]
             if self.can_plot:
                 midnight_data = self.take_midnight_data(type, days_data, station)
             if not midnight_data: 
@@ -260,6 +270,7 @@ class GraphsModule():
         # gets data to search midnight average 
         all_data = {}
         for station in self.stations:
+            station = station.split()[0]
             dates = []
             for date in self.slct_dates:
                 dt = datetime.combine(date, datetime.min.time()) + timedelta(hours=self.data_with_stations[station][3], minutes=self.data_with_stations[station][4])
@@ -288,6 +299,7 @@ class GraphsModule():
             H_data = []
 
             for station in self.stations:
+                station = station.split()[0]
                 for date in self.slct_dates:
                     H_value = calm_values.get(station, None).get(f'{date.day}/{date.month}/{date.year}', None).get(f'{time.hour}:{time.minute}', None).get(type)
                     if H_value is not None:
@@ -302,6 +314,7 @@ class GraphsModule():
     # takes all midnights data from a station in selected dates
     def take_midnight_data(self, type, data_info, station):
         try:
+            station = station.split()[0]
             midnight_data = []
             self.info_time[station] = []
             for date in self.slct_dates:
@@ -354,6 +367,7 @@ class GraphsModule():
         frame.inner_layout.addWidget(lbl_text)
         
         for station in self.stations:
+            station = station.split()[0]
             text_for_lbl += f'\n\n{station}:\n'
             for type in selected_types:
                 text_for_lbl += f'{type}: {avarage_types[station][type]}\n'
@@ -370,6 +384,7 @@ class GraphsModule():
         try:
             avarage_type = {}
             for station in slct_stations:
+                station = station.split()[0]
                 avarage_type[station] = {}
                 if isinstance(self.start_date, QDate):
                     self.start_date = self.start_date.toPyDate()
