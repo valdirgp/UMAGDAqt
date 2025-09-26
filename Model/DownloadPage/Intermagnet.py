@@ -151,11 +151,13 @@ class Intermagnet(DownloadModule):
             options = soup.find_all('option')
 
             stations = []
+            codigos = []
             for option in options:
                 station = option.get('value')
                 if len(station) == 3 and station.isalpha():
                     station = 'VSI' if station.upper() == 'VSS' else station
                     stations.append(station.upper())
+                    codigos.append(station.upper())
 
             # Inicializa listas para coordenadas e dip
             self.latitude = []
@@ -183,7 +185,7 @@ class Intermagnet(DownloadModule):
                 results = list(executor.map(process_station, stations))
 
             # 4. Retorna apenas os resultados válidos
-            return [r for r in results if r is not None]
+            return [r for r in results if r is not None], codigos
 
         except Exception as e:
             QMessageBox.information(
@@ -191,7 +193,7 @@ class Intermagnet(DownloadModule):
                 self.util.dict_language[self.lang]["mgbox_error"],
                 f'Erro ao conectar-se com Intermagnet: {e}'
             )
-            return []
+            return [], []
 
             
     # gets information and control save data

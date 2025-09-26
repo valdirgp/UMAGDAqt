@@ -81,8 +81,8 @@ class DownloadsControl:
         self.Intermagnet = Intermagnet(self.lang, self.root)
         self.Readme = Readme(self.lang)
 
-        self.embrace_stations = self.Embrace.create_stationlist(year)
-        self.intermagnet_stations = self.Intermagnet.create_stationlist(year)
+        self.embrace_stations, self.embrace_codes = self.Embrace.create_stationlist(year)
+        self.intermagnet_stations, self.intermagnet_codes = self.Intermagnet.create_stationlist(year)
 
     def load_widgets(self):
         self.DownloadPage.set_embrace_options(self.embrace_stations)
@@ -151,7 +151,7 @@ class DownloadsControl:
             return
 
         # chama os downloads normalmente; o QProgressDialog é criado por Embrace/Intermagnet
-        if any(item in self.embrace_stations for item in stations_selected):
+        if any(item in self.embrace_codes for item in stations_selected):
             self.Embrace.initialize_download_Embrace(
                 self.DownloadPage.get_options_frame(),
                 download_path,
@@ -161,7 +161,7 @@ class DownloadsControl:
                 start_date
             )
 
-        if any(item in self.intermagnet_stations for item in stations_selected):
+        if any(item in self.intermagnet_codes for item in stations_selected):
             self.Intermagnet.initialize_download_Intermagnet(
                 self.DownloadPage.get_options_frame(),
                 download_path,

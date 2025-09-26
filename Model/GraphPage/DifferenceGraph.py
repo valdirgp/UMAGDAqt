@@ -16,9 +16,9 @@ class DifferenceGraph(GraphsModule):
     # creates graph for a subtracted station in a period of time
     def plot_difference(self, local_downloaded, minuend_station, subtracted_station, selected_types, bold_text, grid_graph, start, end, selected_dates, cal_selection, data_with_stations):
         self.lcl_downloaded = local_downloaded
-        self.min_station = minuend_station
-        self.sub_station = subtracted_station
-        self.stations = [minuend_station, subtracted_station]
+        self.min_station = minuend_station.split()[0]
+        self.sub_station = subtracted_station.split()[0]
+        self.stations = [self.min_station, self.sub_station]
         self.bold_text = bold_text
         self.grid_graph = grid_graph
         self.slct_dates = selected_dates

@@ -68,6 +68,7 @@ class GraphsModule():
                             local_min = int(local_min * 60)
 
                             data_with_stations[f'{st}'].append(long)
+                            #if st == "SJC": print(data_with_stations[f'{st}'][0])
                             data_with_stations[f'{st}'].append(lat)
                             data_with_stations[f'{st}'].append(local_hour * -1)
                             data_with_stations[f'{st}'].append(local_min * -1)

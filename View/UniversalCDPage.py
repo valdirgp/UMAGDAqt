@@ -292,7 +292,7 @@ class UniversalCDPage(QWidget):
         for i in range(self.side_options.list_all_stations.count()):
             item = self.side_options.list_all_stations.item(i)
             if item.isSelected():
-                selected_stations.add(item.text())
+                selected_stations.add(item.text().split()[0])
         return list(selected_stations)
     
 
@@ -301,7 +301,7 @@ class UniversalCDPage(QWidget):
     
 
     def get_selected_disturb_dates(self):
-        return self.side_options.cal_disturb
+        return self.side_options.selected_disturb_dates
     
     def get_local_download(self):
         return self.side_options.combo_download_location.currentText()

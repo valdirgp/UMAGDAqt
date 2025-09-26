@@ -22,7 +22,7 @@ class CalmDisturbModel(GraphsModule):
     # Creates one graph that has all data in a period of time
     def create_graphics_calm_dist(self, local_downloaded, start, end, station, data_with_stations, get_selected_calm_dates, selected_disturb_date):
         self.lcl_downloaded = local_downloaded
-        self.station = station
+        self.station = station.split()[0]
         self.data_with_stations = data_with_stations
         #print(self.data_with_stations)
         self.selected_calm_dates = get_selected_calm_dates #lista de datas

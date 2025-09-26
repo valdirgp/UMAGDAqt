@@ -65,7 +65,7 @@ class ManyGraphs(GraphsModule):
             self.start_date = self.start_date.toPyDate()
         if isinstance(self.end_date, QDate):
             self.end_date = self.end_date.toPyDate()
-        difference_dates = self.end_date - self.start_date
+        difference_dates = (self.end_date - self.start_date) + timedelta(days=1)
         if number_columns * number_rows != difference_dates.days:
             QMessageBox.information(
                 None,
@@ -105,7 +105,7 @@ class ManyGraphs(GraphsModule):
             final_date = self.end_date - timedelta(days=1)
             plt.close('all')
             #plt.rcParams['toolbar'] = 'toolmanager' # allows custom tools mode
-            self.fig, axs = plt.subplots(number_rows, number_columns+1)
+            self.fig, axs = plt.subplots(number_rows, number_columns)
             self.axs = axs.flatten()
             self.filtred_values = []  
             self.current_date = self.start_date
@@ -187,7 +187,7 @@ class ManyGraphs(GraphsModule):
 
                     self.fig.suptitle(f'{plot_type} {self.start_date.strftime("%d/%m/%Y")} - {final_date.strftime("%d/%m/%Y")}')
                     plt.tight_layout()
-                    plt.subplots_adjust(wspace=0.4, hspace=0.4)
+                    #plt.subplots_adjust(wspace=0.4, hspace=0.4)
                     control_reference = False
                     
             self.fig.canvas.mpl_connect('button_press_event', lambda event: self.create_exporter_level_top(event, slct_types))

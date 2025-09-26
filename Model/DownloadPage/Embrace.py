@@ -76,20 +76,22 @@ class Embrace(DownloadModule):
     def create_stationlist(self, ano):
         self.ano = ano
         stations = []
+        codigos = []
         try:
             estacoes = self.obter_coordenadas_estacoes_embrace()
             for codigo, coords in estacoes.items():
                 result = igrf_value(coords['latitude'], coords['longitude'], 300, self.ano)
                 dip = -math.degrees(math.atan((math.tan(math.radians(result[1]))/2)))
                 stations.append(f'{codigo} ({coords["latitude"]:.5f}, {coords["longitude"]:.5f}, {dip:.5f})')
-            return stations
+                codigos.append(codigo)
+            return stations, codigos
         except Exception as e:
             QMessageBox.information(
                 self.root,
                 self.util.dict_language[self.lang]["mgbox_error"],
                 f'Erro ao conectar-se com EMBRACE: {e}'
             )
-            return []
+            return [], []
 
     
     # gets information and control save data

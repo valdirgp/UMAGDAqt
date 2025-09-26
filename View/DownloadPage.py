@@ -286,7 +286,7 @@ class DownloadPage(QWidget):
         for i in range(self.side_options.list_all_stations.count()):
             item = self.side_options.list_all_stations.item(i)
             if item.isSelected():
-                selected_stations.add((item.text())[0].split())
+                selected_stations.add((item.text()).split()[0])
         return list(selected_stations)
 
     '''def get_stations_selected(self):

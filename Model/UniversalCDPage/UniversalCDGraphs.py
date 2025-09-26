@@ -1,9 +1,9 @@
 from Model.GraphPage.GraphsModule import GraphsModule
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time as dt_time
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 #import tkinter as tk
-from PyQt5.QtWidgets import QMessageBox, QDateEdit
+from PyQt5.QtWidgets import QMessageBox, QDateEdit, QCalendarWidget
 from PyQt5.QtCore import QDate
 
 import os
@@ -28,7 +28,7 @@ class UniversalCDModel(GraphsModule):
     # Creates one graph that has all data in a period of time
     def create_graphics_calm_distU_H(self, local_downloaded, start, end, station, data_with_stations, get_selected_calm_dates, selected_disturb_date):
         self.lcl_downloaded = local_downloaded
-        self.station = station
+        self.station = station[0]
         # Garantir que data_with_stations seja um dicionário
         if not isinstance(data_with_stations, dict):
             raise TypeError(f"data_with_stations esperado como dict, mas recebeu {type(data_with_stations)}")
@@ -36,12 +36,15 @@ class UniversalCDModel(GraphsModule):
         self.selected_calm_dates = get_selected_calm_dates
         self.selected_disturb_date = selected_disturb_date
 
-        print(f"type(station): {type(station)}, repr(station): {repr(station)}")
+        #print(f"type(station): {type(station)}, repr(station): {repr(station)}")
 
-
+        if isinstance(start, QCalendarWidget):
+            start = start.selectedDate().toPyDate()
         if isinstance(start, QDate):
             start = start.toPyDate()
 
+        if isinstance(end, QCalendarWidget):
+            end = end.selectedDate().toPyDate()
         if isinstance(end, QDate):
             end = end.toPyDate()
 
@@ -60,10 +63,20 @@ class UniversalCDModel(GraphsModule):
 
     def create_graphics_calm_distU_Z(self, local_downloaded, start, end, station, data_with_stations, get_selected_calm_dates, selected_disturb_date):
         self.lcl_downloaded = local_downloaded
-        self.station = station
+        self.station = station[0]
         self.data_with_stations = data_with_stations
         self.selected_calm_dates = get_selected_calm_dates
         self.selected_disturb_date = selected_disturb_date
+
+        if isinstance(start, QCalendarWidget):
+            start = start.selectedDate().toPyDate()
+        if isinstance(start, QDate):
+            start = start.toPyDate()
+
+        if isinstance(end, QCalendarWidget):
+            end = end.selectedDate().toPyDate()
+        if isinstance(end, QDate):
+            end = end.toPyDate()
 
         # Validate dates
         self.start_date, self.end_date = self.format_dates(start, end)
@@ -79,10 +92,20 @@ class UniversalCDModel(GraphsModule):
 
     def create_graphics_calm_distU_X(self, local_downloaded, start, end, station, data_with_stations, get_selected_calm_dates, selected_disturb_date):
         self.lcl_downloaded = local_downloaded
-        self.station = station
+        self.station = station[0]
         self.data_with_stations = data_with_stations
         self.selected_calm_dates = get_selected_calm_dates
         self.selected_disturb_date = selected_disturb_date
+
+        if isinstance(start, QCalendarWidget):
+            start = start.selectedDate().toPyDate()
+        if isinstance(start, QDate):
+            start = start.toPyDate()
+
+        if isinstance(end, QCalendarWidget):
+            end = end.selectedDate().toPyDate()
+        if isinstance(end, QDate):
+            end = end.toPyDate()
 
         # Validate dates
         self.start_date, self.end_date = self.format_dates(start, end)
@@ -98,10 +121,20 @@ class UniversalCDModel(GraphsModule):
     
     def create_graphics_calm_distU_Y(self, local_downloaded, start, end, station, data_with_stations, get_selected_calm_dates, selected_disturb_date):
         self.lcl_downloaded = local_downloaded
-        self.station = station
+        self.station = station[0]
         self.data_with_stations = data_with_stations
         self.selected_calm_dates = get_selected_calm_dates
         self.selected_disturb_date = selected_disturb_date
+
+        if isinstance(start, QCalendarWidget):
+            start = start.selectedDate().toPyDate()
+        if isinstance(start, QDate):
+            start = start.toPyDate()
+
+        if isinstance(end, QCalendarWidget):
+            end = end.selectedDate().toPyDate()
+        if isinstance(end, QDate):
+            end = end.toPyDate()
 
         # Validate dates
         self.start_date, self.end_date = self.format_dates(start, end)
@@ -117,10 +150,20 @@ class UniversalCDModel(GraphsModule):
 
     def create_graphics_calm_distU_D(self, local_downloaded, start, end, station, data_with_stations, get_selected_calm_dates, selected_disturb_date):
         self.lcl_downloaded = local_downloaded
-        self.station = station
+        self.station = station[0]
         self.data_with_stations = data_with_stations
         self.selected_calm_dates = get_selected_calm_dates
         self.selected_disturb_date = selected_disturb_date
+
+        if isinstance(start, QCalendarWidget):
+            start = start.selectedDate().toPyDate()
+        if isinstance(start, QDate):
+            start = start.toPyDate()
+
+        if isinstance(end, QCalendarWidget):
+            end = end.selectedDate().toPyDate()
+        if isinstance(end, QDate):
+            end = end.toPyDate()
 
         # Validate dates
         self.start_date, self.end_date = self.format_dates(start, end)
@@ -136,10 +179,20 @@ class UniversalCDModel(GraphsModule):
 
     def create_graphics_calm_distU_F(self, local_downloaded, start, end, station, data_with_stations, get_selected_calm_dates, selected_disturb_date):
         self.lcl_downloaded = local_downloaded
-        self.station = station
+        self.station = station[0]
         self.data_with_stations = data_with_stations
         self.selected_calm_dates = get_selected_calm_dates
         self.selected_disturb_date = selected_disturb_date
+
+        if isinstance(start, QCalendarWidget):
+            start = start.selectedDate().toPyDate()
+        if isinstance(start, QDate):
+            start = start.toPyDate()
+
+        if isinstance(end, QCalendarWidget):
+            end = end.selectedDate().toPyDate()
+        if isinstance(end, QDate):
+            end = end.toPyDate()
 
         # Validate dates
         self.start_date, self.end_date = self.format_dates(start, end)
@@ -155,10 +208,20 @@ class UniversalCDModel(GraphsModule):
 
     def create_graphics_calm_distU_I(self, local_downloaded, start, end, station, data_with_stations, get_selected_calm_dates, selected_disturb_date):
         self.lcl_downloaded = local_downloaded
-        self.station = station
+        self.station = station[0]
         self.data_with_stations = data_with_stations
         self.selected_calm_dates = get_selected_calm_dates
         self.selected_disturb_date = selected_disturb_date
+
+        if isinstance(start, QCalendarWidget):
+            start = start.selectedDate().toPyDate()
+        if isinstance(start, QDate):
+            start = start.toPyDate()
+
+        if isinstance(end, QCalendarWidget):
+            end = end.selectedDate().toPyDate()
+        if isinstance(end, QDate):
+            end = end.toPyDate()
 
         # Validate dates
         self.start_date, self.end_date = self.format_dates(start, end)
@@ -174,10 +237,20 @@ class UniversalCDModel(GraphsModule):
 
     def create_graphics_calm_distU_G(self, local_downloaded, start, end, station, data_with_stations, get_selected_calm_dates, selected_disturb_date):
         self.lcl_downloaded = local_downloaded
-        self.station = station
+        self.station = station[0]
         self.data_with_stations = data_with_stations
         self.selected_calm_dates = get_selected_calm_dates
         self.selected_disturb_date = selected_disturb_date
+
+        if isinstance(start, QCalendarWidget):
+            start = start.selectedDate().toPyDate()
+        if isinstance(start, QDate):
+            start = start.toPyDate()
+
+        if isinstance(end, QCalendarWidget):
+            end = end.selectedDate().toPyDate()
+        if isinstance(end, QDate):
+            end = end.toPyDate()
 
         # Validate dates
         self.start_date, self.end_date = self.format_dates(start, end)
@@ -197,7 +270,7 @@ class UniversalCDModel(GraphsModule):
         current_date = self.start_date
 
         while current_date <= self.end_date:
-            single_data = self.get_data(current_date, self.station, self.data_with_stations[f'{self.station}'][0])
+            single_data = self.get_data(current_date, self.station, self.data_with_stations[f"{self.station}"][0])
             station_data.append(single_data)
             current_date += timedelta(days=1)
         return station_data
@@ -221,12 +294,14 @@ class UniversalCDModel(GraphsModule):
             calm_avgMstd_H = self.calculate_calm_averageMstd_H()
 
             lista_legal = []
-            disturbed_date_data = self.get_data(self.selected_disturb_date, self.station, self.data_with_stations[f'{self.station}'][0])
+            disturbed_date_data = self.get_data(self.selected_disturb_date[0], self.station, self.data_with_stations[f'{self.station}'][0])
 
             for _, disturb in enumerate(disturbed_date_data):
                 lista_legal.append(disturb['H'])
 
-            time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_H))]
+            #print(">>> DEBUG start_date:", self.start_date, type(self.start_date))
+            #time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_H))]
+            time = [datetime.combine(self.start_date, dt_time(hour=i//60, minute=i%60)) for i in range(1440)]
 
             ax.plot(time, calm_averages_H, label='Calm Days', color='black', linewidth = 2)
             ax.plot(time, calm_avgPstd_H, label='Calm Days avg + std dev', color='gray', linewidth = 1)
@@ -237,7 +312,9 @@ class UniversalCDModel(GraphsModule):
             ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
             ax.set_ylabel('H(nT)')
             ax.set_xlabel('Time')
-            ax.set_title(f"Station: {self.station}, [{self.start_date}] - [{self.end_date}]")
+
+
+            ax.set_title(f"Station: {self.station}, [{str(self.start_date)}] - [{str(self.end_date)}]")
             ax.grid(True)
             ax.legend()
 
@@ -255,8 +332,9 @@ class UniversalCDModel(GraphsModule):
             QMessageBox.critical(
                 None,
                 self.util.dict_language[self.lang]["mgbox_error"],
-                error
+                (f"Unexpected error while plotting: {error}")
             )
+            print(f"Unexpected error while plotting: {error}")
 
     def plot_calm_avg_Z(self):
         # Plot the average of selected days with two lines for calm and disturbed days.
@@ -268,12 +346,13 @@ class UniversalCDModel(GraphsModule):
             calm_avgMstd_Z = self.calculate_calm_averageMstd_Z()
 
             lista_legal = []
-            disturbed_date_data = self.get_data(self.selected_disturb_date, self.station, self.data_with_stations[f'{self.station}'][0])
+            disturbed_date_data = self.get_data(self.selected_disturb_date[0], self.station, self.data_with_stations[f'{self.station}'][0])
 
             for _, disturb in enumerate(disturbed_date_data):
                 lista_legal.append(disturb['Z'])
 
-            time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_Z))]
+            #time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_Z))]
+            time = [datetime.combine(self.start_date, dt_time(hour=i//60, minute=i%60)) for i in range(1440)]
 
             ax.plot(time, calm_averages_Z, label='Calm Days', color='black', linewidth = 2)
             ax.plot(time, calm_avgPstd_Z, label='Calm Days avg + std dev', color='gray', linewidth = 1)
@@ -295,15 +374,16 @@ class UniversalCDModel(GraphsModule):
             plt.subplots_adjust(left=0.1)  # Ajuste do espaço entre o gráfico e a borda
             plt.show()
 
-        except KeyError:
-            self.show_no_data_message()
+        except KeyError as key:
+            self.show_no_data_message(key)
         except Exception as error:
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
             QMessageBox.critical(
                 None,
                 self.util.dict_language[self.lang]["mgbox_error"],
-                error
+                (f"Unexpected error while plotting: {error}")
             )
+            print(f"Unexpected error while plotting: {error}")
 
     def plot_calm_avg_X(self): # Put a pop up warning for when there's no available data
         # Plot the average of selected days with two lines for calm and disturbed days.
@@ -315,12 +395,13 @@ class UniversalCDModel(GraphsModule):
             calm_avgMstd_X = self.calculate_calm_averageMstd_X()
 
             lista_legal = []
-            disturbed_date_data = self.get_data(self.selected_disturb_date, self.station, self.data_with_stations[f'{self.station}'][0])
+            disturbed_date_data = self.get_data(self.selected_disturb_date[0], self.station, self.data_with_stations[f'{self.station}'][0])
 
             for _, disturb in enumerate(disturbed_date_data):
                 lista_legal.append(disturb['X'])
 
-            time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_X))]
+            #time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_X))]
+            time = [datetime.combine(self.start_date, dt_time(hour=i//60, minute=i%60)) for i in range(1440)]
 
             ax.plot(time, calm_averages_X, label='Calm Days', color='black', linewidth = 2)
             ax.plot(time, calm_avgPstd_X, label='Calm Days avg + std dev', color='gray', linewidth = 1)
@@ -342,15 +423,16 @@ class UniversalCDModel(GraphsModule):
             plt.subplots_adjust(left=0.1)  # Ajuste do espaço entre o gráfico e a borda
             plt.show()
 
-        except KeyError: # If there's no available data for plotting, this message will appear.
-            self.show_no_data_message()
+        except KeyError as key: # If there's no available data for plotting, this message will appear.
+            self.show_no_data_message(key)
         except Exception as error:
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
             QMessageBox.critical(
                 None,
                 self.util.dict_language[self.lang]["mgbox_error"],
-                error
+                (f"Unexpected error while plotting: {error}")
             )
+            print(f"Unexpected error while plotting: {error}")
 
     def plot_calm_avg_Y(self): # Put a pop up warning when there's no available data
         # Plot the average of selected days with two lines for calm and disturbed days.
@@ -362,12 +444,13 @@ class UniversalCDModel(GraphsModule):
             calm_avgMstd_Y = self.calculate_calm_averageMstd_Y()
 
             lista_legal = []
-            disturbed_date_data = self.get_data(self.selected_disturb_date, self.station, self.data_with_stations[f'{self.station}'][0])
+            disturbed_date_data = self.get_data(self.selected_disturb_date[0], self.station, self.data_with_stations[f'{self.station}'][0])
 
             for _, disturb in enumerate(disturbed_date_data):
                 lista_legal.append(disturb['Y'])
 
-            time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_Y))]
+            #time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_Y))]
+            time = [datetime.combine(self.start_date, dt_time(hour=i//60, minute=i%60)) for i in range(1440)]
 
             ax.plot(time, calm_averages_Y, label='Calm Days', color='black', linewidth = 2)
             ax.plot(time, calm_avgPstd_Y, label='Calm Days avg + std dev', color='gray', linewidth = 1)
@@ -389,15 +472,16 @@ class UniversalCDModel(GraphsModule):
             plt.subplots_adjust(left=0.1)  # Ajuste do espaço entre o gráfico e a borda
             plt.show()
 
-        except KeyError: # If there's no available data for plotting, this message will appear.
-            self.show_no_data_message()
+        except KeyError as key: # If there's no available data for plotting, this message will appear.
+            self.show_no_data_message(key)
         except Exception as error:
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
             QMessageBox.critical(
                 None,
                 self.util.dict_language[self.lang]["mgbox_error"],
-                error
+                (f"Unexpected error while plotting: {error}")
             )
+            print(f"Unexpected error while plotting: {error}")
 
     def plot_calm_avg_D(self):
         # Plot the average of selected days with two lines for calm and disturbed days.
@@ -409,12 +493,13 @@ class UniversalCDModel(GraphsModule):
             calm_avgMstd_D = self.calculate_calm_averageMstd_D()
 
             lista_legal = []
-            disturbed_date_data = self.get_data(self.selected_disturb_date, self.station, self.data_with_stations[f'{self.station}'][0])
+            disturbed_date_data = self.get_data(self.selected_disturb_date[0], self.station, self.data_with_stations[f'{self.station}'][0])
 
             for _, disturb in enumerate(disturbed_date_data):
                 lista_legal.append(disturb['D'])
 
-            time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_D))]
+            #time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_D))]
+            time = [datetime.combine(self.start_date, dt_time(hour=i//60, minute=i%60)) for i in range(1440)]
 
             ax.plot(time, calm_averages_D, label='Calm Days', color='black', linewidth = 2)
             ax.plot(time, calm_avgPstd_D, label='Calm Days avg + std dev', color='gray', linewidth = 1)
@@ -436,15 +521,16 @@ class UniversalCDModel(GraphsModule):
             plt.subplots_adjust(left=0.1)  # Ajuste do espaço entre o gráfico e a borda
             plt.show()
         
-        except KeyError: # If there's no available data for plotting, this message will appear.
-            self.show_no_data_message()
+        except KeyError as key: # If there's no available data for plotting, this message will appear.
+            self.show_no_data_message(key)
         except Exception as error:
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
             QMessageBox.critical(
                 None,
                 self.util.dict_language[self.lang]["mgbox_error"],
-                error
+                (f"Unexpected error while plotting: {error}")
             )
+            print(f"Unexpected error while plotting: {error}")
     
     def plot_calm_avg_F(self):
         # Plot the average of selected days with two lines for calm and disturbed days.
@@ -456,12 +542,13 @@ class UniversalCDModel(GraphsModule):
             calm_avgMstd_F = self.calculate_calm_averageMstd_F()
 
             lista_legal = []
-            disturbed_date_data = self.get_data(self.selected_disturb_date, self.station, self.data_with_stations[f'{self.station}'][0])
+            disturbed_date_data = self.get_data(self.selected_disturb_date[0], self.station, self.data_with_stations[f'{self.station}'][0])
 
             for _, disturb in enumerate(disturbed_date_data):
                 lista_legal.append(disturb['F'])
 
-            time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_F))]
+            #time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_F))]
+            time = [datetime.combine(self.start_date, dt_time(hour=i//60, minute=i%60)) for i in range(1440)]
 
             ax.plot(time, calm_averages_F, label='Calm Days', color='black', linewidth = 2)
             ax.plot(time, calm_avgPstd_F, label='Calm Days avg + std dev', color='gray', linewidth = 1)
@@ -483,15 +570,16 @@ class UniversalCDModel(GraphsModule):
             plt.subplots_adjust(left=0.1)  # Ajuste do espaço entre o gráfico e a borda
             plt.show()
 
-        except KeyError: # If there's no available data for plotting, this message will appear.
-            self.show_no_data_message()
+        except KeyError as key: # If there's no available data for plotting, this message will appear.
+            self.show_no_data_message(key)
         except Exception as error:
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
             QMessageBox.critical(
                 None,
                 self.util.dict_language[self.lang]["mgbox_error"],
-                error
+                (f"Unexpected error while plotting: {error}")
             )
+            print(f"Unexpected error while plotting: {error}")
 
     def plot_calm_avg_I(self):
         # Plot the average of selected days with two lines for calm and disturbed days.
@@ -503,12 +591,13 @@ class UniversalCDModel(GraphsModule):
             calm_avgMstd_I = self.calculate_calm_averageMstd_I()
 
             lista_legal = []
-            disturbed_date_data = self.get_data(self.selected_disturb_date, self.station, self.data_with_stations[f'{self.station}'][0])
+            disturbed_date_data = self.get_data(self.selected_disturb_date[0], self.station, self.data_with_stations[f'{self.station}'][0])
 
             for _, disturb in enumerate(disturbed_date_data):
                 lista_legal.append(disturb['I'])
 
-            time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_I))]
+            #time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_I))]
+            time = [datetime.combine(self.start_date, dt_time(hour=i//60, minute=i%60)) for i in range(1440)]
 
             ax.plot(time, calm_averages_I, label='Calm Days', color='black', linewidth = 2)
             ax.plot(time, calm_avgPstd_I, label='Calm Days avg + std dev', color='gray', linewidth = 1)
@@ -530,15 +619,16 @@ class UniversalCDModel(GraphsModule):
             plt.subplots_adjust(left=0.1)  # Ajuste do espaço entre o gráfico e a borda
             plt.show()    
 
-        except KeyError: # If there's no available data for plotting, this message will appear.
-            self.show_no_data_message()
+        except KeyError as key: # If there's no available data for plotting, this message will appear.
+            self.show_no_data_message(key)
         except Exception as error:
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
             QMessageBox.critical(
                 None,
                 self.util.dict_language[self.lang]["mgbox_error"],
-                error
+                (f"Unexpected error while plotting: {error}")
             )
+            print(f"Unexpected error while plotting: {error}")
 
     def plot_calm_avg_G(self): # Put a pop up for when there's no available data
         # Plot the average of selected days with two lines for calm and disturbed days.
@@ -550,12 +640,13 @@ class UniversalCDModel(GraphsModule):
             calm_avgMstd_G = self.calculate_calm_averageMstd_G()
 
             lista_legal = []
-            disturbed_date_data = self.get_data(self.selected_disturb_date, self.station, self.data_with_stations[f'{self.station}'][0])
+            disturbed_date_data = self.get_data(self.selected_disturb_date[0], self.station, self.data_with_stations[f'{self.station}'][0])
 
             for _, disturb in enumerate(disturbed_date_data):
                 lista_legal.append(disturb['G'])
 
-            time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_G))]
+            #time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_G))]
+            time = [datetime.combine(self.start_date, dt_time(hour=i//60, minute=i%60)) for i in range(1440)]
 
             ax.plot(time, calm_averages_G, label='Calm Days', color='black', linewidth = 2)
             ax.plot(time, calm_avgPstd_G, label='Calm Days avg + std dev', color='gray', linewidth = 1)
@@ -577,15 +668,16 @@ class UniversalCDModel(GraphsModule):
             plt.subplots_adjust(left=0.1)  # Ajuste do espaço entre o gráfico e a borda
             plt.show()   
         
-        except KeyError: #If there's no available data for plotting, this message will appear.
-            self.show_no_data_message()
+        except KeyError as key: #If there's no available data for plotting, this message will appear.
+            self.show_no_data_message(key)
         except Exception as error: #If an error occurs, this message will appear alonside the type of error.
             #tk.messagebox.showinfo("Error", f"Unexpected error while plotting: {error}")
             QMessageBox.critical(
                 None,
                 self.util.dict_language[self.lang]["mgbox_error"],
-                error
+                (f"Unexpected error while plotting: {error}")
             )
+            print(f"Unexpected error while plotting: {error}")
     
     def get_cal_datas(self, selected_dates): #Pega a data inicial e final, lista dos nomes das estações e os dados das estações
         data = []
@@ -1035,6 +1127,9 @@ class UniversalCDModel(GraphsModule):
 
     # Retrieves the data for a given station and date from the corresponding file
     def get_data(self, day, station, network_station):
+        if isinstance(day, QDate):
+            day = day.toPyDate()
+
         self.st = station
         self.day = day
         path_station = os.path.join(self.lcl_downloaded, 

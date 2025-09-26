@@ -298,7 +298,7 @@ class DownloadModule(QObject):
             if self.current_file >= self.total_downloads:
                 self.progress_dialog.close()
                 from PyQt5.QtWidgets import QMessageBox
-                title = self.util.dict_language[self.lang]["msgbox_info"]
+                title = self.util.dict_language[self.lang]["mgbox_success"]
                 text = "\n".join(responses) if len(responses) > 1 else "Download concluído."
 
                 QMessageBox.information(None, title, text)
