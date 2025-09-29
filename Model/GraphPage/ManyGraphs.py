@@ -66,7 +66,7 @@ class ManyGraphs(GraphsModule):
         if isinstance(self.end_date, QDate):
             self.end_date = self.end_date.toPyDate()
         difference_dates = (self.end_date - self.start_date) + timedelta(days=1)
-        if number_columns * number_rows != difference_dates.days:
+        if number_columns * number_rows < difference_dates.days:
             QMessageBox.information(
                 None,
                 self.util.dict_language[self.lang]["mgbox_error"],
