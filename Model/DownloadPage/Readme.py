@@ -29,8 +29,8 @@ class Readme(DownloadModule):
 
         self.request_embrace_queue = queue.Queue()
         self.request_intermagnet_queue = queue.Queue()
-        for station in liststations_Embrace: self.request_embrace_queue.put(station)
-        for station in liststations_Intermagnet: self.request_intermagnet_queue.put(station)
+        for station in liststations_Embrace: self.request_embrace_queue.put(station.split()[0])
+        for station in liststations_Intermagnet: self.request_intermagnet_queue.put(station.split()[0])
 
         self.threads = []
         for _ in range(int(max_threads/2)): 

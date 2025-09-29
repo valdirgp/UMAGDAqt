@@ -18,6 +18,14 @@ class SideOptionsDownload(QWidget):
         #self.page_frame = root
         self.options_frame = None
 
+    # Função de filtro
+    def filter_visible_items(self):
+        filter_text = self.search_input.text().lower()
+        for i in range(self.list_all_stations.count()):
+            item = self.list_all_stations.item(i)
+            item.setHidden(filter_text not in item.text().lower())
+
+
     # create download widget
     def create_download_options(self):
         # Parent do ScrollableFrame agora é self, e não DownloadPage
@@ -30,14 +38,17 @@ class SideOptionsDownload(QWidget):
         layout.setContentsMargins(5,5,5,5)
         layout.setSpacing(8)
 
-
-
         # Drive selection
         lbl_drive = QLabel(self.util.dict_language[self.language]["lbl_dr"])
         layout.addWidget(lbl_drive)
         self.combo_download_location = QComboBox()
         self.populate_combo_local()
         layout.addWidget(self.combo_download_location)
+
+        # campo para digitar filtro
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Filtrar estações...")
+        layout.addWidget(self.search_input)
 
         # Station selection
         lbl_station = QLabel(self.util.dict_language[self.language]["lbl_st"])
@@ -47,6 +58,9 @@ class SideOptionsDownload(QWidget):
         layout.addWidget(self.list_all_stations)
         self.scrollbar = QScrollBar()
         self.list_all_stations.setVerticalScrollBar(self.scrollbar)
+
+        # Conectar filtro em tempo real
+        self.search_input.textChanged.connect(self.filter_visible_items)
 
         # Select/Clear all buttons
         btns_layout = QHBoxLayout()
@@ -84,7 +98,7 @@ class SideOptionsDownload(QWidget):
         self.cal_initial_date.setDisplayFormat('dd/MM/yyyy')
         self.cal_initial_date.setCalendarPopup(True)
         hoje = QDate.currentDate()
-        data = QDate(self.year, hoje.month(), hoje.day())
+        data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_initial_date.setDate(data)
         layout.addWidget(self.cal_initial_date)
 

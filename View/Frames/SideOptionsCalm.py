@@ -1,7 +1,7 @@
 from Model.Custom.CustomttkFrame import ScrollableFrame
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QListWidget, QAbstractItemView,
-    QPushButton, QCalendarWidget, QDateEdit, QSizePolicy, QScrollBar
+    QPushButton, QCalendarWidget, QDateEdit, QSizePolicy, QScrollBar, QLineEdit
 )
 from PyQt5.QtCore import QDate
 import psutil
@@ -19,6 +19,13 @@ class SideOptionsCalm(QWidget):
 
         self.combo_local_download = None
         self.local_downloads_function = None
+
+    # Função de filtro
+    def filter_visible_items(self):
+        filter_text = self.search_input.text().lower()
+        for i in range(self.list_all_stations.count()):
+            item = self.list_all_stations.item(i)
+            item.setHidden(filter_text not in item.text().lower())
 
     # Creates options to create graphs
     def create_calm_plot_options(self):
@@ -42,6 +49,11 @@ class SideOptionsCalm(QWidget):
         self.combo_download_location.currentIndexChanged.connect(self.change_local)
         layout.addWidget(self.combo_download_location)
 
+        # campo para digitar filtro
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Filtrar estações...")
+        layout.addWidget(self.search_input)
+
         # Station selection
         lbl_station = QLabel(self.util.dict_language[self.lang]['lbl_st'])
         layout.addWidget(lbl_station)
@@ -50,6 +62,9 @@ class SideOptionsCalm(QWidget):
         layout.addWidget(self.list_all_stations)
         self.scrollbar = QScrollBar()
         self.list_all_stations.setVerticalScrollBar(self.scrollbar)
+
+        # Conectar filtro em tempo real
+        self.search_input.textChanged.connect(self.filter_visible_items)
 
         # Duration label
         lbl_duration = QLabel(self.util.dict_language[self.lang]['lbl_dur'])
@@ -62,7 +77,7 @@ class SideOptionsCalm(QWidget):
         self.startdate.setDisplayFormat('dd/MM/yyyy')
         self.startdate.setCalendarPopup(True)
         hoje = QDate.currentDate()
-        data = QDate(self.year, hoje.month(), hoje.day())
+        data = QDate(self.year[2], self.year[1], self.year[0])
         self.startdate.setDate(data)
         layout.addWidget(self.startdate)
 
@@ -73,7 +88,7 @@ class SideOptionsCalm(QWidget):
         self.enddate.setDisplayFormat('dd/MM/yyyy')
         self.enddate.setCalendarPopup(True)
         hoje = QDate.currentDate()
-        data = QDate(self.year, hoje.month(), hoje.day())
+        data = QDate(self.year[2], self.year[1], self.year[0])
         self.enddate.setDate(data)
         layout.addWidget(self.enddate)
 
@@ -90,7 +105,7 @@ class SideOptionsCalm(QWidget):
         self.cal_calm = QCalendarWidget()
         self.cal_calm.setGridVisible(True)
         hoje = QDate.currentDate()
-        data = QDate(self.year, hoje.month(), hoje.day())
+        data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_calm.setSelectedDate(data)
         self.cal_calm.selectionChanged.connect(lambda: self.add_date(self.cal_calm, self.selected_calm_dates))
         self.cal_calm.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)

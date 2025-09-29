@@ -25,6 +25,7 @@ class GraphsModule():
 
     # Searches for downloaded stations from EMBRACE and INTERMAGNET data folders
     def search_stations_downloaded(self, year, drive_location="C:\\"):
+        year = year[2]
         current_year = datetime.now().year
         main_downloaded_stations = set()
         data_with_stations = {}
@@ -74,10 +75,13 @@ class GraphsModule():
                             data_with_stations[f'{st}'].append(local_min * -1)
                     except Exception as error:
                         print('erro adquirindo dados do readme', error)
+        #else: return [], {}
                         
         main_downloaded_stations = sorted(list(main_downloaded_stations), key=str.lower)
 
         for i in range(0, len(main_downloaded_stations)):
+            if len(data_with_stations[main_downloaded_stations[i]]) < 5:
+                continue
             result = igrf_value(data_with_stations[main_downloaded_stations[i]][2], data_with_stations[main_downloaded_stations[i]][1], 300, year)
             dip = -math.degrees(math.atan((math.tan(math.radians(result[1]))/2)))
             main_downloaded_stations[i] = f"{main_downloaded_stations[i]} ({data_with_stations[main_downloaded_stations[i]][2]:.5f}, {data_with_stations[main_downloaded_stations[i]][1]:.5f}, {dip:.5f})"

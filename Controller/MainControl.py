@@ -101,9 +101,11 @@ from Controller.UniversalCDPageControl import UniversalCDPageControl
 from General.util import Util
 
 from PyQt5.QtWidgets import (
-    QMainWindow, QMenuBar, QMenu, QStackedWidget, QSpinBox, QWidgetAction, QComboBox
+    QMainWindow, QMenuBar, QMenu, QStackedWidget, QSpinBox, QWidgetAction, QComboBox, QDateEdit
 )
+from PyQt5.QtCore import QDate
 from PyQt5.QtGui import QIcon
+from datetime import datetime
 import psutil
 
 
@@ -127,7 +129,7 @@ class MainControl:
         self.root.setMenuBar(menubar)
 
         if access_allow:
-            magnetic_eq_coords = self.util.calculate_inclination(year)
+            magnetic_eq_coords = self.util.calculate_inclination(year[2])
 
             self.DownloadPage = DownloadsControl(self.root, lang, year, drive, magnetic_eq_coords)
             self.DownloadPage.load_widgets()
@@ -174,6 +176,7 @@ class MainControl:
             lang_menu.addAction(self.util.dict_language[lang]["menu_port"], lambda: self.reset("br"))
             config_menu.addMenu(lang_menu)
 
+            '''
             year_menu = QMenu(self.util.dict_language[lang]["menu_year"], self.root)
 
             # Campo de ano com setinhas
@@ -191,6 +194,41 @@ class MainControl:
             # Exemplo: conectando a mudança de valor
             # Exemplo: chamar função só quando perder o foco (ou Enter)
             year_spin.editingFinished.connect(lambda: self.util.change_year(year_spin.value()))
+            '''
+
+            # Criar submenu de data
+            date_menu = QMenu(self.util.dict_language[lang]["menu_date"], self.root)
+
+            # Criar o QDateEdit (input de data)
+            date_edit = QDateEdit()
+            date_edit.setCalendarPopup(True)  # Habilita o calendário ao clicar
+            date_edit.setDisplayFormat("dd/MM/yyyy")  # Formato brasileiro
+
+            # Definir data inicial
+            initial_date = QDate(year[2], year[1], year[0])
+            date_edit.setDate(initial_date)
+            date_edit.setMinimumDate(QDate(1900, 1, 1))
+            ano_atual = datetime.now().year
+            mes_atual = datetime.now().month
+            dia_atual = datetime.now().day
+            date_edit.setMaximumDate(QDate(ano_atual, mes_atual, dia_atual))
+
+            # Colocar o widget no menu usando QWidgetAction
+            date_action = QWidgetAction(self.root)
+            date_action.setDefaultWidget(date_edit)
+
+            # Adicionar ao menu e depois ao menu principal
+            date_menu.addAction(date_action)
+            config_menu.addMenu(date_menu)
+
+            # Conectar o evento de edição finalizada (quando perde o foco ou aperta Enter)
+            def update_date():
+                selected_date = date_edit.date()
+                self.util.change_year(
+                    year=[selected_date.day(), selected_date.month(), selected_date.year()]                  
+                )
+
+            date_edit.editingFinished.connect(update_date)
 
             drive_menu = QMenu(self.util.dict_language[lang]["menu_drive"], self.root)
 

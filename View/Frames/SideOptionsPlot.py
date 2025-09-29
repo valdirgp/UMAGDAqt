@@ -1,7 +1,7 @@
 from Model.Custom.CustomttkFrame import ScrollableFrame
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QListWidget, QAbstractItemView,
-    QPushButton, QCheckBox, QDateEdit, QSizePolicy, QScrollBar, QFrame, QListWidgetItem
+    QPushButton, QCheckBox, QDateEdit, QSizePolicy, QScrollBar, QFrame, QListWidgetItem, QLineEdit
 )
 from PyQt5.QtCore import QDate, Qt
 import psutil
@@ -21,6 +21,13 @@ class SideOptionsPlot(QWidget):
         self.btn_globaldays_function = None
         self.btn_manydays_function = None
         self.local_downloads_function = None
+
+    # Função de filtro
+    def filter_visible_items(self):
+        filter_text = self.search_input.text().lower()
+        for i in range(self.list_all_stations.count()):
+            item = self.list_all_stations.item(i)
+            item.setHidden(filter_text not in item.text().lower())
 
     # creates options to create graphs
     def create_plot_options(self):
@@ -44,6 +51,11 @@ class SideOptionsPlot(QWidget):
         self.combo_download_location.currentIndexChanged.connect(self.change_local)
         layout.addWidget(self.combo_download_location)
 
+        # campo para digitar filtro
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Filtrar estações...")
+        layout.addWidget(self.search_input)
+
         # Station selection
         lbl_station = QLabel(self.util.dict_language[self.language]['lbl_st'])
         layout.addWidget(lbl_station)
@@ -52,6 +64,9 @@ class SideOptionsPlot(QWidget):
         layout.addWidget(self.list_all_stations)
         self.scrollbar = QScrollBar()
         self.list_all_stations.setVerticalScrollBar(self.scrollbar)
+
+        # Conectar filtro em tempo real
+        self.search_input.textChanged.connect(self.filter_visible_items)
 
         # Select/Clear all buttons
         btns_layout = QHBoxLayout()
@@ -128,7 +143,7 @@ class SideOptionsPlot(QWidget):
         self.cal_calm.setDisplayFormat('dd/MM/yyyy')
         self.cal_calm.setCalendarPopup(True)
         hoje = QDate.currentDate()
-        data = QDate(self.year, hoje.month(), hoje.day())
+        data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_calm.setDate(data)
         layout.addWidget(self.cal_calm)
 
@@ -145,7 +160,7 @@ class SideOptionsPlot(QWidget):
         self.date.setDisplayFormat('dd/MM/yyyy')
         self.date.setCalendarPopup(True)
         hoje = QDate.currentDate()
-        data = QDate(self.year, hoje.month(), hoje.day())
+        data = QDate(self.year[2], self.year[1], self.year[0])
         self.date.setDate(data)
         self.options_layout.addWidget(self.date)
         self.btn_singleday_confirm = QPushButton(self.util.dict_language[self.language]['btn_confirm'])
@@ -162,7 +177,7 @@ class SideOptionsPlot(QWidget):
         self.startdate.setDisplayFormat('dd/MM/yyyy')
         self.startdate.setCalendarPopup(True)
         hoje = QDate.currentDate()
-        data = QDate(self.year, hoje.month(), hoje.day())
+        data = QDate(self.year[2], self.year[1], self.year[0])
         self.startdate.setDate(data)
         self.options_layout.addWidget(self.startdate)
 
@@ -172,7 +187,7 @@ class SideOptionsPlot(QWidget):
         self.enddate.setDisplayFormat('dd/MM/yyyy')
         self.enddate.setCalendarPopup(True)
         hoje = QDate.currentDate()
-        data = QDate(self.year, hoje.month(), hoje.day())
+        data = QDate(self.year[2], self.year[1], self.year[0])
         self.enddate.setDate(data)
         self.options_layout.addWidget(self.enddate)
 
@@ -190,7 +205,7 @@ class SideOptionsPlot(QWidget):
         self.startdate.setDisplayFormat('dd/MM/yyyy')
         self.startdate.setCalendarPopup(True)
         hoje = QDate.currentDate()
-        data = QDate(self.year, hoje.month(), hoje.day())
+        data = QDate(self.year[2], self.year[1], self.year[0])
         self.startdate.setDate(data)
         self.options_layout.addWidget(self.startdate)
 
@@ -200,7 +215,7 @@ class SideOptionsPlot(QWidget):
         self.enddate.setDisplayFormat('dd/MM/yyyy')
         self.enddate.setCalendarPopup(True)
         hoje = QDate.currentDate()
-        data = QDate(self.year, hoje.month(), hoje.day())
+        data = QDate(self.year[2], self.year[1], self.year[0])
         self.enddate.setDate(data)
         self.options_layout.addWidget(self.enddate)
 

@@ -2,7 +2,7 @@ from Model.Custom.CustomttkFrame import ScrollableFrame
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QListWidget, 
     QAbstractItemView, QPushButton, QCheckBox, QDateEdit, QSizePolicy, 
-    QScrollBar, QFrame, QCalendarWidget
+    QScrollBar, QFrame, QCalendarWidget, QLineEdit
 )
 from PyQt5.QtCore import QDate
 import psutil
@@ -26,6 +26,13 @@ class SideOptionsUniversalCD(QWidget):
 
         self.btn_plot_selected_function = None
 
+    # Função de filtro
+    def filter_visible_items(self):
+        filter_text = self.search_input.text().lower()
+        for i in range(self.list_all_stations.count()):
+            item = self.list_all_stations.item(i)
+            item.setHidden(filter_text not in item.text().lower())
+
     # Cria opções da aba Universal Calm/Disturb
     def create_Ucalmdisturb_plot_options(self):
         self.frame_side_functions_ucalmdisturb = ScrollableFrame(self.window, 255)
@@ -48,6 +55,11 @@ class SideOptionsUniversalCD(QWidget):
         self.combo_download_location.currentIndexChanged.connect(self.change_local)
         layout.addWidget(self.combo_download_location)
 
+        # campo para digitar filtro
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Filtrar estações...")
+        layout.addWidget(self.search_input)
+
         # Station selection
         lbl_station = QLabel(self.util.dict_language[self.lang]['lbl_st'])
         layout.addWidget(lbl_station)
@@ -58,6 +70,9 @@ class SideOptionsUniversalCD(QWidget):
 
         self.scrollbar = QScrollBar()
         self.list_all_stations.setVerticalScrollBar(self.scrollbar)
+
+        # Conectar filtro em tempo real
+        self.search_input.textChanged.connect(self.filter_visible_items)
 
         # Duration (start and end date)
         lbl_duration = QLabel(self.util.dict_language[self.lang]['lbl_dur'])
@@ -70,7 +85,7 @@ class SideOptionsUniversalCD(QWidget):
         self.startdate.setDisplayFormat('dd/MM/yyyy')
         self.startdate.setCalendarPopup(True)
         hoje = QDate.currentDate()
-        data = QDate(self.year, hoje.month(), hoje.day())
+        data = QDate(self.year[2], self.year[1], self.year[0])
         self.startdate.setDate(data)
         layout.addWidget(self.startdate)
 
@@ -81,7 +96,7 @@ class SideOptionsUniversalCD(QWidget):
         self.enddate.setDisplayFormat('dd/MM/yyyy')
         self.enddate.setCalendarPopup(True)
         hoje = QDate.currentDate()
-        data = QDate(self.year, hoje.month(), hoje.day())
+        data = QDate(self.year[2], self.year[1], self.year[0])
         self.enddate.setDate(data)
         layout.addWidget(self.enddate)
 
@@ -98,7 +113,7 @@ class SideOptionsUniversalCD(QWidget):
 
         self.cal_calm = QCalendarWidget()
         hoje = QDate.currentDate()
-        data = QDate(self.year, hoje.month(), hoje.day())
+        data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_calm.setSelectedDate(data)
         self.cal_calm.clicked.connect(lambda date: self.add_date(date, self.selected_calm_dates))
 
@@ -113,7 +128,7 @@ class SideOptionsUniversalCD(QWidget):
 
         self.cal_disturb = QCalendarWidget()
         hoje = QDate.currentDate()
-        data = QDate(self.year, hoje.month(), hoje.day())
+        data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_disturb.setSelectedDate(data)
         self.cal_disturb.clicked.connect(lambda date: self.add_date(date, self.selected_disturb_dates))
         

@@ -22,7 +22,7 @@ class Util():
                                     "menu_lang": "Idioma",
                                     "menu_en":"Inglês",
                                     "menu_port":"Português",
-                                    "menu_year": "Ano",
+                                    "menu_date": "Data",
                                     "menu_drive": "Drive",
                                     "menu_reset": "Reiniciar",
                                     "menu_about": "Sobre",
@@ -137,7 +137,7 @@ class Util():
                                     "menu_lang": "Language",
                                     "menu_en":"English",
                                     "menu_port":"Portuguese",
-                                    "menu_year": "Year",
+                                    "menu_date": "Date",
                                     "menu_drive": "Drive",
                                     "menu_reset": "Restart",
                                     "menu_about": "About",
@@ -286,11 +286,16 @@ class Util():
             data_list = file.split()
             if "year:" in data_list:
                 idx = data_list.index("year:")
-                return int(data_list[idx + 1])
+                data = data_list[idx + 1].split("/")
+                for e, value in enumerate(data):
+                    data[e] = int(value)
+                return data
         from datetime import datetime
 
         ano_atual = datetime.now().year
-        return ano_atual
+        mes_atual = datetime.now().month
+        dia_atual = datetime.now().day
+        return [dia_atual, mes_atual, ano_atual]
     
     def change_year(self, year):
         lines = []
@@ -298,7 +303,7 @@ class Util():
             for line in f:
                 key, value = line.strip().split()
                 if key.strip() == "year:":
-                    lines.append(f"year: {year}\n")
+                    lines.append(f"year: {year[0]}/{year[1]}/{year[2]}\n")
                 else:
                     lines.append(line)
 
@@ -362,7 +367,6 @@ class Util():
         #         if abs(result[1]) <= 0.5:
         #             dip.append(lat)
         #             break
-        
         for long in range(-180, 181):
             result = igrf_value(0.0, long, 300, self.ano) 
             dip.append(-math.degrees(math.atan((math.tan(math.radians(result[1]))/2))))  # Inclinação magnética 

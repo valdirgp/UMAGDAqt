@@ -81,8 +81,8 @@ class DownloadsControl:
         self.Intermagnet = Intermagnet(self.lang, self.root)
         self.Readme = Readme(self.lang)
 
-        self.embrace_stations, self.embrace_codes = self.Embrace.create_stationlist(year)
-        self.intermagnet_stations, self.intermagnet_codes = self.Intermagnet.create_stationlist(year)
+        self.embrace_stations, self.embrace_codes = self.Embrace.create_stationlist(year[2])
+        self.intermagnet_stations, self.intermagnet_codes = self.Intermagnet.create_stationlist(year[2])
 
     def load_widgets(self):
         self.DownloadPage.set_embrace_options(self.embrace_stations)
