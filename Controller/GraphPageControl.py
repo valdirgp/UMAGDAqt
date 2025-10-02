@@ -6,6 +6,7 @@ from Model.GraphPage.TideGraph import TideGraph
 from Model.GraphPage.DifferenceGraph import DifferenceGraph
 from View.GraphPage import GraphPage
 
+
 class GraphControl():
     def __init__(self, root, language, year, drive, magnetic_eq_coords=0):
         self.root = root
@@ -15,11 +16,10 @@ class GraphControl():
         self.Graphs = GraphPage(root, self.lang, self.year, self.drive, magnetic_eq_coords)
         self.Module = GraphsModule(self.lang)
         self.SingleModule = SingleGraph(self.root, self.lang)
-        self.GlobalModule = GlobalGraph(self.root, self.lang)
+        self.GlobalModule = GlobalGraph(self.root, self.lang, self.year)
         self.ManyModule = ManyGraphs(self.root, self.lang)
         self.TideModule = TideGraph(self.root, self.lang)
         self.DifferenceModule = DifferenceGraph(self.root, self.lang)
-        
 
     # creates graph frames for the window and bind type of plots to variables
     def load_widgets(self):

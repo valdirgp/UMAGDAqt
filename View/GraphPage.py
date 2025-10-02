@@ -8,6 +8,7 @@ import cartopy.crs as ccrs
 import numpy as np
 
 
+
 class GraphPage(QWidget):
     def __init__(self, root, language, year, drive, magnetic_eq_coords=0):
         super().__init__(root)
@@ -20,6 +21,7 @@ class GraphPage(QWidget):
         self.util = Util()
         self.side_options = SideOptionsPlot(self, self.lang, self.year, self.drive)
         self.map_widget = Map(self)
+
         self.downloaded_data_stations = []
         self.colors = []
         self.all_locals = []
@@ -83,6 +85,8 @@ class GraphPage(QWidget):
 
         main_layout.addWidget(self.side_options.frame_side_functions)
         main_layout.addWidget(self.map_widget.map_frame)
+
+        
 
     # select all stations from map and listbox
     def set_all_selected(self):
@@ -237,6 +241,10 @@ class GraphPage(QWidget):
     def update_min_sub_list(self):
         self.side_options.populate_list_options(self.side_options.minuend_stations_list, self.downloaded_data_stations)
         self.side_options.populate_list_options(self.side_options.subtracted_stations_list, self.downloaded_data_stations)
+
+    def onfile_changed(self, path):
+        self.side_options.list_all_stations.clear()
+        self.side_options.populate_list_options(self.side_options.list_all_stations, self.downloaded_data_stations)
 
     def bind_single_graph(self, callback):
         self.side_options.btn_singleday_function = callback

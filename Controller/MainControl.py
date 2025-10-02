@@ -108,6 +108,7 @@ from PyQt5.QtGui import QIcon
 from datetime import datetime
 import psutil
 
+from PyQt5.QtCore import QFileSystemWatcher
 
 class MainControl:
     def __init__(self, root: QMainWindow):
@@ -115,38 +116,39 @@ class MainControl:
         self.util = Util()
         self.stack = QStackedWidget()
         self.root.setCentralWidget(self.stack)
+        self.watcher = QFileSystemWatcher()
 
 
     def initialize_app(self):
-        lang = self.util.get_language_config()
-        year = self.util.get_year_config()
-        drive = self.util.get_drive_config()
-        self.root.setWindowTitle(self.util.dict_language[lang]["title"])
-        self.License = License(lang)
+        self.lang = self.util.get_language_config()
+        self.year = self.util.get_year_config()
+        self.drive = self.util.get_drive_config()
+        self.root.setWindowTitle(self.util.dict_language[self.lang]["title"])
+        self.License = License(self.lang)
         access_allow = self.License.verify_fisical_adress()
 
         menubar = QMenuBar(self.root)
         self.root.setMenuBar(menubar)
 
         if access_allow:
-            magnetic_eq_coords = self.util.calculate_inclination(year[2])
+            magnetic_eq_coords = self.util.calculate_inclination(self.year)
 
-            self.DownloadPage = DownloadsControl(self.root, lang, year, drive, magnetic_eq_coords)
+            self.DownloadPage = DownloadsControl(self.root, self.lang, self.year, self.drive, magnetic_eq_coords)
             self.DownloadPage.load_widgets()
         
-            self.GraphPage = GraphControl(self.root, lang, year, drive, magnetic_eq_coords)
+            self.GraphPage = GraphControl(self.root, self.lang, self.year, self.drive, magnetic_eq_coords)
             self.GraphPage.load_widgets()
 
-            self.CalmDisturbPage = CalmDisturbControl(self.root, lang, year, drive, magnetic_eq_coords)
+            self.CalmDisturbPage = CalmDisturbControl(self.root, self.lang, self.year, self.drive, magnetic_eq_coords)
             self.CalmDisturbPage.load_widgets()
 
-            self.CalmPage = CalmControl(self.root, lang, year, drive, magnetic_eq_coords)
+            self.CalmPage = CalmControl(self.root, self.lang, self.year, self.drive, magnetic_eq_coords)
             self.CalmPage.load_widgets()
 
-            self.UniversalCDPage = UniversalCDPageControl(self.root, lang, year, drive, magnetic_eq_coords)
+            self.UniversalCDPage = UniversalCDPageControl(self.root, self.lang, self.year, self.drive, magnetic_eq_coords)
             self.UniversalCDPage.load_widgets()
 
-            self.AboutPage = AboutPage(self.root, lang)
+            self.AboutPage = AboutPage(self.root, self.lang)
             self.AboutPage.load_page()
 
             # adiciona páginas ao stack
@@ -159,21 +161,21 @@ class MainControl:
             self.stack.addWidget(self.AboutPage)
 
             # menu principal
-            func_menu = QMenu(self.util.dict_language[lang]["menu_main"], self.root)
+            func_menu = QMenu(self.util.dict_language[self.lang]["menu_main"], self.root)
 
-            func_menu.addAction(self.util.dict_language[lang]["menu_dwd"], lambda: self.stack.setCurrentWidget(self.DownloadPage.get_widget()))
-            func_menu.addAction(self.util.dict_language[lang]["menu_graph"], lambda: self.stack.setCurrentWidget(self.GraphPage.get_widget()))
-            func_menu.addAction(self.util.dict_language[lang]['menu_cd'], lambda: self.stack.setCurrentWidget(self.CalmDisturbPage.get_widget()))
-            func_menu.addAction(self.util.dict_language[lang]['menu_c'], lambda: self.stack.setCurrentWidget(self.CalmPage.get_widget()))
-            func_menu.addAction(self.util.dict_language[lang]['menu_ucd'], lambda: self.stack.setCurrentWidget(self.UniversalCDPage.get_widget()))
+            func_menu.addAction(self.util.dict_language[self.lang]["menu_dwd"], lambda: self.stack.setCurrentWidget(self.DownloadPage.get_widget()))
+            func_menu.addAction(self.util.dict_language[self.lang]["menu_graph"], lambda: self.stack.setCurrentWidget(self.GraphPage.get_widget()))
+            func_menu.addAction(self.util.dict_language[self.lang]['menu_cd'], lambda: self.stack.setCurrentWidget(self.CalmDisturbPage.get_widget()))
+            func_menu.addAction(self.util.dict_language[self.lang]['menu_c'], lambda: self.stack.setCurrentWidget(self.CalmPage.get_widget()))
+            func_menu.addAction(self.util.dict_language[self.lang]['menu_ucd'], lambda: self.stack.setCurrentWidget(self.UniversalCDPage.get_widget()))
 
             #func_menu.addAction(self.util.dict_language[lang]["menu_about"], lambda: self.stack.setCurrentWidget(self.AboutPage))
 
             # menu de configurações
-            config_menu = QMenu(self.util.dict_language[lang]["menu_config"], self.root)
-            lang_menu = QMenu(self.util.dict_language[lang]["menu_lang"], self.root)
-            lang_menu.addAction(self.util.dict_language[lang]["menu_en"], lambda: self.reset("en"))
-            lang_menu.addAction(self.util.dict_language[lang]["menu_port"], lambda: self.reset("br"))
+            config_menu = QMenu(self.util.dict_language[self.lang]["menu_config"], self.root)
+            lang_menu = QMenu(self.util.dict_language[self.lang]["menu_lang"], self.root)
+            lang_menu.addAction(self.util.dict_language[self.lang]["menu_en"], lambda: self.reset("en"))
+            lang_menu.addAction(self.util.dict_language[self.lang]["menu_port"], lambda: self.reset("br"))
             config_menu.addMenu(lang_menu)
 
             '''
@@ -197,15 +199,15 @@ class MainControl:
             '''
 
             # Criar submenu de data
-            date_menu = QMenu(self.util.dict_language[lang]["menu_date"], self.root)
+            date_menu = QMenu(self.util.dict_language[self.lang]["menu_date"], self.root)
 
             # Criar o QDateEdit (input de data)
             date_edit = QDateEdit()
             date_edit.setCalendarPopup(True)  # Habilita o calendário ao clicar
             date_edit.setDisplayFormat("dd/MM/yyyy")  # Formato brasileiro
-
+            date_edit.setMinimumSize(85, 25)
             # Definir data inicial
-            initial_date = QDate(year[2], year[1], year[0])
+            initial_date = QDate(self.year[2], self.year[1], self.year[0])
             date_edit.setDate(initial_date)
             date_edit.setMinimumDate(QDate(1900, 1, 1))
             ano_atual = datetime.now().year
@@ -230,7 +232,7 @@ class MainControl:
 
             date_edit.editingFinished.connect(update_date)
 
-            drive_menu = QMenu(self.util.dict_language[lang]["menu_drive"], self.root)
+            drive_menu = QMenu(self.util.dict_language[self.lang]["menu_drive"], self.root)
 
             # Criar combobox
             drive_combo = QComboBox()
@@ -239,7 +241,7 @@ class MainControl:
             for part in psutil.disk_partitions(all=False):
                 drive_combo.addItem(part.device)  # exemplo: "C:\", "D:\"
 
-            index = drive_combo.findText(drive)
+            index = drive_combo.findText(self.drive)
             if index != -1:  # se encontrou
                 drive_combo.setCurrentIndex(index)
 
@@ -253,49 +255,57 @@ class MainControl:
             # Exemplo: ação ao trocar drive
             drive_combo.currentTextChanged.connect(lambda: self.util.change_drive(drive_combo.currentText()))
 
-            config_menu.addAction(self.util.dict_language[lang]["menu_reset"], lambda: self.reset())
+            config_menu.addAction(self.util.dict_language[self.lang]["menu_reset"], lambda: self.reset())
 
             menubar.addMenu(func_menu)
             menubar.addMenu(config_menu)
-            menubar.addAction(self.util.dict_language[lang]["menu_about"], lambda: self.stack.setCurrentWidget(self.AboutPage))
+            menubar.addAction(self.util.dict_language[self.lang]["menu_about"], lambda: self.stack.setCurrentWidget(self.AboutPage))
 
             # abre página inicial
             self.stack.setCurrentWidget(self.GraphPage.get_widget())
 
+            path = "General/config.txt"
+            self.watcher.addPath(path)
+            self.watcher.fileChanged.connect(self.update_listbox_on_change)
+
         else:
-            self.InitialPage = InitialPage(self.root, lang)
+            self.InitialPage = InitialPage(self.root, self.lang)
             self.InitialPage.load_page()
 
-            self.LicenseTopLevel = LicenseTopLevel(self.root, lang)
+            self.LicenseTopLevel = LicenseTopLevel(self.root, self.lang)
             #self.LicenseTopLevel.load_page()
 
-            self.AboutPage = AboutPage(self.root, lang)
+            self.AboutPage = AboutPage(self.root, self.lang)
             self.AboutPage.load_page()
 
             self.stack.addWidget(self.InitialPage)
             self.stack.addWidget(self.AboutPage)
 
-            menubar.addAction(self.util.dict_language[lang]["menu_initial"], lambda: self.stack.setCurrentWidget(self.InitialPage))
+            menubar.addAction(self.util.dict_language[self.lang]["menu_initial"], lambda: self.stack.setCurrentWidget(self.InitialPage))
 
-            config_menu = QMenu(self.util.dict_language[lang]["menu_config"], self.root)
-            lang_menu = QMenu(self.util.dict_language[lang]["menu_lang"], self.root)
-            lang_menu.addAction(self.util.dict_language[lang]["menu_en"], lambda: self.reset("en"))
-            lang_menu.addAction(self.util.dict_language[lang]["menu_port"], lambda: self.reset("br"))
+            config_menu = QMenu(self.util.dict_language[self.lang]["menu_config"], self.root)
+            lang_menu = QMenu(self.util.dict_language[self.lang]["menu_lang"], self.root)
+            lang_menu.addAction(self.util.dict_language[self.lang]["menu_en"], lambda: self.reset("en"))
+            lang_menu.addAction(self.util.dict_language[self.lang]["menu_port"], lambda: self.reset("br"))
             config_menu.addMenu(lang_menu)
 
             menubar.addMenu(config_menu)
-            menubar.addAction(self.util.dict_language[lang]["menu_about"], lambda: self.stack.setCurrentWidget(self.AboutPage))
-            menubar.addAction(self.util.dict_language[lang]["menu_lc"], self.create_license_TopLevel)
+            menubar.addAction(self.util.dict_language[self.lang]["menu_about"], lambda: self.stack.setCurrentWidget(self.AboutPage))
+            menubar.addAction(self.util.dict_language[self.lang]["menu_lc"], self.create_license_TopLevel)
 
             self.stack.setCurrentWidget(self.InitialPage)
+
+    def update_listbox_on_change(self):
+        if self.year != self.util.get_year_config():
+            self.initialize_app()
 
     def create_license_TopLevel(self):
         self.LicenseTopLevel.load_page()
         self.LicenseTopLevel.bind_get_new_user_info(self.License.create_lincense_request)
 
     def reset(self, lang=""):
-        lang = self.util.get_language_config() if lang == "" else lang
-        self.util.change_lang(lang)
+        if lang != "":
+            self.util.change_lang(lang)
         self.root.close()
 
         new_root = QMainWindow()

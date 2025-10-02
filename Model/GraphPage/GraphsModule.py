@@ -23,8 +23,32 @@ class GraphsModule():
 
         self.util = Util()
 
+    def to_decimal_year(self, dt_object: datetime) -> float:
+        """
+        Converts a datetime object to a decimal year.
+        
+        This function correctly accounts for leap years.
+        
+        Args:
+            dt_object (datetime): The datetime object to convert.
+        
+        Returns:
+            float: The date and time as a decimal year.
+        """
+
+        year_start = datetime(dt_object.year, 1, 1)
+        year_end = datetime(dt_object.year + 1, 1, 1)
+
+        days_in_year = (year_end - year_start).days
+
+        day_of_year = (dt_object - year_start).days
+
+        return dt_object.year + (day_of_year / days_in_year)
+
     # Searches for downloaded stations from EMBRACE and INTERMAGNET data folders
     def search_stations_downloaded(self, year, drive_location="C:\\"):
+        year_date = datetime(year[2], year[1], year[0])
+        year_date = self.to_decimal_year(year_date)
         year = year[2]
         current_year = datetime.now().year
         main_downloaded_stations = set()
@@ -82,8 +106,9 @@ class GraphsModule():
         for i in range(0, len(main_downloaded_stations)):
             if len(data_with_stations[main_downloaded_stations[i]]) < 5:
                 continue
-            result = igrf_value(data_with_stations[main_downloaded_stations[i]][2], data_with_stations[main_downloaded_stations[i]][1], 300, year)
-            dip = -math.degrees(math.atan((math.tan(math.radians(result[1]))/2)))
+            result = igrf_value(data_with_stations[main_downloaded_stations[i]][2], data_with_stations[main_downloaded_stations[i]][1], 0.300, year_date)
+            #dip = -math.degrees(math.atan((math.tan(math.radians(result[1]))/2)))
+            dip = result[1]
             main_downloaded_stations[i] = f"{main_downloaded_stations[i]} ({data_with_stations[main_downloaded_stations[i]][2]:.5f}, {data_with_stations[main_downloaded_stations[i]][1]:.5f}, {dip:.5f})"
         return main_downloaded_stations, data_with_stations
     

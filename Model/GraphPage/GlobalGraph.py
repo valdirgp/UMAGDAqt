@@ -1,16 +1,21 @@
 from Model.GraphPage.GraphsModule import GraphsModule
 from Model.Custom.CustomPltOptions import CustomPltOptions
+from General.util import Util
 from datetime import timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QDate
-from datetime import datetime
+from datetime import datetime, time, date
+import math
+from pyIGRF import igrf_value
 
 class GlobalGraph(GraphsModule):
-    def __init__(self, root, language):
+    def __init__(self, root, language, year):
         self.root = root
         self.lang = language
+        self.year = year
+        self.util = Util()
         super().__init__(self.lang)
 
     # creates one graph that has all data in a period of time
@@ -57,6 +62,9 @@ class GlobalGraph(GraphsModule):
         #self.fig.canvas.manager.toolmanager.add_tool('Graph Info', CustomPltOptions, inform_graph=lambda: self.inform_graph(selected_types, avarage_types))
         #self.fig.canvas.manager.toolbar.add_tool('Graph Info', 'io')
         plt.show()
+        
+        if self.start_date != self.util.get_year_config()[2]:
+            self.util.change_year([self.start_date.day, self.start_date.month, self.start_date.year])
 
     # add delta in dict if it was selected
     def add_delta_dict(self, type):

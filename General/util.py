@@ -356,9 +356,32 @@ class Util():
         for widget in root.findChildren(type(root)):
             widget.setParent(None)
 
+    def to_decimal_year(self, dt_object: datetime) -> float:
+        """
+        Converts a datetime object to a decimal year.
+        
+        This function correctly accounts for leap years.
+        
+        Args:
+            dt_object (datetime): The datetime object to convert.
+        
+        Returns:
+            float: The date and time as a decimal year.
+        """
+
+        year_start = datetime(dt_object.year, 1, 1)
+        year_end = datetime(dt_object.year + 1, 1, 1)
+
+        days_in_year = (year_end - year_start).days
+
+        day_of_year = (dt_object - year_start).days
+
+        return dt_object.year + (day_of_year / days_in_year)
+
     # calcula o equador magnético baseado na longitude e latitude fornecida
     def calculate_inclination(self, ano):
-        self.ano = ano
+        ano = datetime(ano[2], ano[1], ano[0])
+        self.ano = self.to_decimal_year(ano)
         dip = []
         #for long in range(-180, 181): 
         #     lat_range = np.linspace(-90, 90, 543)
@@ -368,8 +391,9 @@ class Util():
         #             dip.append(lat)
         #             break
         for long in range(-180, 181):
-            result = igrf_value(0.0, long, 300, self.ano) 
-            dip.append(-math.degrees(math.atan((math.tan(math.radians(result[1]))/2))))  # Inclinação magnética 
+            result = igrf_value(0.0, long, 0.300, self.ano) 
+            #dip.append(-math.degrees(math.atan((math.tan(math.radians(result[1]))/2))))  # Inclinação magnética 
+            dip.append(result[1])  # Inclinação magnética
         return dip
     
     '''def calculate_inclination(self):
