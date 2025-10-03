@@ -10,16 +10,17 @@ import numpy as np
 
 
 class GraphPage(QWidget):
-    def __init__(self, root, language, year, drive, magnetic_eq_coords=0):
+    def __init__(self, root, language, year, final, drive, magnetic_eq_coords=0):
         super().__init__(root)
         self.root = root
         self.lang = language
         self.year = year
+        self.final = final
         self.drive = drive
         self.magnetic_eq_coords = magnetic_eq_coords
 
         self.util = Util()
-        self.side_options = SideOptionsPlot(self, self.lang, self.year, self.drive)
+        self.side_options = SideOptionsPlot(self, self.lang, self.year, self.final, self.drive)
         self.map_widget = Map(self)
 
         self.downloaded_data_stations = []
@@ -242,9 +243,9 @@ class GraphPage(QWidget):
         self.side_options.populate_list_options(self.side_options.minuend_stations_list, self.downloaded_data_stations)
         self.side_options.populate_list_options(self.side_options.subtracted_stations_list, self.downloaded_data_stations)
 
-    def onfile_changed(self, path):
-        self.side_options.list_all_stations.clear()
-        self.side_options.populate_list_options(self.side_options.list_all_stations, self.downloaded_data_stations)
+    #def onfile_changed(self, path):
+    #    self.side_options.list_all_stations.clear()
+    #    self.side_options.populate_list_options(self.side_options.list_all_stations, self.downloaded_data_stations)
 
     def bind_single_graph(self, callback):
         self.side_options.btn_singleday_function = callback

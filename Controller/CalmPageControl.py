@@ -3,12 +3,13 @@ from Model.GraphPage.GraphsModule import GraphsModule
 from Model.CalmPage.CalmGraphs import CalmModel
 
 class CalmControl():
-    def __init__(self, root, language, year, drive, magnetic_eq_coords=0):
+    def __init__(self, root, language, year, final, drive, magnetic_eq_coords=0):
         self.root = root
         self.lang = language
         self.year = year
+        self.final = final
         self.drive = drive
-        self.Graphs = CalmPage(root, self.lang, self.year, self.drive, magnetic_eq_coords)
+        self.Graphs = CalmPage(root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
         self.Model = GraphsModule(self.lang)
         self.CModel = CalmModel(self.root, self.lang)
 

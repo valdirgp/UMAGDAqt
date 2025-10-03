@@ -3,12 +3,13 @@ from Model.UniversalCDPage.UniversalCDGraphs import UniversalCDModel
 from View.UniversalCDPage import UniversalCDPage
 
 class UniversalCDPageControl():
-    def __init__(self, root, language, year, drive, magnetic_eq_coords=0):
+    def __init__(self, root, language, year, final, drive, magnetic_eq_coords=0):
         self.root = root
         self.lang = language
         self.year = year
+        self.final = final
         self.drive = drive
-        self.Graphs = UniversalCDPage(root, self.lang, year, drive, magnetic_eq_coords)
+        self.Graphs = UniversalCDPage(root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
         self.Model = GraphsModule(self.lang)
         self.CDModel = UniversalCDModel(self.root, self.lang)
 

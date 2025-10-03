@@ -7,16 +7,17 @@ import cartopy.crs as ccrs
 import numpy as np
 
 class CalmPage(QWidget):
-    def __init__(self, root, language, year, drive, magnetic_eq_coords={"long":0, "lat":0, "dip":0}):
+    def __init__(self, root, language, year, final, drive, magnetic_eq_coords={"long":0, "lat":0, "dip":0}):
         super().__init__(root)
         self.root = root
         self.lang = language
         self.year = year
+        self.final = final
         self.drive = drive
         self.magnetic_eq_coords = magnetic_eq_coords
         self.util = Util()
         # Composição: instanciando componentes ao invés de herdar
-        self.side_options = SideOptionsCalm(self, self.lang, self.year, self.drive)
+        self.side_options = SideOptionsCalm(self, self.lang, self.year, self.final, self.drive)
         self.map_widget = Map(self)
         self.downloaded_data_stations = []
         self.colors = []

@@ -122,6 +122,7 @@ class MainControl:
     def initialize_app(self):
         self.lang = self.util.get_language_config()
         self.year = self.util.get_year_config()
+        self.final = self.util.get_final_config()
         self.drive = self.util.get_drive_config()
         self.root.setWindowTitle(self.util.dict_language[self.lang]["title"])
         self.License = License(self.lang)
@@ -136,16 +137,16 @@ class MainControl:
             self.DownloadPage = DownloadsControl(self.root, self.lang, self.year, self.drive, magnetic_eq_coords)
             self.DownloadPage.load_widgets()
         
-            self.GraphPage = GraphControl(self.root, self.lang, self.year, self.drive, magnetic_eq_coords)
+            self.GraphPage = GraphControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
             self.GraphPage.load_widgets()
 
-            self.CalmDisturbPage = CalmDisturbControl(self.root, self.lang, self.year, self.drive, magnetic_eq_coords)
+            self.CalmDisturbPage = CalmDisturbControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
             self.CalmDisturbPage.load_widgets()
 
-            self.CalmPage = CalmControl(self.root, self.lang, self.year, self.drive, magnetic_eq_coords)
+            self.CalmPage = CalmControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
             self.CalmPage.load_widgets()
 
-            self.UniversalCDPage = UniversalCDPageControl(self.root, self.lang, self.year, self.drive, magnetic_eq_coords)
+            self.UniversalCDPage = UniversalCDPageControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
             self.UniversalCDPage.load_widgets()
 
             self.AboutPage = AboutPage(self.root, self.lang)
@@ -219,8 +220,23 @@ class MainControl:
             date_action = QWidgetAction(self.root)
             date_action.setDefaultWidget(date_edit)
 
+            date_edit_final = QDateEdit()
+            date_edit_final.setCalendarPopup(True)  # Habilita o calendário ao clicar
+            date_edit_final.setDisplayFormat("dd/MM/yyyy")  # Formato brasileiro
+            date_edit_final.setMinimumSize(85, 25)
+            # Definir data inicial
+            initial_date_final = QDate(self.final[2], self.final[1], self.final[0])
+            date_edit_final.setDate(initial_date_final)
+            date_edit_final.setMinimumDate(QDate(1900, 1, 1))
+            date_edit_final.setMaximumDate(QDate(ano_atual, mes_atual, dia_atual))
+
+            # Colocar o widget no menu usando QWidgetAction
+            date_action_final = QWidgetAction(self.root)
+            date_action_final.setDefaultWidget(date_edit_final)
+            
             # Adicionar ao menu e depois ao menu principal
             date_menu.addAction(date_action)
+            date_menu.addAction(date_action_final)
             config_menu.addMenu(date_menu)
 
             # Conectar o evento de edição finalizada (quando perde o foco ou aperta Enter)
@@ -231,6 +247,16 @@ class MainControl:
                 )
 
             date_edit.editingFinished.connect(update_date)
+
+            # Conectar o evento de edição finalizada (quando perde o foco ou aperta Enter)
+            def update_final():
+                selected_date = date_edit_final.date()
+                self.util.change_final(
+                    final=[selected_date.day(), selected_date.month(), selected_date.year()]                  
+                )
+
+            date_edit_final.editingFinished.connect(update_final)
+
 
             drive_menu = QMenu(self.util.dict_language[self.lang]["menu_drive"], self.root)
 
@@ -296,7 +322,7 @@ class MainControl:
             self.stack.setCurrentWidget(self.InitialPage)
 
     def update_listbox_on_change(self):
-        if self.year != self.util.get_year_config():
+        if self.year != self.util.get_year_config() or self.final != self.util.get_final_config():
             self.initialize_app()
 
     def create_license_TopLevel(self):

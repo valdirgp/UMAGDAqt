@@ -310,6 +310,36 @@ class Util():
         with open(self.resource_path("config.txt"), "w") as f:
             f.writelines(lines)
 
+    def get_final_config(self):
+        with open(self.resource_path("config.txt"), "r") as f:
+            file = f.read()
+            data_list = file.split()
+            if "final:" in data_list:
+                idx = data_list.index("final:")
+                data = data_list[idx + 1].split("/")
+                for e, value in enumerate(data):
+                    data[e] = int(value)
+                return data
+        from datetime import datetime
+
+        ano_atual = datetime.now().year
+        mes_atual = datetime.now().month
+        dia_atual = datetime.now().day
+        return [dia_atual, mes_atual, ano_atual]
+    
+    def change_final(self, final):
+        lines = []
+        with open(self.resource_path("config.txt"), "r") as f:
+            for line in f:
+                key, value = line.strip().split()
+                if key.strip() == "final:":
+                    lines.append(f"final: {final[0]}/{final[1]}/{final[2]}\n")
+                else:
+                    lines.append(line)
+
+        with open(self.resource_path("config.txt"), "w") as f:
+            f.writelines(lines)
+
     def get_drive_config(self):
         with open(self.resource_path("config.txt"), "r") as f:
             file = f.read()
@@ -392,8 +422,8 @@ class Util():
         #             break
         for long in range(-180, 181):
             result = igrf_value(0.0, long, 0.300, self.ano) 
-            #dip.append(-math.degrees(math.atan((math.tan(math.radians(result[1]))/2))))  # Inclinação magnética 
-            dip.append(result[1])  # Inclinação magnética
+            dip.append(-math.degrees(math.atan((math.tan(math.radians(result[1]))/2))))  # Inclinação magnética 
+            #dip.append(result[1])  # Inclinação magnética
         return dip
     
     '''def calculate_inclination(self):

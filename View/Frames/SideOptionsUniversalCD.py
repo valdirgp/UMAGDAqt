@@ -10,12 +10,13 @@ from General.util import Util
 
 
 class SideOptionsUniversalCD(QWidget):
-    def __init__(self, root, language, year, drive):
+    def __init__(self, root, language, year, final, drive):
         super().__init__(root)
         self.util = Util()
         self.window = root
         self.lang = language
         self.year = year
+        self.final = final
         self.drive = drive
 
         self.selected_calm_dates = []
@@ -96,7 +97,7 @@ class SideOptionsUniversalCD(QWidget):
         self.enddate.setDisplayFormat('dd/MM/yyyy')
         self.enddate.setCalendarPopup(True)
         hoje = QDate.currentDate()
-        data = QDate(self.year[2], self.year[1], self.year[0])
+        data = QDate(self.final[2], self.final[1], self.final[0])
         self.enddate.setDate(data)
         layout.addWidget(self.enddate)
 

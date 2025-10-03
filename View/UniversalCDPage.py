@@ -10,16 +10,17 @@ import cartopy.crs as ccrs
 import numpy as np
 
 class UniversalCDPage(QWidget):
-    def __init__(self, root, language, year, drive, magnetic_eq_coords):
+    def __init__(self, root, language, year, final, drive, magnetic_eq_coords):
         super().__init__(root)
         self.root = root
         self.lang = language
         self.year = year
+        self.final = final
         self.drive = drive
         self.magnetic_eq_coords = magnetic_eq_coords
 
         self.util = Util()
-        self.side_options = SideOptionsUniversalCD(self, self.lang, self.year, self.drive)
+        self.side_options = SideOptionsUniversalCD(self, self.lang, self.year, self.final, self.drive)
         self.map_widget = Map(self)
         #SideOptionsUniversalCD.__init__(self, root, self.lang)
         #Map.__init__(self, root)
