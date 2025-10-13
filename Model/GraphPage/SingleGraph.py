@@ -53,6 +53,14 @@ class SingleGraph(GraphsModule):
         #self.fig.canvas.manager.toolbar.add_tool('Graph Info', 'io')
         plt.show()
 
+        year_config = self.util.get_year_config()
+        
+        if self.start_date.day != year_config[0] or self.start_date.month != year_config[1] or self.start_date.year != year_config[2]:
+            print("SingleGraph - plot_day")
+            print("start_date:", self.start_date)
+            print("year_config:", year_config)
+            self.util.change_year([self.start_date.day, self.start_date.month, self.start_date.year])
+
     # add delta in dict if it was selected
     def add_delta_dict(self, type):
         base_type = type.replace('d', '')

@@ -1,9 +1,9 @@
 from Model.Custom.CustomttkFrame import ScrollableFrame
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QListWidget, QAbstractItemView,
-    QPushButton, QCalendarWidget, QDateEdit, QSizePolicy, QScrollBar, QLineEdit
+    QPushButton, QCalendarWidget, QDateEdit, QSizePolicy, QScrollBar, QLineEdit, QListWidgetItem
 )
-from PyQt5.QtCore import QDate
+from PyQt5.QtCore import QDate, Qt
 import psutil
 from General.util import Util
 
@@ -108,7 +108,8 @@ class SideOptionsCalm(QWidget):
         hoje = QDate.currentDate()
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_calm.setSelectedDate(data)
-        self.cal_calm.selectionChanged.connect(lambda: self.add_date(self.cal_calm, self.selected_calm_dates))
+        #self.add_date(self.cal_calm, self.selected_calm_dates)
+        self.cal_calm.clicked.connect(lambda: self.add_date(self.cal_calm, self.selected_calm_dates))
         self.cal_calm.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # Conecta ao dateChanged do QDateEdit
@@ -152,8 +153,14 @@ class SideOptionsCalm(QWidget):
     # Fill a listbox with the given data
     def populate_list_options(self, listwidget, stations):
         listwidget.clear()
-        for i in stations:
-            listwidget.addItem(i)
+        for st in stations:
+            codigo = st.split()[0]   # pega só o código da estação (ex: "ARA")
+            texto  = st              # texto completo (ex: "ARA (lat, lon, dip)")
+
+            item = QListWidgetItem(texto)   # o que aparece na lista
+            item.setData(Qt.UserRole, codigo)  # dado "oculto", só o código
+            listwidget.addItem(item)
+        self.filter_visible_items()
 
     # Fill combobox that chooses path
     def populate_combo_local(self):

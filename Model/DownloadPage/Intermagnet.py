@@ -13,6 +13,7 @@ from General.util import Util
 import math
 from pyIGRF import igrf_value
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 
 class Intermagnet(DownloadModule):
     def __init__(self, language, root=None):
@@ -138,9 +139,31 @@ class Intermagnet(DownloadModule):
             print(f"Erro ao obter coordenadas da estação {station}: {e}")
         return None  # Retorna None se falhar
 
+    def to_decimal_year(self, dt_object: datetime) -> float:
+        """
+        Converts a datetime object to a decimal year.
+        
+        This function correctly accounts for leap years.
+        
+        Args:
+            dt_object (datetime): The datetime object to convert.
+        
+        Returns:
+            float: The date and time as a decimal year.
+        """
+
+        year_start = datetime(dt_object.year, 1, 1)
+        year_end = datetime(dt_object.year + 1, 1, 1)
+
+        days_in_year = (year_end - year_start).days
+
+        day_of_year = (dt_object - year_start).days
+
+        return dt_object.year + (day_of_year / days_in_year)
 
     def create_stationlist(self, ano):
-        self.ano = ano
+        ano = datetime(ano[2], ano[1], ano[0])
+        self.ano = self.to_decimal_year(ano)
         try:
             # 1. Obter lista de estações do site
             response = requests.get(
@@ -169,7 +192,7 @@ class Intermagnet(DownloadModule):
                 estacoes = self.obter_coordenadas_estacoes(station)
                 if estacoes is None:
                     return None
-                result = igrf_value(estacoes["latitude"], estacoes["longitude"], 300, self.ano)
+                result = igrf_value(estacoes["latitude"], estacoes["longitude"], 0.300, self.ano)
                 dip = -math.degrees(math.atan((math.tan(math.radians(result[1])) / 2)))
 
                 # Salva coordenadas e dip

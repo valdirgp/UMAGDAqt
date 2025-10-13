@@ -1,4 +1,4 @@
-from Model.GraphPage.GraphsModule import GraphsModule
+'''from Model.GraphPage.GraphsModule import GraphsModule
 from datetime import datetime, timedelta, time as dt_time
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -1227,5 +1227,371 @@ class UniversalCDModel(GraphsModule):
                 None,
                 self.util.dict_language[self.lang]["mgbox_error"],
                 error
+            )
+            return data'''
+
+from Model.GraphPage.GraphsModule import GraphsModule
+from datetime import datetime, timedelta, time as dt_time
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from PyQt5.QtWidgets import QMessageBox, QCalendarWidget
+from PyQt5.QtCore import QDate
+import os
+import math
+from General.util import Util
+
+
+class UniversalCDModel(GraphsModule):
+    """
+    Modelo unificado para gráficos de dias calmos e perturbados (Calm & Disturbed Days).
+    Versão refatorada, mantendo compatibilidade com os métodos antigos.
+    """
+
+    def __init__(self, root, language):
+        super().__init__(language)
+        self.root = root
+        self.lang = language
+        self.start_date = None
+        self.end_date = None
+        self.station = None
+        self.data_with_stations = None
+        self.temp_window = None
+        self.lcl_downloaded = None
+        self.selected_calm_dates = None
+        self.selected_disturb_date = None
+
+        self.util = Util()
+
+        # Métodos dinâmicos para compatibilidade com versões antigas
+        components = ['H', 'X', 'Y', 'Z', 'D', 'F', 'I', 'G']
+        for comp in components:
+            setattr(self, f"calculate_calm_average_{comp}",
+                    lambda c=comp: self.calculate_calm_average(c))
+            setattr(self, f"calculate_calm_averagePstd_{comp}",
+                    lambda c=comp: self.calculate_calm_averagePstd(c))
+            setattr(self, f"calculate_calm_averageMstd_{comp}",
+                    lambda c=comp: self.calculate_calm_averageMstd(c))
+
+    # ----------------------------
+    # Funções de interface / plot
+    # ----------------------------
+    def create_graphics_calm_distU(self, component, local_downloaded, start, end, station,
+                                   data_with_stations, calm_dates, disturb_date):
+        """
+        Cria gráfico genérico para qualquer componente (H, X, Y, Z, D, F, I, G).
+        Mantém as mesmas entradas da versão original.
+        """
+        self.lcl_downloaded = local_downloaded
+        self.station = station[0]
+        self.data_with_stations = data_with_stations
+        self.selected_calm_dates = calm_dates
+        self.selected_disturb_date = disturb_date
+
+        # Normalizar tipos de data (corrigido; não usar locals() para isso)
+        if isinstance(start, QCalendarWidget):
+            start = start.selectedDate().toPyDate()
+        elif isinstance(start, QDate):
+            start = start.toPyDate()
+
+        if isinstance(end, QCalendarWidget):
+            end = end.selectedDate().toPyDate()
+        elif isinstance(end, QDate):
+            end = end.toPyDate()
+
+        # Validar/formatar datas (usa format_dates do GraphsModule)
+        self.start_date, self.end_date = self.format_dates(start, end)
+        if not self.start_date:
+            return
+
+        # Reunir dados (compatibilidade com get_stations_data ou comportamento antigo)
+        self.data_all = self.gather_station_data()
+        if not self.data_all:
+            return
+
+        # Plotar componente
+        self.plot_calm_avg(component)
+
+        year_config = self.util.get_year_config()
+        final_config = self.util.get_final_config()
+
+        if self.start_date.day != year_config[0] or self.start_date.month != year_config[1] or self.start_date.year != year_config[2]:
+            print("UniversalCDGraphs - create_graphics_calm_distU")
+            print("start_date: ", self.start_date)
+            print("metodo get year: ", self.util.get_year_config())
+            self.util.change_year([self.start_date.day, self.start_date.month, self.start_date.year])
+        if self.end_date.day != final_config[0] or self.end_date.month != final_config[1] or self.end_date.year != final_config[2]:
+            print("UniversalCDGraphs - create_graphics_calm_distU")
+            print("end_date: ", self.end_date)
+            print("metodo get final: ", self.util.get_final_config())
+            self.util.change_final([self.end_date.day, self.end_date.month, self.end_date.year])
+
+    def plot_calm_avg(self, component):
+        """Plota qualquer componente com média e +/- desvio padrão."""
+        try:
+            plt.close("all")
+            fig, ax = plt.subplots(figsize=(10, 6))
+
+            # Busca métodos de cálculo dinamicamente (compatibilidade)
+            calc_base = getattr(self, f"calculate_calm_average_{component}")
+            calc_plus = getattr(self, f"calculate_calm_averagePstd_{component}")
+            calc_minus = getattr(self, f"calculate_calm_averageMstd_{component}")
+
+            calm_avg = calc_base()
+            calm_avgPstd = calc_plus()
+            calm_avgMstd = calc_minus()
+
+            disturbed_data = self.get_data(
+                self.selected_disturb_date[0],
+                self.station,
+                self.data_with_stations[self.station][0]
+            )
+
+            lista_legal = [d.get(component) for d in disturbed_data]
+            time = [datetime.combine(self.start_date, dt_time(hour=i // 60, minute=i % 60))
+                    for i in range(1440)]
+
+            ax.plot(time, calm_avg, label='Calm Days', color='black', linewidth=2)
+            ax.plot(time, calm_avgPstd, label='Calm Days avg + std dev', color='gray', linewidth=1)
+            ax.plot(time, calm_avgMstd, label='Calm Days avg - std dev', color='gray', linewidth=1)
+            ax.plot(time, lista_legal, label='Disturbed Day', color='red', linewidth=1.5)
+
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+            ax.set_ylabel(f"{component}(nT)")
+            ax.set_xlabel('Time')
+            ax.set_title(f"Station: {self.station}, [{self.start_date}] - [{self.end_date}]")
+            ax.grid(True)
+            ax.legend()
+
+            # Ajustar limites do eixo X para tocar o lado esquerdo
+            ax.set_xlim(left=time[0], right=time[-1])
+
+            fig.suptitle('Calm and Disturbed Days Data')
+            plt.subplots_adjust(left=0.1)  # Ajuste do espaço entre o gráfico e a borda
+            plt.show()
+
+        except KeyError as key:
+            # manter comportamento antigo: popup com mensagem localizada
+            self.show_no_data_message(key)
+        except Exception as error:
+            QMessageBox.critical(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                (f"Unexpected error while plotting: {error}")
+            )
+            print(f"Unexpected error while plotting: {error}")
+
+    # ----------------------------
+    # Cálculos genéricos
+    # ----------------------------
+    def calculate_calm_average(self, component: str):
+        """Calcula a média dos dias calmos para o componente solicitado."""
+        calm_averages = []
+        calm_values = self.get_cal_datas(self.selected_calm_dates)
+        for hour in range(1440):
+            try:
+                values = [day[hour][component] for day in calm_values if day[hour].get(component) is not None]
+                average = sum(values) / len(values)
+            except Exception:
+                average = None
+            calm_averages.append(average)
+        return calm_averages
+
+    def calculate_calm_averagePstd(self, component: str):
+        """Calcula média + desvio padrão (average + std)."""
+        calm_avgPstd = []
+        calm_values = self.get_cal_datas(self.selected_calm_dates)
+        for hour in range(1440):
+            try:
+                values = [day[hour][component] for day in calm_values if day[hour].get(component) is not None]
+                average = sum(values) / len(values)
+                variance = sum((x - average) ** 2 for x in values) / len(values)
+                std = variance ** 0.5 + average
+            except Exception:
+                std = None
+            calm_avgPstd.append(std)
+        return calm_avgPstd
+
+    def calculate_calm_averageMstd(self, component: str):
+        """Calcula média - desvio padrão (average - std)."""
+        calm_avgMstd = []
+        calm_values = self.get_cal_datas(self.selected_calm_dates)
+        for hour in range(1440):
+            try:
+                values = [day[hour][component] for day in calm_values if day[hour].get(component) is not None]
+                average = sum(values) / len(values)
+                variance = sum((x - average) ** 2 for x in values) / len(values)
+                std = average - variance ** 0.5
+            except Exception:
+                std = None
+            calm_avgMstd.append(std)
+        return calm_avgMstd
+
+    # ----------------------------
+    # Métodos de obtenção de dados
+    # ----------------------------
+    def get_cal_datas(self, selected_dates):
+        """
+        Pega os dados para cada data selecionada (lista de dias calmos).
+        Retorna uma lista onde cada item é a lista de 1440 dicts do dia.
+        """
+        data = []
+        for date in selected_dates:
+            data.append(self.get_data(date, self.station, self.data_with_stations[f'{self.station}'][0]))
+        return data
+
+    def gather_station_data(self):
+        """
+        Compatibilidade: retorna os dados por dia entre self.start_date e self.end_date.
+        Primeiro tenta aproveitar um método existente `get_stations_data()` (se houver),
+        caso contrário faz o loop diário e chama self.get_data() — igual ao comportamento original.
+        """
+        # 1) Se existir get_stations_data(), tenta usá-lo (mantém compatibilidade)
+        if hasattr(self, 'get_stations_data'):
+            try:
+                return self.get_stations_data()
+            except TypeError:
+                # se o método exigir parâmetros diferentes, cairá para o fallback
+                pass
+            except Exception:
+                pass
+
+        # 2) Fallback: comportamento original (loop por dias)
+        station_data = []
+        if self.start_date is None or self.end_date is None:
+            return station_data
+
+        current_date = self.start_date
+        while current_date <= self.end_date:
+            try:
+                network_station = self.data_with_stations[f"{self.station}"][0]
+                single_data = self.get_data(current_date, self.station, network_station)
+            except Exception:
+                # dia vazio em caso de erro
+                single_data = [{'D': None, 'H': None, 'Z': None, 'I': None, 'F': None, 'G': None, 'X': None, 'Y': None}] * 1440
+            station_data.append(single_data)
+            current_date += timedelta(days=1)
+        return station_data
+
+    def show_no_data_message(self, key):
+        """Mostra popup de erro quando não há dados (mantendo internacionalização)."""
+        try:
+            QMessageBox.critical(
+                None,
+                self.util.dict_language[self.lang]["lbl_err_plot"],
+                self.util.dict_language[self.lang]["mgbox_err_plot"] + f": {key}"
+            )
+        except Exception:
+            QMessageBox.critical(None, "Error", f"No data found: {key}")
+
+    def get_data(self, day, station, network_station):
+        """
+        Lê o arquivo .min para a data/estação informada e retorna lista com 1440 dicts.
+        Compatível com o parser original (embrace / intermagnet cases).
+        """
+        if isinstance(day, QDate):
+            day = day.toPyDate()
+
+        self.st = station
+        self.day = day
+        path_station = os.path.join(self.lcl_downloaded,
+                                    'Magnetometer',
+                                    network_station,
+                                    str(self.day.year),
+                                    self.st,
+                                    f'{self.st.lower()}{self.day.year}{self.day.month:02}{self.day.day:02}min.min'
+                                    )
+        is_header = True
+        data = []
+
+        try:
+            with open(path_station, 'r') as file:
+                lines = file.read().split('\n')
+        except FileNotFoundError:
+            # manter mesmo comportamento do original
+            return [{'D': None, 'H': None, 'Z': None, 'I': None, 'F': None, 'G': None, 'X': None, 'Y': None}] * 1440
+
+        try:
+            # Diferencia VSS/Embrace vs Intermagnet
+            self.st = 'VSS' if (self.st == 'VSI') or (self.st == 'VSE') else self.st
+            archive_case = None
+
+            for line in lines:
+                if line == '':
+                    continue
+                if is_header:
+                    if line.find('H(nT)') != -1:
+                        is_header = False
+                        archive_case = 'embrace:h'
+                    if line.find(f'{self.st}X') != -1 and line.find(f'{self.st}F') != -1:
+                        is_header = False
+                        archive_case = 'intermagnet:x,y,f'
+                    if line.find(f'{self.st}X') != -1 and line.find(f'{self.st}G') != -1:
+                        is_header = False
+                        archive_case = 'intermagnet:x,y,g'
+                    if line.find(f'{self.st}H') != -1:
+                        is_header = False
+                        archive_case = 'intermagnet:h'
+                else:
+                    data_dict = {}
+                    separated_data = line.split()
+                    match archive_case:
+                        case 'embrace:h':
+                            try:
+                                data_dict['D'] = float(separated_data[5]) if float(separated_data[5]) != 99999.00 else None
+                                data_dict['H'] = float(separated_data[6]) if float(separated_data[6]) != 99999.00 else None
+                                data_dict['Z'] = float(separated_data[7]) if float(separated_data[7]) != 99999.00 else None
+                                data_dict['I'] = float(separated_data[8]) if float(separated_data[8]) != 99999.00 else None
+                                data_dict['F'] = float(separated_data[9]) if float(separated_data[9]) != 99999.00 else None
+                            except Exception:
+                                # mantém comportamento original (não parar a execução)
+                                print('error getting data: ', archive_case)
+
+                        case 'intermagnet:x,y,f':
+                            try:
+                                if float(separated_data[3]) != 99999.00 and float(separated_data[4]) != 99999.00:
+                                    data_dict['H'] = math.sqrt(float(separated_data[3])**2 + float(separated_data[4])**2)
+                                else:
+                                    data_dict['H'] = None
+                                data_dict['X'] = float(separated_data[3]) if float(separated_data[3]) != 99999.00 else None
+                                data_dict['Y'] = float(separated_data[4]) if float(separated_data[4]) != 99999.00 else None
+                                data_dict['Z'] = float(separated_data[5]) if float(separated_data[5]) != 99999.00 else None
+                                data_dict['F'] = float(separated_data[6]) if float(separated_data[6]) != 99999.00 else None
+                            except Exception:
+                                print('error getting data: ', archive_case)
+
+                        case 'intermagnet:x,y,g':
+                            try:
+                                if float(separated_data[3]) != 99999.00 and float(separated_data[4]) != 99999.00:
+                                    data_dict['H'] = math.sqrt(float(separated_data[3])**2 + float(separated_data[4])**2)
+                                else:
+                                    data_dict['H'] = None
+                                data_dict['X'] = float(separated_data[3]) if float(separated_data[3]) != 99999.00 else None
+                                data_dict['Y'] = float(separated_data[4]) if float(separated_data[4]) != 99999.00 else None
+                                data_dict['Z'] = float(separated_data[5]) if float(separated_data[5]) != 99999.00 else None
+                                data_dict['G'] = float(separated_data[6]) if float(separated_data[6]) != 99999.00 else None
+                            except Exception:
+                                print('error getting data: ', archive_case)
+
+                        case 'intermagnet:h':
+                            try:
+                                data_dict['H'] = float(separated_data[3]) if float(separated_data[3]) != 99999.00 else None
+                                data_dict['D'] = float(separated_data[4]) if float(separated_data[4]) != 99999.00 else None
+                                data_dict['Z'] = float(separated_data[5]) if float(separated_data[5]) != 99999.00 else None
+                                data_dict['F'] = float(separated_data[6]) if float(separated_data[6]) != 99999.00 else None
+                            except Exception:
+                                print('error getting data: ', archive_case)
+
+                        case _:
+                            # caso não definido no header, tenta pular
+                            pass
+
+                    data.append(data_dict)
+            return data
+        except Exception as error:
+            # Erro inesperado ao ler/parsear
+            QMessageBox.critical(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                f'{self.util.dict_language[self.lang].get("mgbox_error_info_ad", "Error")}: {error}'
             )
             return data

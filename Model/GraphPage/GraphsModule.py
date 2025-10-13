@@ -1,5 +1,5 @@
 from Model.Custom.CustomttkFrame import ScrollableFrame
-import os
+import os, sys
 from datetime import datetime
 import math
 import re
@@ -44,6 +44,15 @@ class GraphsModule():
         day_of_year = (dt_object - year_start).days
 
         return dt_object.year + (day_of_year / days_in_year)
+    
+    @staticmethod
+    def resource_path(relative_path):
+        try:
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+            
+        return os.path.join(base_path, relative_path)
 
     # Searches for downloaded stations from EMBRACE and INTERMAGNET data folders
     def search_stations_downloaded(self, year, drive_location="C:\\"):
@@ -72,8 +81,8 @@ class GraphsModule():
                         data_with_stations[station] = ['INTERMAGNET']
                         main_downloaded_stations.add(station)
 
-        if os.path.exists('readme_stations.txt'):
-            with open('readme_stations.txt','r') as file:
+        if os.path.exists(self.resource_path('readme_stations.txt')):
+            with open(self.resource_path('readme_stations.txt'),'r') as file:
                 lines = file.readlines()
                 lines.pop(0)
                 for line in lines:
@@ -469,7 +478,7 @@ class GraphsModule():
         if has_deg: return 'Deg'
 
     # verify if all inputs has something selected
-    def verify_inputs(self, station_selected=True, type_selected=True):
+    def verify_inputs(self, station_selected=True, type_selected=True, calm_dates_selected=True, disturb_dates_selected=True):
         if not station_selected:
             QMessageBox.information(
                 None,
@@ -482,6 +491,20 @@ class GraphsModule():
                 None,
                 self.util.dict_language[self.lang]["mgbox_error"],
                 self.util.dict_language[self.lang]["mgbox_error_dt_type"]
+            )
+            return False
+        if not calm_dates_selected:
+            QMessageBox.information(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                self.util.dict_language[self.lang]["mgbox_error_calm_dates"]
+            )
+            return False
+        if not disturb_dates_selected:
+            QMessageBox.information(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                self.util.dict_language[self.lang]["mgbox_error_disturb_dates"]
             )
             return False
         return True

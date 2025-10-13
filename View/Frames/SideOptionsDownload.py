@@ -1,9 +1,9 @@
 from Model.Custom.CustomttkFrame import ScrollableFrame
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QListWidget, QAbstractItemView,
-    QPushButton, QDateEdit, QSizePolicy, QScrollBar, QLineEdit
+    QPushButton, QDateEdit, QSizePolicy, QScrollBar, QLineEdit, QListWidgetItem
 )
-from PyQt5.QtCore import QDate
+from PyQt5.QtCore import QDate, Qt
 from PyQt5.QtGui import QIntValidator
 import psutil
 from General.util import Util
@@ -117,8 +117,14 @@ class SideOptionsDownload(QWidget):
     # fill all listbox
     def populate_stations_listbox(self, listwidget, stations):
         listwidget.clear()
-        for i in stations:
-            listwidget.addItem(i)
+        for st in stations:
+            codigo = st.split()[0]   # pega só o código da estação (ex: "ARA")
+            texto  = st              # texto completo (ex: "ARA (lat, lon, dip)")
+
+            item = QListWidgetItem(texto)   # o que aparece na lista
+            item.setData(Qt.UserRole, codigo)  # dado "oculto", só o código
+            listwidget.addItem(item)
+        self.filter_visible_items()
 
     # fill combox with all drive options
     def populate_combo_local(self):

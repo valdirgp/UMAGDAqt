@@ -1,7 +1,7 @@
 from View.Frames.SideOptionsCalmDisturb import SideOptionsCalmDisturb
 from View.Frames.Map import Map
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QDate
 from General.util import Util
 import re
 import cartopy.crs as ccrs
@@ -78,8 +78,8 @@ class CalmDisturbPage(QWidget):
         # Se self.magnetic_eq_coords for um único valor, crie um array do mesmo tamanho
         y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
         
-        self.map_widget.ax.plot(longitudes, y_values, color='gray', transform=ccrs.PlateCarree())
-        self.map_widget.ax.plot(longitudes, y_values * 0, color='gray', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values, color='red', lw='3', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values * 0, color='black', transform=ccrs.PlateCarree())
 
         self.map_widget.fig.canvas.mpl_connect('button_press_event', self.map_on_click)
 
@@ -188,12 +188,24 @@ class CalmDisturbPage(QWidget):
         self.map_widget.scart_plots.clear()
         for text in self.map_widget.text_annotations:
             text.remove()
-        self.map_widget.text_annotations.clear()
-
+        self.map_widget.text_annotations.clear() 
+        
         self.get_downloaded_stations_location()
         self.map_widget.set_station_map(self.longitude, self.latitude)
         self.map_widget.set_stationsname_map(self.all_locals)
+
+        longitudes = np.linspace(-180, 180, 361)
+
+        y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
+
+        self.map_widget.ax.plot(longitudes, y_values, color='red', lw='3', transform=ccrs.PlateCarree())
+
         self.map_widget.canvas.draw()
+
+        self.side_options.cal_calm.setSelectedDate(QDate(self.year[2], self.year[1], self.year[0]))
+        self.side_options.cal_disturb.setSelectedDate(QDate(self.year[2], self.year[1], self.year[0]))
+        self.side_options.startdate.setDate(QDate(self.year[2], self.year[1], self.year[0]))
+        self.side_options.enddate.setDate(QDate(self.final[2], self.final[1], self.final[0]))
 
     def bind_plot_graph(self, callback):
         self.side_options.btn_plot_confirm.clicked.connect(callback)

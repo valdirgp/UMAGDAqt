@@ -67,7 +67,11 @@ from Model.DownloadPage.Intermagnet import Intermagnet
 from Model.DownloadPage.Readme import Readme
 from View.DownloadPage import DownloadPage
 from Model.DownloadPage.DownloadThread import DownloadThread
-import re
+from PyQt5.QtCore import QFileSystemWatcher, QDate
+from General.util import Util
+import re, math
+from datetime import datetime
+from pyIGRF import igrf_value
 
 class DownloadsControl:
     def __init__(self, root, language, year, drive, magnetic_eq_coords=0):
@@ -81,8 +85,17 @@ class DownloadsControl:
         self.Intermagnet = Intermagnet(self.lang, self.root)
         self.Readme = Readme(self.lang)
 
-        self.embrace_stations, self.embrace_codes = self.Embrace.create_stationlist(year[2])
-        self.intermagnet_stations, self.intermagnet_codes = self.Intermagnet.create_stationlist(year[2])
+        self.embrace_stations, self.embrace_codes = self.Embrace.create_stationlist(self.year)
+        self.intermagnet_stations, self.intermagnet_codes = self.Intermagnet.create_stationlist(self.year)
+
+        self.watcher = QFileSystemWatcher()
+        self.util = Util()
+
+        path = "General/config.txt"
+        self.watcher.addPath(path)
+        #self.watcher.fileChanged.connect(self.update_listbox_on_change)
+        self.watcher.fileChanged.connect(lambda: self.update_data())
+
 
     def load_widgets(self):
         self.DownloadPage.set_embrace_options(self.embrace_stations)
@@ -100,6 +113,40 @@ class DownloadsControl:
             self.embrace_stations,
             self.intermagnet_stations,
             self.config_page
+        )
+
+    def update_data(self):
+        if self.util.get_year_config() == self.year: return
+        self.year = self.util.get_year_config()
+        ano = self.util.to_decimal_year(datetime(self.year[2], self.year[1], self.year[0]))
+        for i in range(len(self.embrace_stations)):
+            match = re.match(r'^([A-Z]{3}) \(([-\d.]+), ([-\d.]+), ([-\d.]+)\)', self.embrace_stations[i])
+            if match:
+                sigla = match.group(1)
+                lat = float(match.group(2))
+                lon = float(match.group(3))
+                result = igrf_value(lat, lon, 0.300, ano)
+                dip = -math.degrees(math.atan((math.tan(math.radians(result[1])) / 2)))
+                self.embrace_stations[i] = f"{sigla} ({lat}, {lon}, {dip:.5f})"
+        for i in range(len(self.intermagnet_stations)):
+            match = re.match(r'^([A-Z]{3}) \(([-\d.]+), ([-\d.]+), ([-\d.]+)\)', self.intermagnet_stations[i])
+            if match:
+                sigla = match.group(1)
+                lat = float(match.group(2))
+                lon = float(match.group(3))
+                result = igrf_value(lat, lon, 0.300, ano)
+                dip = -math.degrees(math.atan((math.tan(math.radians(result[1])) / 2)))
+                self.intermagnet_stations[i] = f"{sigla} ({lat}, {lon}, {dip:.5f})"
+        self.DownloadPage.set_embrace_options(self.embrace_stations)
+        self.DownloadPage.set_intermagnet_options(self.intermagnet_stations)
+        self.DownloadPage.side_options.populate_stations_listbox(
+            self.DownloadPage.side_options.list_all_stations,
+            sorted(self.embrace_stations + self.intermagnet_stations)
+        )
+
+        self.DownloadPage.year = self.year
+        self.DownloadPage.side_options.cal_initial_date.setDate(
+            QDate(self.year[2], self.year[1], self.year[0])
         )
 
     '''def call_both(self):

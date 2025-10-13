@@ -101,14 +101,14 @@ from Controller.UniversalCDPageControl import UniversalCDPageControl
 from General.util import Util
 
 from PyQt5.QtWidgets import (
-    QMainWindow, QMenuBar, QMenu, QStackedWidget, QSpinBox, QWidgetAction, QComboBox, QDateEdit
+    QMainWindow, QMenuBar, QMenu, QStackedWidget, QWidgetAction, QComboBox, QDateEdit
 )
 from PyQt5.QtCore import QDate
 from PyQt5.QtGui import QIcon
 from datetime import datetime
 import psutil
 
-from PyQt5.QtCore import QFileSystemWatcher
+#from PyQt5.QtCore import QFileSystemWatcher
 
 class MainControl:
     def __init__(self, root: QMainWindow):
@@ -116,7 +116,7 @@ class MainControl:
         self.util = Util()
         self.stack = QStackedWidget()
         self.root.setCentralWidget(self.stack)
-        self.watcher = QFileSystemWatcher()
+        #self.watcher = QFileSystemWatcher()
 
 
     def initialize_app(self):
@@ -170,34 +170,12 @@ class MainControl:
             func_menu.addAction(self.util.dict_language[self.lang]['menu_c'], lambda: self.stack.setCurrentWidget(self.CalmPage.get_widget()))
             func_menu.addAction(self.util.dict_language[self.lang]['menu_ucd'], lambda: self.stack.setCurrentWidget(self.UniversalCDPage.get_widget()))
 
-            #func_menu.addAction(self.util.dict_language[lang]["menu_about"], lambda: self.stack.setCurrentWidget(self.AboutPage))
-
             # menu de configurações
             config_menu = QMenu(self.util.dict_language[self.lang]["menu_config"], self.root)
             lang_menu = QMenu(self.util.dict_language[self.lang]["menu_lang"], self.root)
             lang_menu.addAction(self.util.dict_language[self.lang]["menu_en"], lambda: self.reset("en"))
             lang_menu.addAction(self.util.dict_language[self.lang]["menu_port"], lambda: self.reset("br"))
             config_menu.addMenu(lang_menu)
-
-            '''
-            year_menu = QMenu(self.util.dict_language[lang]["menu_year"], self.root)
-
-            # Campo de ano com setinhas
-            year_spin = QSpinBox()
-            year_spin.setRange(1900, 2100)   # limite mínimo e máximo
-            year_spin.setValue(year)         # valor inicial
-
-            # Criar um widgetAction para colocar o spinbox dentro do menu
-            year_action = QWidgetAction(self.root)
-            year_action.setDefaultWidget(year_spin)
-
-            year_menu.addAction(year_action)
-            config_menu.addMenu(year_menu)
-
-            # Exemplo: conectando a mudança de valor
-            # Exemplo: chamar função só quando perder o foco (ou Enter)
-            year_spin.editingFinished.connect(lambda: self.util.change_year(year_spin.value()))
-            '''
 
             # Criar submenu de data
             date_menu = QMenu(self.util.dict_language[self.lang]["menu_date"], self.root)
@@ -237,30 +215,25 @@ class MainControl:
             # Adicionar ao menu e depois ao menu principal
             date_menu.addAction(date_action)
             date_menu.addAction(date_action_final)
+            date_menu.addAction(self.util.dict_language[self.lang]["btn_confirm"], lambda: confirm_date())
             config_menu.addMenu(date_menu)
 
-            # Conectar o evento de edição finalizada (quando perde o foco ou aperta Enter)
-            def update_date():
+            def confirm_date():
                 selected_date = date_edit.date()
-                self.util.change_year(
-                    year=[selected_date.day(), selected_date.month(), selected_date.year()]                  
-                )
-
-            date_edit.editingFinished.connect(update_date)
-
-            # Conectar o evento de edição finalizada (quando perde o foco ou aperta Enter)
-            def update_final():
-                selected_date = date_edit_final.date()
-                self.util.change_final(
-                    final=[selected_date.day(), selected_date.month(), selected_date.year()]                  
-                )
-
-            date_edit_final.editingFinished.connect(update_final)
-
+                selected_date_final = date_edit_final.date()
+                
+                if selected_date.day() != self.year[0] or selected_date.month() != self.year[1] or selected_date.year() != self.year[2]:
+                    self.util.change_year(
+                        year=[selected_date.day(), selected_date.month(), selected_date.year()]                  
+                    )
+                if selected_date_final.day() != self.final[0] or selected_date_final.month() != self.final[1] or selected_date_final.year() != self.final[2]:
+                    self.util.change_final(
+                        final=[selected_date_final.day(), selected_date_final.month(), selected_date_final.year()]                  
+                    )
+                self.reset(self.lang)
 
             drive_menu = QMenu(self.util.dict_language[self.lang]["menu_drive"], self.root)
 
-            # Criar combobox
             drive_combo = QComboBox()
 
             # Listar drives disponíveis
@@ -290,9 +263,10 @@ class MainControl:
             # abre página inicial
             self.stack.setCurrentWidget(self.GraphPage.get_widget())
 
-            path = "General/config.txt"
-            self.watcher.addPath(path)
-            self.watcher.fileChanged.connect(self.update_listbox_on_change)
+            #path = "General/config.txt"
+            #self.watcher.addPath(path)
+            #self.watcher.fileChanged.connect(self.update_listbox_on_change)
+            #self.watcher.fileChanged.connect(self.reset)
 
         else:
             self.InitialPage = InitialPage(self.root, self.lang)
@@ -324,20 +298,27 @@ class MainControl:
     def update_listbox_on_change(self):
         if self.year != self.util.get_year_config() or self.final != self.util.get_final_config():
             self.initialize_app()
+        
+    def restart_pages(self):
+        pass
 
     def create_license_TopLevel(self):
         self.LicenseTopLevel.load_page()
         self.LicenseTopLevel.bind_get_new_user_info(self.License.create_lincense_request)
 
-    def reset(self, lang=""):
+    def reset(self, lang="", *args, **kwargs):
+        if lang not in ("", "en", "br"):
+            lang = ""
+
         if lang != "":
             self.util.change_lang(lang)
+
         self.root.close()
 
         new_root = QMainWindow()
         new_root.resize(1920, 1080)
         new_root.showMaximized()
-        new_root.setWindowIcon(QIcon('General/images/univap.ico'))
+        new_root.setWindowIcon(QIcon(self.util.resource_path('images/univap.ico')))
         app = MainControl(new_root)
         app.initialize_app()
         new_root.show()

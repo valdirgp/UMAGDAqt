@@ -6,7 +6,6 @@ from General.util import Util
 import cartopy.crs as ccrs
 import numpy as np
 
-
 class DownloadPage(QWidget):
     def __init__(self, root, language, year, drive, magnetic_eq_coords):
         super().__init__(root)
@@ -25,6 +24,7 @@ class DownloadPage(QWidget):
         self.map_widget = Map(self)                               # idem
         self.embrace_stations = []
         self.intermagnet_stations = []
+        
 
     def ensure_array(self, y, x):
         """
@@ -76,8 +76,8 @@ class DownloadPage(QWidget):
 
         longitudes = np.linspace(-180, 180, 361)
         y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
-        self.map_widget.ax.plot(longitudes, y_values, color='#4B4B4B', transform=ccrs.PlateCarree())
-        self.map_widget.ax.plot(longitudes, y_values * 0, color='#7A7A7A', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values, color="#ff0707", lw='3', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values * 0, color='#000000', transform=ccrs.PlateCarree())
 
         # se magnetic_eq_coords for escalar, converta para array do mesmo tamanho
         '''if np.isscalar(self.magnetic_eq_coords):
@@ -94,6 +94,8 @@ class DownloadPage(QWidget):
 
         main_layout.addWidget(self.side_options.options_frame)
         main_layout.addWidget(self.map_widget.map_frame)
+
+
 
     # select all stations from map and listbox
     def set_all_selected(self):

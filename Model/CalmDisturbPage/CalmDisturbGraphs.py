@@ -5,6 +5,7 @@ import matplotlib.dates as mdates
 from PyQt5.QtWidgets import QMessageBox
 import os
 import math
+from General.util import Util
 
 class CalmDisturbModel(GraphsModule):
     def __init__(self, root, language):
@@ -16,6 +17,8 @@ class CalmDisturbModel(GraphsModule):
         self.station = None
         self.data_with_stations = None
         self.temp_window = None
+
+        self.util = Util()
 
         super().__init__(self.lang)
 
@@ -40,6 +43,20 @@ class CalmDisturbModel(GraphsModule):
 
         # Plot data
         self.plot_calm_avg()
+
+        year_config = self.util.get_year_config()
+        final_config = self.util.get_final_config()
+
+        if self.start_date.day != year_config[0] or self.start_date.month != year_config[1] or self.start_date.year != year_config[2]:
+            print("CalmDisturbGraphs - create_graphics_calm_dist")
+            print("start_date: ", self.start_date)
+            print("metodo get year: ", self.util.get_year_config())
+            self.util.change_year([self.start_date.day, self.start_date.month, self.start_date.year])
+        if self.end_date.day != final_config[0] or self.end_date.month != final_config[1] or self.end_date.year != final_config[2]:
+            print("CalmDisturbGraphs - create_graphics_calm_dist")
+            print("end_date: ", self.end_date)
+            print("metodo get final: ", self.util.get_final_config())
+            self.util.change_final([self.end_date.day, self.end_date.month, self.end_date.year])
 
     # Collects data for the selected station within the date range
     def gather_station_data(self):

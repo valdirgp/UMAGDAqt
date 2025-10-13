@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import QMessageBox
 from General.util import Util
 import math
 from pyIGRF import igrf_value
+from datetime import datetime
 
 class Embrace(DownloadModule):
     def __init__(self, language, root=None):
@@ -72,15 +73,38 @@ class Embrace(DownloadModule):
         except Exception as e:
             print(f"Erro ao obter estações EMBRACE: {e}")
             return {}
+        
+    def to_decimal_year(self, dt_object: datetime) -> float:
+        """
+        Converts a datetime object to a decimal year.
+        
+        This function correctly accounts for leap years.
+        
+        Args:
+            dt_object (datetime): The datetime object to convert.
+        
+        Returns:
+            float: The date and time as a decimal year.
+        """
+
+        year_start = datetime(dt_object.year, 1, 1)
+        year_end = datetime(dt_object.year + 1, 1, 1)
+
+        days_in_year = (year_end - year_start).days
+
+        day_of_year = (dt_object - year_start).days
+
+        return dt_object.year + (day_of_year / days_in_year)
 
     def create_stationlist(self, ano):
-        self.ano = ano
+        ano = datetime(ano[2], ano[1], ano[0])
+        self.ano = self.to_decimal_year(ano)
         stations = []
         codigos = []
         try:
             estacoes = self.obter_coordenadas_estacoes_embrace()
             for codigo, coords in estacoes.items():
-                result = igrf_value(coords['latitude'], coords['longitude'], 300, self.ano)
+                result = igrf_value(coords['latitude'], coords['longitude'], 0.300, self.ano)
                 dip = -math.degrees(math.atan((math.tan(math.radians(result[1]))/2)))
                 stations.append(f'{codigo} ({coords["latitude"]:.5f}, {coords["longitude"]:.5f}, {dip:.5f})')
                 codigos.append(codigo)

@@ -1,13 +1,11 @@
 from View.Frames.SideOptionsPlot import SideOptionsPlot
 from View.Frames.Map import Map
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QDate
 import re
 from General.util import Util
 import cartopy.crs as ccrs
 import numpy as np
-
-
 
 class GraphPage(QWidget):
     def __init__(self, root, language, year, final, drive, magnetic_eq_coords=0):
@@ -79,15 +77,13 @@ class GraphPage(QWidget):
         # Se self.magnetic_eq_coords for um único valor, crie um array do mesmo tamanho
         y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
         
-        self.map_widget.ax.plot(longitudes, y_values, color='gray', transform=ccrs.PlateCarree())
-        self.map_widget.ax.plot(longitudes, y_values * 0, color='gray', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values, color='red', lw='3', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values * 0, color='black', transform=ccrs.PlateCarree())
 
         self.map_widget.fig.canvas.mpl_connect('button_press_event', self.map_on_click)
 
         main_layout.addWidget(self.side_options.frame_side_functions)
         main_layout.addWidget(self.map_widget.map_frame)
-
-        
 
     # select all stations from map and listbox
     def set_all_selected(self):
@@ -104,27 +100,6 @@ class GraphPage(QWidget):
         self.all_locals = []
         self.longitude = []
         self.latitude = []
-
-        """
-        try:
-            with open('readme_stations.txt','r') as file: 
-                file_lines = file.read().split('\n')[1:-1]
-                for line in file_lines:
-                    try:
-                        station_info = re.split(r'\s{2,}', line)
-                        long, lat = float(station_info[2]), float(station_info[3])
-                        if long > 180:
-                            long = long - 360.0
-                        if station_info[0] in self.downloaded_data_stations:
-                            self.longitude.append(long)
-                            self.latitude.append(lat)
-                            self.all_locals.append({'station': station_info[0], 'longitude': long, 'latitude': lat})
-                    except Exception as error:
-                        print(error)
-        except Exception:
-            warning = QLabel(self.util.dict_language[self.lang]['lbl_noreadme'])
-            self.side_options.frame_side_functions.inner_frame.layout().addWidget(warning)
-        """
         
         for i in range(self.side_options.list_all_stations.count()):
             item = self.side_options.list_all_stations.item(i)
@@ -235,9 +210,18 @@ class GraphPage(QWidget):
 
         y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
 
-        self.map_widget.ax.plot(longitudes, y_values, color='gray', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values, color='red', transform=ccrs.PlateCarree())
 
         self.map_widget.canvas.draw()
+
+        self.side_options.year = self.year
+        self.side_options.final = self.final
+
+        self.side_options.cal_calm.setDate(QDate(self.year[2], self.year[1], self.year[0]))
+        if hasattr(self.side_options, 'startdate'):
+            self.side_options.startdate.setDate(QDate(self.year[2], self.year[1], self.year[0]))
+        if hasattr(self.side_options, 'enddate'):
+            self.side_options.enddate.setDate(QDate(self.final[2], self.final[1], self.final[0]))
 
     def update_min_sub_list(self):
         self.side_options.populate_list_options(self.side_options.minuend_stations_list, self.downloaded_data_stations)
@@ -311,7 +295,7 @@ class GraphPage(QWidget):
         return self.side_options.combo_type_plot.currentIndex()
 
     def get_date(self):
-        return self.side_options.date.date().toPyDate()
+        return self.side_options.startdate.date().toPyDate()
 
     def get_start_date(self):
         #return self.side_options.startdate.date().toPyDate()

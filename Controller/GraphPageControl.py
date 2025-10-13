@@ -5,6 +5,9 @@ from Model.GraphPage.ManyGraphs import ManyGraphs
 from Model.GraphPage.TideGraph import TideGraph
 from Model.GraphPage.DifferenceGraph import DifferenceGraph
 from View.GraphPage import GraphPage
+from PyQt5.QtCore import QFileSystemWatcher
+from General.util import Util
+import sys, os
 
 
 class GraphControl():
@@ -21,6 +24,25 @@ class GraphControl():
         self.ManyModule = ManyGraphs(self.root, self.lang)
         self.TideModule = TideGraph(self.root, self.lang)
         self.DifferenceModule = DifferenceGraph(self.root, self.lang)
+
+        self.watcher = QFileSystemWatcher()
+        self.util = Util()
+
+        path = self.resource_path("config.txt")
+        self.watcher.addPath(path)
+        #self.watcher.fileChanged.connect(self.update_listbox_on_change)
+        self.watcher.fileChanged.connect(lambda: self.get_search_stations_downloaded_filtred(self.drive))
+
+    # creates an absolute path
+    @staticmethod
+    def resource_path(relative_path):
+        try:
+            base_path = sys._MEIPASS
+            base_path = os.path.join(base_path, "General")
+        except Exception:
+            base_path = os.path.abspath("./General")
+            
+        return os.path.join(base_path, relative_path)
 
     # creates graph frames for the window and bind type of plots to variables
     def load_widgets(self):
@@ -40,15 +62,21 @@ class GraphControl():
 
     # gets info and update downloaded data available
     def get_search_stations_downloaded_filtred(self, drive):
+        if self.util.get_year_config() != self.year:
+            self.year = self.util.get_year_config()
+        if self.util.get_final_config() != self.final:
+            self.final = self.util.get_final_config()
         downloaded_data_stations, self.data_with_stations = self.Module.search_stations_downloaded(self.year, drive)
         self.Graphs.bind_search_stations_downloaded(downloaded_data_stations)
         #self.Graphs.bind_search_stations_downloaded(self.data_with_stations)
+        self.Graphs.year = self.year
+        self.Graphs.final = self.final
         self.Graphs.update_data()
 
     # call graphs creation
     def call_graph_creation(self):
         match self.Graphs.get_graph_type():
-            case 0: # SINGLE GRAPH
+            case 1: # SINGLE GRAPH
                 if not self.Module.verify_inputs(station_selected=self.Graphs.get_stations_selected(), type_selected=self.Graphs.get_type_data()): return
 
                 self.SingleModule.plot_day(
@@ -62,7 +90,7 @@ class GraphControl():
                     self.Graphs.get_cal_selection(),
                     self.data_with_stations,
                 )
-            case 1: # GLOBAL GRAPH
+            case 2: # GLOBAL GRAPH
                 if not self.Module.verify_inputs(station_selected=self.Graphs.get_stations_selected(), type_selected=self.Graphs.get_type_data()): return
 
                 self.GlobalModule.plot_global_days(
@@ -77,7 +105,7 @@ class GraphControl():
                     self.Graphs.get_cal_selection(),
                     self.data_with_stations,
                 )
-            case 2: # MANY GRAPHS
+            case 3: # MANY GRAPHS
                 if not self.Module.verify_inputs(station_selected=self.Graphs.get_stations_selected(), type_selected=self.Graphs.get_type_data()): return
 
                 self.ManyModule.plot_more_days(
@@ -94,7 +122,7 @@ class GraphControl():
                     self.Graphs.get_column_entry(),
                     self.Graphs.get_row_entry(),
                 )
-            case 3: # TIDE'S GRAPH
+            case 4: # TIDE'S GRAPH
                 if not self.Module.verify_inputs(station_selected=self.Graphs.get_stations_selected(),type_selected=self.Graphs.get_type_data()): return
 
                 self.TideModule.plot_tide(
@@ -110,7 +138,7 @@ class GraphControl():
                     self.data_with_stations,
                 )
             
-            case 4: # DIFFERENCE GRAPH
+            case 5: # DIFFERENCE GRAPH
                 if not self.Module.verify_inputs(type_selected=self.Graphs.get_type_data()): return
 
                 self.DifferenceModule.plot_difference(

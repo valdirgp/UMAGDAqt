@@ -10,6 +10,7 @@ import re
 from charset_normalizer import detect
 from urllib3.exceptions import InsecureRequestWarning
 from PyQt5.QtWidgets import QMessageBox
+import sys, os
 
 class Readme(DownloadModule):
     def __init__(self, language, root=None):
@@ -131,9 +132,18 @@ class Readme(DownloadModule):
             finally:
                 self.update_progressbar()
 
+    @staticmethod
+    def resource_path(relative_path):
+        try:
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+            
+        return os.path.join(base_path, relative_path)
+
     # writes readme file with obtained data from embrace and intermagnet
     def write_readme(self):
-        with open('readme_stations.txt', 'w') as f:
+        with open(self.resource_path('readme_stations.txt'), 'w') as f:
             f.write("acronym     station                                             longitude     latitude    source\n")
             if self.info_embrace_stations: # check if embrace info was obtained
                 for station in self.info_embrace_stations:

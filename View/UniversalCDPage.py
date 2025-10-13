@@ -1,6 +1,7 @@
 from View.Frames.SideOptionsUniversalCD import SideOptionsUniversalCD
 from View.Frames.Map import Map
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QMessageBox, QGridLayout
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QMessageBox
+from PyQt5.QtCore import QDate
 #import tkinter as tk
 #import tkinter.messagebox as messagebox
 #from tkinter import ttk
@@ -89,8 +90,8 @@ class UniversalCDPage(QWidget):
         longitudes = np.linspace(-180, 180, 361)
 
         y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
-        self.map_widget.ax.plot(longitudes, y_values, color='gray', transform=ccrs.PlateCarree())
-        self.map_widget.ax.plot(longitudes, y_values * 0, color='gray', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values, color='red', lw='3', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values * 0, color='black', transform=ccrs.PlateCarree())
 
         self.map_widget.fig.canvas.mpl_connect('button_press_event', self.map_on_click)
 
@@ -236,7 +237,7 @@ class UniversalCDPage(QWidget):
     def update_data(self):
         self.side_options.list_all_stations.clear()
         self.side_options.populate_list_options(self.side_options.list_all_stations, self.downloaded_data_stations)
-        for scatter in self.scart_plots:
+        for scatter in self.map_widget.scart_plots:
             scatter.remove()
         self.map_widget.scart_plots.clear()
         for text in self.map_widget.text_annotations:
@@ -251,9 +252,14 @@ class UniversalCDPage(QWidget):
 
         y_values = self.ensure_array(self.magnetic_eq_coords, longitudes)
 
-        self.map_widget.ax.plot(longitudes, y_values, color='gray', transform=ccrs.PlateCarree())
+        self.map_widget.ax.plot(longitudes, y_values, color='red', lw='3', transform=ccrs.PlateCarree())
 
         self.map_widget.canvas.draw()
+
+        self.side_options.cal_calm.setSelectedDate(QDate(self.year[2], self.year[1], self.year[0]))
+        self.side_options.cal_disturb.setSelectedDate(QDate(self.year[2], self.year[1], self.year[0]))
+        self.side_options.startdate.setDate(QDate(self.year[2], self.year[1], self.year[0]))
+        self.side_options.enddate.setDate(QDate(self.final[2], self.final[1], self.final[0]))
 
     def get_type_data(self):
         selected_types = list()

@@ -121,6 +121,7 @@ class SideOptionsPlot(QWidget):
         layout.addWidget(lbl_tpgraph)
         self.combo_type_plot = QComboBox()
         self.combo_type_plot.addItems([
+            "",
             self.util.dict_language[self.language]['combo_sing'],
             self.util.dict_language[self.language]['combo_sing_many'],
             self.util.dict_language[self.language]['combo_many'],
@@ -134,7 +135,7 @@ class SideOptionsPlot(QWidget):
         self.options_frame = QFrame()
         self.options_layout = QVBoxLayout(self.options_frame)
         self.options_frame.setLayout(self.options_layout)
-        self.create_oneday_options()
+        #self.create_oneday_options()
         layout.addWidget(self.options_frame)
 
         # Calm days calendar
@@ -151,19 +152,22 @@ class SideOptionsPlot(QWidget):
         #self.frame_side_functions.inner_frame.setLayout(layout)
         #self.frame_side_functions.setLayout(QVBoxLayout())
         self.frame_side_functions.show()
+    
+    def create_none_options(self):
+        self.clear_options_frame()
 
     # create a child for frame_side_functions to have one day options
     def create_oneday_options(self):
         self.clear_options_frame()
         lbl_date = QLabel(self.util.dict_language[self.language]['lbl_dt'])
         self.options_layout.addWidget(lbl_date)
-        self.date = QDateEdit()
-        self.date.setDisplayFormat('dd/MM/yyyy')
-        self.date.setCalendarPopup(True)
+        self.startdate = QDateEdit()
+        self.startdate.setDisplayFormat('dd/MM/yyyy')
+        self.startdate.setCalendarPopup(True)
         hoje = QDate.currentDate()
         data = QDate(self.year[2], self.year[1], self.year[0])
-        self.date.setDate(data)
-        self.options_layout.addWidget(self.date)
+        self.startdate.setDate(data)
+        self.options_layout.addWidget(self.startdate)
         self.btn_singleday_confirm = QPushButton(self.util.dict_language[self.language]['btn_confirm'])
         if self.btn_singleday_function:
             self.btn_singleday_confirm.clicked.connect(self.btn_singleday_function)
@@ -254,18 +258,21 @@ class SideOptionsPlot(QWidget):
     def change_parameters(self, index):
         match index:
             case 0:
+                self.create_none_options()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.NoSelection)
+            case 1:
                 self.create_oneday_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
-            case 1:
-                self.create_manydays_options()
-                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
             case 2:
-                self.create_grid_options()
+                self.create_manydays_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
             case 3:
-                self.create_manydays_options()
+                self.create_grid_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
             case 4:
+                self.create_manydays_options()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+            case 5:
                 self.create_manydays_options()
                 self.add_subtractions_widget()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.NoSelection)
@@ -285,6 +292,7 @@ class SideOptionsPlot(QWidget):
             item = QListWidgetItem(texto)   # o que aparece na lista
             item.setData(Qt.UserRole, codigo)  # dado "oculto", só o código
             listwidget.addItem(item)
+        self.filter_visible_items()
 
     # fill combobox that is chooses path
     def populate_combo_local(self):

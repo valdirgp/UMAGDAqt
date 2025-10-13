@@ -92,8 +92,10 @@ class Util():
 
                                     "mgbox_error": "ERRO",
                                     "mgbox_error_st": "Selecione estação desejada",
-                                    "mgbox_error_dur": "Digite a duração desejado",
+                                    "mgbox_error_dur": "Digite a duração desejada",
                                     "mgbox_error_dur_type": "Digite tipo de duração desejada",
+                                    "mgbox_error_calm_dates": "Selecione um dia calmo",
+                                    "mgbox_error_disturb_dates": "Selecione um dia perturbado",
                                     "mgbox_error_dt_format": "formato de data inválido. Utilize DD/MM/YYYY.",
                                     "mgbox_error_dt_dif": "Data inválida. A data inicial deve ser menor do que a final",
                                     "mgbox_error_notfound": "Arquivo não foi encontrado",
@@ -204,6 +206,8 @@ class Util():
                                     "mgbox_error_st": "select a station",
                                     "mgbox_error_dur": "Enter a duration",
                                     "mgbox_error_dur_type": "Enter a duration type",
+                                    "mgbox_error_calm_dates": "Enter a calm day",
+                                    "mgbox_error_disturb_dates": "Enter a disturbed day",
                                     "mgbox_error_dt_format": "Invalid date format. Use DD/MM/YYYY",
                                     "mgbox_error_dt_dif": "Invalid date. The start date must be less than the end date",
                                     "mgbox_error_notfound": "File was not found",
@@ -375,6 +379,7 @@ class Util():
     def resource_path(relative_path):
         try:
             base_path = sys._MEIPASS
+            base_path = os.path.join(base_path, "General")
         except Exception:
             base_path = os.path.abspath("./General")
             
