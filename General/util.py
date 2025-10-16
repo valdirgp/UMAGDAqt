@@ -85,6 +85,7 @@ class Util():
                                     "combo_many": "Vários Gráficos",
                                     "combo_tide": "Maré",
                                     "combo_difference": "Diferença",
+                                    "combo_contorno": "Contorno",
 
                                     "progbar_dwd_Embrace": "Progresso Embrace",
                                     "progbar_dwd_Intermagnet": "Progresso Intermagnet",
@@ -197,6 +198,7 @@ class Util():
                                     "combo_many": "Many Graphs",
                                     "combo_tide": "Tide",
                                     "combo_difference": "Difference",
+                                    "combo_contorno": "Contour",
 
                                     "progbar_dwd_Embrace": "Embrace Progress",
                                     "progbar_dwd_Intermagnet": "Intermagnet Progress",

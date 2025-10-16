@@ -239,6 +239,9 @@ class GraphPage(QWidget):
 
     def bind_many_graphs(self, callback):
         self.side_options.btn_manydays_function = callback
+    
+    def bind_contour_graph(self, callback):
+        self.side_options.btn_contour_function = callback
 
     def bind_search_stations_downloaded(self, callback):
         self.downloaded_data_stations = callback

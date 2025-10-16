@@ -10,10 +10,9 @@ from datetime import datetime, time, date
 import math
 
 class GlobalGraph(GraphsModule):
-    def __init__(self, root, language, year):
+    def __init__(self, root, language):
         self.root = root
         self.lang = language
-        self.year = year
         self.util = Util()
         super().__init__(self.lang)
 

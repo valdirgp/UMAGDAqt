@@ -4,6 +4,7 @@ from Model.GraphPage.GlobalGraph import GlobalGraph
 from Model.GraphPage.ManyGraphs import ManyGraphs
 from Model.GraphPage.TideGraph import TideGraph
 from Model.GraphPage.DifferenceGraph import DifferenceGraph
+from Model.GraphPage.ContourGraph import ContourGraph
 from View.GraphPage import GraphPage
 from PyQt5.QtCore import QFileSystemWatcher
 from General.util import Util
@@ -20,10 +21,11 @@ class GraphControl():
         self.Graphs = GraphPage(root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
         self.Module = GraphsModule(self.lang)
         self.SingleModule = SingleGraph(self.root, self.lang)
-        self.GlobalModule = GlobalGraph(self.root, self.lang, self.year)
+        self.GlobalModule = GlobalGraph(self.root, self.lang)
         self.ManyModule = ManyGraphs(self.root, self.lang)
         self.TideModule = TideGraph(self.root, self.lang)
         self.DifferenceModule = DifferenceGraph(self.root, self.lang)
+        self.ContourModule = ContourGraph(self.root, self.lang)
 
         self.watcher = QFileSystemWatcher()
         self.util = Util()
@@ -52,6 +54,7 @@ class GraphControl():
         self.Graphs.bind_single_graph(self.call_graph_creation)
         self.Graphs.bind_global_graph(self.call_graph_creation)
         self.Graphs.bind_many_graphs(self.call_graph_creation)
+        self.Graphs.bind_contour_graph(self.call_graph_creation)
 
     # gets all the downloaded stations
     def get_search_stations_downloaded(self):
@@ -153,6 +156,20 @@ class GraphControl():
                     self.Graphs.get_selected_dates(),
                     self.Graphs.get_cal_selection(),
                     self.data_with_stations,
+                )
+            case 6: # CONTOUR GRAPH
+                if not self.Module.verify_inputs(station_selected=self.Graphs.get_stations_selected(), type_selected=self.Graphs.get_type_data()): return
+
+                self.ContourModule.plot_contour(
+                    self.Graphs.get_local_download(),
+                    self.Graphs.get_stations_selected(),
+                    self.Graphs.get_type_data(),
+                    self.Graphs.get_bold_text(),
+                    self.Graphs.get_grid_graph(),
+                    self.Graphs.get_start_date(),
+                    self.Graphs.get_end_date(),
+                    self.Graphs.get_selected_dates(),
+                    self.data_with_stations
                 )
     
     # expõe o widget para ser adicionado ao QStackedWidget

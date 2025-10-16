@@ -21,6 +21,7 @@ class SideOptionsPlot(QWidget):
         self.btn_singleday_function = None
         self.btn_globaldays_function = None
         self.btn_manydays_function = None
+        self.btn_contour_function = None
         self.local_downloads_function = None
 
     # Função de filtro
@@ -126,7 +127,8 @@ class SideOptionsPlot(QWidget):
             self.util.dict_language[self.language]['combo_sing_many'],
             self.util.dict_language[self.language]['combo_many'],
             self.util.dict_language[self.language]['combo_tide'],
-            self.util.dict_language[self.language]['combo_difference']
+            self.util.dict_language[self.language]['combo_difference'],
+            self.util.dict_language[self.language]['combo_contorno']
         ])
         self.combo_type_plot.currentIndexChanged.connect(self.change_parameters)
         layout.addWidget(self.combo_type_plot)
@@ -253,6 +255,34 @@ class SideOptionsPlot(QWidget):
         self.subtracted_stations_list = QListWidget()
         self.options_layout.addWidget(self.subtracted_stations_list)
         self.update_lists()
+    
+    def create_contorno_options(self):
+        self.clear_options_frame()
+
+        lbl_initial_date = QLabel(self.util.dict_language[self.language]['lbl_init_dt'])
+        self.options_layout.addWidget(lbl_initial_date)
+        self.startdate = QDateEdit()
+        self.startdate.setDisplayFormat('dd/MM/yyyy')
+        self.startdate.setCalendarPopup(True)
+        hoje = QDate.currentDate()
+        data = QDate(self.year[2], self.year[1], self.year[0])
+        self.startdate.setDate(data)
+        self.options_layout.addWidget(self.startdate)
+
+        lbl_final_date = QLabel(self.util.dict_language[self.language]['lbl_fin_dt'])
+        self.options_layout.addWidget(lbl_final_date)
+        self.enddate = QDateEdit()
+        self.enddate.setDisplayFormat('dd/MM/yyyy')
+        self.enddate.setCalendarPopup(True)
+        hoje = QDate.currentDate()
+        data = QDate(self.final[2], self.final[1], self.final[0])
+        self.enddate.setDate(data)
+        self.options_layout.addWidget(self.enddate)
+
+        self.btn_contour_confirm = QPushButton(self.util.dict_language[self.language]['btn_confirm'])
+        if self.btn_contour_function:
+            self.btn_contour_confirm.clicked.connect(self.btn_contour_function)
+        self.options_layout.addWidget(self.btn_contour_confirm)
 
     # changes kind of options plotting
     def change_parameters(self, index):
@@ -276,6 +306,9 @@ class SideOptionsPlot(QWidget):
                 self.create_manydays_options()
                 self.add_subtractions_widget()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.NoSelection)
+            case 6:
+                self.create_contorno_options()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
 
     # update all info came from the chosen drive 
     def change_local(self, index):
