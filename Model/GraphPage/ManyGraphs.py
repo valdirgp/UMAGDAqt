@@ -61,6 +61,13 @@ class ManyGraphs(GraphsModule):
 
     # Check if grid (columns x rows) matches the number of days in the range
     def validate_grid(self, number_columns, number_rows):
+        if number_rows is None or number_columns is None:
+            QMessageBox.information(
+                None,
+                self.util.dict_language[self.lang]["mgbox_error"],
+                self.util.dict_language[self.lang]["mgbox_error_lincol"]
+            )
+            return False
         if isinstance(self.start_date, QDate):
             self.start_date = self.start_date.toPyDate()
         if isinstance(self.end_date, QDate):

@@ -217,7 +217,7 @@ class GraphPage(QWidget):
         self.side_options.year = self.year
         self.side_options.final = self.final
 
-        self.side_options.cal_calm.setDate(QDate(self.year[2], self.year[1], self.year[0]))
+        self.side_options.cal_calm.setSelectedDate(QDate(self.year[2], self.year[1], self.year[0]))
         if hasattr(self.side_options, 'startdate'):
             self.side_options.startdate.setDate(QDate(self.year[2], self.year[1], self.year[0]))
         if hasattr(self.side_options, 'enddate'):
@@ -308,10 +308,10 @@ class GraphPage(QWidget):
         return self.side_options.enddate.date().toPyDate()
 
     def get_column_entry(self):
-        return int(self.side_options.columm_entry.currentText())
+        return int(self.side_options.columm_entry.currentText()) if self.side_options.columm_entry.currentText() != "" else None
  
     def get_row_entry(self):
-        return int(self.side_options.row_entry.currentText())
+        return int(self.side_options.row_entry.currentText()) if self.side_options.row_entry.currentText() != "" else None
     
     def get_selected_dates(self):
         return self.side_options.selected_dates

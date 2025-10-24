@@ -1,4 +1,4 @@
 lang: br
-year: 9/9/2024
+year: 8/9/2024
 final: 12/9/2024
 drive: C:\

@@ -16,6 +16,7 @@ class SideOptionsCalm(QWidget):
         self.final = final
         self.drive = drive
         self.util = Util()
+        #self.selected_calm_dates = set()
         self.selected_calm_dates = []
 
         self.combo_local_download = None
@@ -109,13 +110,18 @@ class SideOptionsCalm(QWidget):
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_calm.setSelectedDate(data)
         #self.add_date(self.cal_calm, self.selected_calm_dates)
-        self.cal_calm.clicked.connect(lambda: self.add_date(self.cal_calm, self.selected_calm_dates))
+        self.cal_calm.clicked.connect(lambda date: self.date_selected(date))
         self.cal_calm.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # Conecta ao dateChanged do QDateEdit
         self.startdate.dateChanged.connect(lambda new_date: sync_calendar_month_year(self.cal_calm, self.startdate))
 
         layout.addWidget(self.cal_calm)
+
+        self.date_list = QListWidget()
+        self.date_list.setSelectionMode(QListWidget.MultiSelection)  # Permite selecionar múltiplos itens
+        self.date_list.itemClicked.connect(self.remove_date_from_list)  # Conectar evento de clique na lista
+        layout.addWidget(self.date_list)
 
         # Clear all button
         self.btn_clear_all = QPushButton(self.util.dict_language[self.lang]['btn_clr'])
@@ -148,9 +154,84 @@ class SideOptionsCalm(QWidget):
     # Clear all station's list
     def clean_all(self):
         self.selected_calm_dates.clear()
-        # No direct equivalent to calevent_remove("all") in QCalendarWidget, so just clear the list
+        
+        self.selected_calm_dates.clear()
+        self.date_list.clear()
+        self.update_calendar_selection()
 
-    # Fill a listbox with the given data
+    def date_selected(self, date):
+        """
+        Esse método será chamado quando uma data for clicada no QCalendarWidget.
+        Ele adiciona ou remove a data da lista de datas selecionadas.
+        """
+        date = date.toPyDate()
+        date_str = str(date)
+        print(type(date))
+        # Verifica se a data já está na lista
+        if date in self.selected_calm_dates:
+            # Remove a data da lista
+            self.selected_calm_dates.remove(date)
+            # Remove a data da lista visual (QListWidget)
+            for i in range(self.date_list.count()):
+                item = self.date_list.item(i)
+                if item.text() == date_str:
+                    self.date_list.takeItem(i)
+                    break
+        else:
+            # Adiciona a data à lista de datas selecionadas
+            self.selected_calm_dates.append(date)
+            # Adiciona a data ao QListWidget
+            self.date_list.addItem(date_str)
+
+        # Atualiza as datas destacadas no calendário
+        self.update_calendar_selection()
+
+    def remove_date_from_list(self, item):
+        """
+        Esse método será chamado quando um item for clicado na QListWidget.
+        Ele remove a data clicada tanto da lista quanto do QCalendarWidget.
+        """
+        date_str = (item.text()).toPyDate()
+
+        # Remover a data da lista de datas selecionadas
+        if date_str in self.selected_calm_dates:
+            self.selected_calm_dates.remove(date_str)
+            # Remover o item da QListWidget
+            self.date_list.takeItem(self.date_list.row(item))
+
+        # Atualiza o calendário para refletir a remoção
+        self.update_calendar_selection()
+
+    def update_calendar_selection(self):
+        """
+        Atualiza as datas selecionadas visualmente no QCalendarWidget.
+        """
+        from PyQt5.QtGui import QTextCharFormat, QColor
+        from PyQt5.QtCore import QDate, Qt
+        # Criar uma lista de QDate a partir das datas selecionadas
+        selected_qdates = [date for date in self.selected_calm_dates]
+
+        # Criar um formato de texto para as datas selecionadas (cor vermelha)
+        text_format = QTextCharFormat()
+        text_format.setForeground(QColor(0, 128, 0))  # Define a cor do texto como vermelho
+
+        # Criar um formato de texto normal (sem cor)
+        normal_format = QTextCharFormat()
+
+        # Iterar sobre as datas do mês visível
+        first_date = self.cal_calm.selectedDate().addDays(-self.cal_calm.selectedDate().day() + 1)
+        last_date = first_date.addMonths(1).addDays(-1)
+
+        # Limpar as formatações anteriores (se necessário)
+        for day in range(first_date.day(), last_date.day() + 1):
+            date = QDate(first_date.year(), first_date.month(), day)
+            self.cal_calm.setDateTextFormat(date, normal_format)
+
+        # Aplicar a cor vermelha para as datas selecionadas
+        for selected_date in selected_qdates:
+            if first_date <= selected_date <= last_date:
+                self.cal_calm.setDateTextFormat(selected_date, text_format)
+
     def populate_list_options(self, listwidget, stations):
         listwidget.clear()
         for st in stations:

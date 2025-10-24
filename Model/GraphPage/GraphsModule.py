@@ -1,10 +1,9 @@
 from Model.Custom.CustomttkFrame import ScrollableFrame
 import os, sys
-from datetime import datetime
+from datetime import datetime, timedelta, date as Date
 import math
 import re
 from General.util import Util
-from datetime import timedelta
 from PyQt5.QtWidgets import (
     QMessageBox, QDialog, QVBoxLayout, QLabel, QCheckBox, QPushButton, QFileDialog, QWidget
 )
@@ -284,6 +283,8 @@ class GraphsModule():
             station = station.split()[0]
             dates = []
             for date in self.slct_dates:
+                if isinstance(date, QDate):
+                    date = Date(date.year(), date.month(), date.day())
                 dt = datetime.combine(date, datetime.min.time()) + timedelta(hours=self.data_with_stations[station][3], minutes=self.data_with_stations[station][4])
                 dates.append(dt.replace(hour=0, minute=0))
             especific_data = self.get_especific_dates(dates, station)
@@ -312,6 +313,8 @@ class GraphsModule():
             station = station.split()[0]
             dates = []
             for date in self.slct_dates:
+                if isinstance(date, QDate):
+                    date = Date(date.year(), date.month(), date.day())
                 dt = datetime.combine(date, datetime.min.time()) + timedelta(hours=self.data_with_stations[station][3], minutes=self.data_with_stations[station][4])
                 dates.append(dt.replace(hour=0, minute=0))
             especific_data = self.get_especific_dates(dates, station)
@@ -340,6 +343,8 @@ class GraphsModule():
             for station in self.stations:
                 station = station.split()[0]
                 for date in self.slct_dates:
+                    if isinstance(date, QDate):
+                        date = Date(date.year(), date.month(), date.day())
                     H_value = calm_values.get(station, None).get(f'{date.day}/{date.month}/{date.year}', None).get(f'{time.hour}:{time.minute}', None).get(type)
                     if H_value is not None:
                         H_data.append(H_value)
@@ -357,6 +362,8 @@ class GraphsModule():
             midnight_data = []
             self.info_time[station] = []
             for date in self.slct_dates:
+                if isinstance(date, QDate):
+                    date = Date(date.year(), date.month(), date.day())
                 day = datetime.combine(date, datetime.min.time()) + timedelta(hours=self.data_with_stations[station][3], minutes=self.data_with_stations[station][4])
                 data = data_info[station][f'{day.day}/{day.month}/{day.year}'][f'{day.hour}:{day.minute}'][type]
                 # add to data in time to info dict

@@ -36,6 +36,8 @@ class ContourGraph(GraphsModule):
         self.data_with_stations = data_with_stations
         self.slct_types = selected_types
 
+        self._original_clim = None
+
         self.start_date, self.end_date = self.format_dates(start, end)
         self.end_date += timedelta(days=1)
         if not self.start_date:
@@ -240,15 +242,16 @@ class ContourGraph(GraphsModule):
                         if vmin < vmax:
                             self.current_contour.set_clim(vmin, vmax)       # atualiza contorno
                             self._current_cbar.update_normal(self.current_contour)  # atualiza cores
-                            self._current_cbar.set_ticks(np.linspace(vmin, vmax, 5))  # recalcula ticks automáticos
+                            self._current_cbar.set_ticks(np.linspace(vmin, vmax, 10))  # recalcula ticks automáticos
                             self.fig.canvas.draw_idle()
                         dlg.close()
 
                 def on_reset():
-                    vmin, vmax = self._original_clim
+                    vmin = self._original_clim[0]
+                    vmax = self._original_clim[1]
                     self.current_contour.set_clim(vmin, vmax)
                     self._current_cbar.update_normal(self.current_contour)
-                    self._current_cbar.set_ticks(np.linspace(vmin, vmax, 5))
+                    self._current_cbar.set_ticks(np.linspace(vmin, vmax, 10))
                     le_min.setText(f"{vmin:.6g}")  
                     le_max.setText(f"{vmax:.6g}")
                     self.fig.canvas.draw_idle()   
@@ -271,17 +274,20 @@ class ContourGraph(GraphsModule):
             QMessageBox.information(
                 None,
                 self.util.dict_language[self.lang]["mgbox_error"],
-                self.util.dict_language[self.lang]["mgbox_error_plt"]
+                self.util.dict_language[self.lang]["mgbox_error_plt_st"]
             )
             self.can_plot = False
-            print("❌ Erro ao gerar gráfico:", error)
+            print(error, "\nNECESSÁRIO AO MENOS DUAS ESTAÇÕES PARA CONTORNO")
 
 
     def config_graph(self, plot_type):
         # configura eixo X (tempo diário)
-        timeday = [self.start_date + timedelta(days=i) for i in range((self.end_date - self.start_date).days + 1)]
-        self.ax.set_xticks(timeday)
+        self.ax.xaxis.set_major_locator(mdates.DayLocator())  
         self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%d'))
+        self.ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
+        self.ax.tick_params(axis='x', which='minor', labelbottom=False)
+        #self.fig.autofmt_xdate()
+        #self.ax.xaxis.set_minor_locator(mdates.MinuteLocator(interval=30))
 
         self.ax.set_xlim(self.start_date, self.end_date)
         self.ax.set_xlabel('UT (Dias)')
@@ -297,6 +303,6 @@ class ContourGraph(GraphsModule):
                 label.set_fontweight('bold')
 
         if self.grid_graph:
-            self.ax.grid(True, linestyle='--', alpha=0.5)
+            self.ax.grid(True, linestyle='-', alpha=1, which='major', color='black', linewidth=1)
 
     

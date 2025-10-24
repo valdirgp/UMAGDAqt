@@ -1,12 +1,17 @@
 from Model.Custom.CustomttkFrame import ScrollableFrame
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QListWidget, QAbstractItemView,
-    QPushButton, QCheckBox, QDateEdit, QSizePolicy, QScrollBar, QFrame, QListWidgetItem, QLineEdit
+    QPushButton, QCheckBox, QDateEdit, QSizePolicy, QScrollBar, QFrame, QListWidgetItem, 
+    QLineEdit, QCalendarWidget
 )
 from PyQt5.QtCore import QDate, Qt
+from PyQt5.QtGui import QWheelEvent
 import psutil
 from General.util import Util
 
+class NoScrollCalendar(QCalendarWidget):
+    def wheelEvent(self, event: QWheelEvent):
+        return
 class SideOptionsPlot(QWidget):
     def __init__(self, root, language, year, final, drive):
         super().__init__(root)
@@ -16,13 +21,15 @@ class SideOptionsPlot(QWidget):
         self.year = year
         self.final = final
         self.drive = drive
-        self.selected_dates = []
+        self.selected_dates = set()
 
         self.btn_singleday_function = None
         self.btn_globaldays_function = None
         self.btn_manydays_function = None
         self.btn_contour_function = None
         self.local_downloads_function = None
+
+        self.selected_dates = set()
 
     # Função de filtro
     def filter_visible_items(self):
@@ -36,8 +43,8 @@ class SideOptionsPlot(QWidget):
         self.frame_side_functions = ScrollableFrame(self.window, 255)
         self.frame_side_functions.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.frame_side_functions.setMinimumWidth(255)
-        self.frame_side_functions.setMaximumWidth(255)
-        self.frame_side_functions.setFixedWidth(255)
+        self.frame_side_functions.setMaximumWidth(325)
+        #self.frame_side_functions.setFixedWidth(255)
         self.frame_side_functions.setObjectName("sideOptionsPlotFrame")
 
         #layout = QVBoxLayout(self.frame_side_functions.inner_frame)
@@ -104,6 +111,8 @@ class SideOptionsPlot(QWidget):
                     label, attr = plot_types[i + j]
                     cb = QCheckBox(label)
                     setattr(self, attr, cb)
+                    self.checkboxes[label] = cb
+                    cb.stateChanged.connect(self.on_checkbox_changed)
                     row_layout.addWidget(cb)
             layout.addLayout(row_layout)
 
@@ -141,22 +150,141 @@ class SideOptionsPlot(QWidget):
         layout.addWidget(self.options_frame)
 
         # Calm days calendar
-        lbl_calm = QLabel(self.util.dict_language[self.language]['lbl_calm'])
+        '''lbl_calm = QLabel(self.util.dict_language[self.language]['lbl_calm'])
         layout.addWidget(lbl_calm)
-        self.cal_calm = QDateEdit()
-        self.cal_calm.setDisplayFormat('dd/MM/yyyy')
-        self.cal_calm.setCalendarPopup(True)
+        self.cal_calm = QCalendarWidget()
+        #self.cal_calm.setDisplayFormat('dd/MM/yyyy')
+        #self.cal_calm.setCalendarPopup(True)
+        self.cal_calm.setSelectionMode(QCalendarWidget.MultiSelection)
         hoje = QDate.currentDate()
         data = QDate(self.year[2], self.year[1], self.year[0])
-        self.cal_calm.setDate(data)
+        self.cal_calm.setSelectedDate(data)
+        layout.addWidget(self.cal_calm)'''
+
+        self.cal_calm = QCalendarWidget()
+        self.cal_calm.setGridVisible(True)
+        data = QDate(self.year[2], self.year[1], self.year[0])
+        self.cal_calm.setSelectedDate(data)
+        self.cal_calm.setEnabled(False)
+        self.cal_calm.clicked.connect(self.date_selected)  # Conectar o evento de clique ao método
         layout.addWidget(self.cal_calm)
+
+        # Lista para exibir as datas selecionadas
+        self.date_list = QListWidget()
+        self.date_list.setSelectionMode(QListWidget.MultiSelection)  # Permite selecionar múltiplos itens
+        self.date_list.itemClicked.connect(self.remove_date_from_list)  # Conectar evento de clique na lista
+        layout.addWidget(self.date_list)
+
+        # Botões para adicionar e remover datas diretamente da lista
+        btn_layout = QHBoxLayout()
+        self.btn_clear = QPushButton("Limpar Seleção")
+        self.btn_clear.clicked.connect(self.clear_selection)
+        btn_layout.addWidget(self.btn_clear)
+        layout.addLayout(btn_layout)
 
         #self.frame_side_functions.inner_frame.setLayout(layout)
         #self.frame_side_functions.setLayout(QVBoxLayout())
         self.frame_side_functions.show()
+
+    def on_checkbox_changed(self):
+        """Método chamado toda vez que uma checkbox muda de estado."""
+        d_checked = any(
+            cb.isChecked() for lbl, cb in self.checkboxes.items() if lbl.startswith('d')
+        )
+
+        if self.combo_type_plot.currentIndex() not in (0, 5):
+            self.cal_calm.setEnabled(d_checked)
+        else:
+            self.cal_calm.setEnabled(False)
     
     def create_none_options(self):
         self.clear_options_frame()
+    
+    def date_selected(self, date):
+        """
+        Esse método será chamado quando uma data for clicada no QCalendarWidget.
+        Ele adiciona ou remove a data da lista de datas selecionadas.
+        """
+        date_str = date.toString("dd/MM/yyyy")
+
+        # Verifica se a data já está na lista
+        if date in self.selected_dates:
+            # Remove a data da lista
+            self.selected_dates.remove(date)
+            # Remove a data da lista visual (QListWidget)
+            for i in range(self.date_list.count()):
+                item = self.date_list.item(i)
+                if item.text() == date_str:
+                    self.date_list.takeItem(i)
+                    break
+        else:
+            # Adiciona a data à lista de datas selecionadas
+            self.selected_dates.add(date)
+            # Adiciona a data ao QListWidget
+            self.date_list.addItem(date_str)
+
+        # Atualiza as datas destacadas no calendário
+        self.update_calendar_selection()
+
+    def remove_date_from_list(self, item):
+        """
+        Esse método será chamado quando um item for clicado na QListWidget.
+        Ele remove a data clicada tanto da lista quanto do QCalendarWidget.
+        """
+        date_str = item.text()
+
+        # Remover a data da lista de datas selecionadas
+        if date_str in self.selected_dates:
+            self.selected_dates.remove(date_str)
+            # Remover o item da QListWidget
+            self.date_list.takeItem(self.date_list.row(item))
+
+        # Atualiza o calendário para refletir a remoção
+        self.update_calendar_selection()
+
+
+
+
+    def update_calendar_selection(self):
+        """
+        Atualiza as datas selecionadas visualmente no QCalendarWidget.
+        """
+        from PyQt5.QtGui import QTextCharFormat, QColor
+        from PyQt5.QtCore import QDate, Qt
+        # Criar uma lista de QDate a partir das datas selecionadas
+        #selected_qdates = [QDate.fromString(date, "dd/MM/yyyy") for date in self.selected_dates]
+        selected_qdates = [date for date in self.selected_dates]
+        # Criar um formato de texto para as datas selecionadas (cor vermelha)
+        text_format = QTextCharFormat()
+        text_format.setForeground(QColor(0, 128, 0))  # Define a cor do texto como vermelho
+
+        # Criar um formato de texto normal (sem cor)
+        normal_format = QTextCharFormat()
+
+        # Iterar sobre as datas do mês visível
+        first_date = self.cal_calm.selectedDate().addDays(-self.cal_calm.selectedDate().day() + 1)
+        last_date = first_date.addMonths(1).addDays(-1)
+
+        # Limpar as formatações anteriores (se necessário)
+        for day in range(first_date.day(), last_date.day() + 1):
+            date = QDate(first_date.year(), first_date.month(), day)
+            self.cal_calm.setDateTextFormat(date, normal_format)
+
+        # Aplicar a cor vermelha para as datas selecionadas
+        for selected_date in selected_qdates:
+            if first_date <= selected_date <= last_date:
+                self.cal_calm.setDateTextFormat(selected_date, text_format)
+
+
+
+
+    def clear_selection(self):
+        """
+        Limpa todas as datas selecionadas, tanto no calendário quanto na lista.
+        """
+        self.selected_dates.clear()  # Limpa o conjunto de datas selecionadas
+        self.date_list.clear()  # Limpa a lista visível no QListWidget
+        self.update_calendar_selection()  # Atualiza o calendário (desmarcando todas as datas)
 
     # create a child for frame_side_functions to have one day options
     def create_oneday_options(self):
@@ -309,6 +437,7 @@ class SideOptionsPlot(QWidget):
             case 6:
                 self.create_contorno_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+        self.on_checkbox_changed()
 
     # update all info came from the chosen drive 
     def change_local(self, index):
