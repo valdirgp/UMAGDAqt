@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QSizePolicy
 
 class ScrollableFrame(QWidget):
-    def __init__(self, parent, width):
+    def __init__(self, parent, width, max):
         super().__init__(parent)
 
          # Criação da área de scroll
@@ -24,5 +24,5 @@ class ScrollableFrame(QWidget):
 
         # Definições de tamanho
         self.setMinimumWidth(width)
-        self.setMaximumWidth(width)
+        self.setMaximumWidth(max)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)

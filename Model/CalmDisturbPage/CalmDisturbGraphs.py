@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import QDate
 import os
 import math
 from General.util import Util
@@ -89,6 +90,8 @@ class CalmDisturbModel(GraphsModule):
         #time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages))]
         # Use o primeiro (ou único) dia perturbado como referência do eixo X
         disturbed_day = self.selected_disturb_date[0]
+        if isinstance(disturbed_day, QDate):
+            disturbed_day = disturbed_day.toPyDate()
 
         # Se for date, converte para datetime na meia-noite
         if isinstance(disturbed_day, datetime):
@@ -190,7 +193,9 @@ class CalmDisturbModel(GraphsModule):
     # Retrieves the data for a given station and date from the corresponding file
     def get_data(self, day, station, network_station):
         self.st = station
-        self.day = day
+        if isinstance(day, QDate):
+            day = day.toPyDate()
+        self.day = datetime.combine(day, datetime.min.time())
         path_station = os.path.join(self.lcl_downloaded,
                                     'Magnetometer',
                                     network_station,

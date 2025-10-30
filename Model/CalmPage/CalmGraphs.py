@@ -1,8 +1,9 @@
 from Model.GraphPage.GraphsModule import GraphsModule
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import QDate
 import os
 import math
 from General.util import Util
@@ -116,6 +117,8 @@ class CalmModel(GraphsModule):
 
         # Garantir que o eixo X seja datetime contínuo
         disturbed_day = self.selected_calm_dates[0]  # ou use qualquer dia de referência
+        if isinstance(disturbed_day, QDate):
+            disturbed_day = disturbed_day.toPyDate()
         base_time = datetime.combine(disturbed_day, datetime.min.time())
         time = [base_time + timedelta(minutes=i) for i in range(len(calm_averages_H))]
 
@@ -177,6 +180,8 @@ class CalmModel(GraphsModule):
 
         # Garantir que o eixo X seja datetime contínuo
         disturbed_day = self.selected_calm_dates[0]  # ou use qualquer dia de referência
+        if isinstance(disturbed_day, QDate):
+            disturbed_day = disturbed_day.toPyDate()
         base_time = datetime.combine(disturbed_day, datetime.min.time())
         time = [base_time + timedelta(minutes=i) for i in range(len(calm_averages_Z))]
 
@@ -309,7 +314,9 @@ class CalmModel(GraphsModule):
     # Retrieves the data for a given station and date from the corresponding file
     def get_data(self, day, station, network_station):
         self.st = station
-        self.day = day
+        if isinstance(day, QDate):
+            day = day.toPyDate()
+        self.day = datetime.combine(day, datetime.min.time())
         path_station = os.path.join(self.lcl_downloaded, 
                                     'Magnetometer', 
                                     network_station, 

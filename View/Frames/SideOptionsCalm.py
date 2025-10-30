@@ -31,7 +31,7 @@ class SideOptionsCalm(QWidget):
 
     # Creates options to create graphs
     def create_calm_plot_options(self):
-        self.frame_side_functions_calm = ScrollableFrame(self.window, 255)
+        self.frame_side_functions_calm = ScrollableFrame(self.window, 255, 325)
         self.frame_side_functions_calm.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.frame_side_functions_calm.setMinimumWidth(255)
         self.frame_side_functions_calm.setMaximumWidth(325)
@@ -110,7 +110,7 @@ class SideOptionsCalm(QWidget):
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_calm.setSelectedDate(data)
         #self.add_date(self.cal_calm, self.selected_calm_dates)
-        self.cal_calm.clicked.connect(lambda date: self.date_selected(date))
+        self.cal_calm.clicked.connect(self.date_selected)
         self.cal_calm.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # Conecta ao dateChanged do QDateEdit
@@ -164,9 +164,8 @@ class SideOptionsCalm(QWidget):
         Esse método será chamado quando uma data for clicada no QCalendarWidget.
         Ele adiciona ou remove a data da lista de datas selecionadas.
         """
-        date = date.toPyDate()
-        date_str = str(date)
-        print(type(date))
+        date_str = date.toString("dd/MM/yyyy")
+
         # Verifica se a data já está na lista
         if date in self.selected_calm_dates:
             # Remove a data da lista
@@ -180,6 +179,7 @@ class SideOptionsCalm(QWidget):
         else:
             # Adiciona a data à lista de datas selecionadas
             self.selected_calm_dates.append(date)
+            print(date)
             # Adiciona a data ao QListWidget
             self.date_list.addItem(date_str)
 
@@ -191,11 +191,13 @@ class SideOptionsCalm(QWidget):
         Esse método será chamado quando um item for clicado na QListWidget.
         Ele remove a data clicada tanto da lista quanto do QCalendarWidget.
         """
-        date_str = (item.text()).toPyDate()
+        date_str = item.text()
+        date = date_str.split("/")
+        date = QDate(int(date[2]), int(date[1]), int(date[0]))
 
         # Remover a data da lista de datas selecionadas
-        if date_str in self.selected_calm_dates:
-            self.selected_calm_dates.remove(date_str)
+        if date in self.selected_calm_dates:
+            self.selected_calm_dates.remove(date)
             # Remover o item da QListWidget
             self.date_list.takeItem(self.date_list.row(item))
 
@@ -209,8 +211,8 @@ class SideOptionsCalm(QWidget):
         from PyQt5.QtGui import QTextCharFormat, QColor
         from PyQt5.QtCore import QDate, Qt
         # Criar uma lista de QDate a partir das datas selecionadas
+        #selected_qdates = [QDate.fromString(date, "dd/MM/yyyy") for date in self.selected_dates]
         selected_qdates = [date for date in self.selected_calm_dates]
-
         # Criar um formato de texto para as datas selecionadas (cor vermelha)
         text_format = QTextCharFormat()
         text_format.setForeground(QColor(0, 128, 0))  # Define a cor do texto como vermelho
@@ -233,6 +235,7 @@ class SideOptionsCalm(QWidget):
                 self.cal_calm.setDateTextFormat(selected_date, text_format)
 
     def populate_list_options(self, listwidget, stations):
+        selecionados = [item.text() for item in listwidget.selectedItems()]
         listwidget.clear()
         for st in stations:
             codigo = st.split()[0]   # pega só o código da estação (ex: "ARA")
@@ -241,9 +244,12 @@ class SideOptionsCalm(QWidget):
             item = QListWidgetItem(texto)   # o que aparece na lista
             item.setData(Qt.UserRole, codigo)  # dado "oculto", só o código
             listwidget.addItem(item)
+            if any(sel.startswith(codigo) for sel in selecionados):
+                selecionar = listwidget.findItems(codigo, Qt.MatchContains)
+                selecionar[0].setSelected(True)
+                print(selecionar)
         self.filter_visible_items()
 
-    # Fill combobox that chooses path
     def populate_combo_local(self):
         combo_list = []
         particoes = psutil.disk_partitions()
@@ -255,7 +261,6 @@ class SideOptionsCalm(QWidget):
         index = self.combo_download_location.findText(self.drive)
         self.combo_download_location.setCurrentIndex(index)
 
-    # Update all info came from the chosen drive 
     def change_local(self, index):
         if self.local_downloads_function:
             self.local_downloads_function()

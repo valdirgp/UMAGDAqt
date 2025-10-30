@@ -33,7 +33,7 @@ class SideOptionsDownload(QWidget):
         #self.options_frame = ScrollableFrame(self, 255)
         #self.options_frame.setStyleSheet("background-color: #2c2c2c;")
 
-        self.options_frame = ScrollableFrame(self, 255)
+        self.options_frame = ScrollableFrame(self, 255, 255)
         layout = self.options_frame.inner_layout  # pega o layout do scroll
         layout.setContentsMargins(5,5,5,5)
         layout.setSpacing(8)
@@ -116,6 +116,7 @@ class SideOptionsDownload(QWidget):
 
     # fill all listbox
     def populate_stations_listbox(self, listwidget, stations):
+        selecionados = [item.text() for item in listwidget.selectedItems()]
         listwidget.clear()
         for st in stations:
             codigo = st.split()[0]   # pega só o código da estação (ex: "ARA")
@@ -124,6 +125,10 @@ class SideOptionsDownload(QWidget):
             item = QListWidgetItem(texto)   # o que aparece na lista
             item.setData(Qt.UserRole, codigo)  # dado "oculto", só o código
             listwidget.addItem(item)
+            if any(sel.startswith(codigo) for sel in selecionados):
+                selecionar = listwidget.findItems(codigo, Qt.MatchContains)
+                selecionar[0].setSelected(True)
+                print(selecionar)
         self.filter_visible_items()
 
     # fill combox with all drive options

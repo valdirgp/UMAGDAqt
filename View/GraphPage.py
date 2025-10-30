@@ -192,10 +192,9 @@ class GraphPage(QWidget):
 
     # update all appearing widgets
     def update_data(self):
-        self.side_options.list_all_stations.clear()
         self.side_options.populate_list_options(self.side_options.list_all_stations, self.downloaded_data_stations)
         self.side_options.update_lists = self.update_min_sub_list
-        for scatter in self.map_widget.scart_plots:
+        '''for scatter in self.map_widget.scart_plots:
             scatter.remove()
         self.map_widget.scart_plots.clear()
         for text in self.map_widget.text_annotations:
@@ -204,7 +203,7 @@ class GraphPage(QWidget):
         
         self.get_downloaded_stations_location()
         self.map_widget.set_station_map(self.longitude, self.latitude)
-        self.map_widget.set_stationsname_map(self.all_locals)
+        self.map_widget.set_stationsname_map(self.all_locals)'''
 
         longitudes = np.linspace(-180, 180, 361)
 
