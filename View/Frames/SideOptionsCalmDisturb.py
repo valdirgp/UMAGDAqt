@@ -106,6 +106,7 @@ class SideOptionsCalmDisturb(QWidget):
         layout.addWidget(lbl_calm_date)
         self.cal_calm = QCalendarWidget()
         self.cal_calm.setGridVisible(True)
+        self.cal_calm.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
         hoje = QDate.currentDate()
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_calm.setSelectedDate(data)
@@ -125,6 +126,7 @@ class SideOptionsCalmDisturb(QWidget):
         lbl_disturb_date = QLabel(self.util.dict_language[self.lang]['lbl_disturb'])
         layout.addWidget(lbl_disturb_date)
         self.cal_disturb = QCalendarWidget()
+        self.cal_disturb.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
         self.cal_disturb.setGridVisible(True)
         hoje = QDate.currentDate()
         data = QDate(self.year[2], self.year[1], self.year[0])
@@ -168,7 +170,11 @@ class SideOptionsCalmDisturb(QWidget):
     # clear all station's list
     def clean_all(self):
         self.selected_calm_dates.clear()
+        self.calm_date_list.clear()
         self.selected_disturb_dates.clear()
+        self.disturb_date_list.clear()
+        self.update_calendar_selection(self.selected_calm_dates, self.cal_calm)
+        self.update_calendar_selection(self.selected_disturb_dates, self.cal_disturb)
 
     def date_selected(self, date, selected_dates, date_list, calendar):
         """

@@ -106,6 +106,7 @@ class SideOptionsCalm(QWidget):
         layout.addWidget(lbl_calm_date)
         self.cal_calm = QCalendarWidget()
         self.cal_calm.setGridVisible(True)
+        self.cal_calm.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
         hoje = QDate.currentDate()
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_calm.setSelectedDate(data)

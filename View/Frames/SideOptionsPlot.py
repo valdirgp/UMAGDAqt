@@ -37,7 +37,7 @@ class SideOptionsPlot(QWidget):
 
     # creates options to create graphs
     def create_plot_options(self):
-        self.frame_side_functions = ScrollableFrame(self.window, 255, 325)
+        self.frame_side_functions = ScrollableFrame(self.window, 255, 330)
         self.frame_side_functions.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         #self.frame_side_functions.setMinimumWidth(255)
         #self.frame_side_functions.setMaximumWidth(330)
@@ -162,8 +162,9 @@ class SideOptionsPlot(QWidget):
         layout.addWidget(lbl_calm)
 
         self.cal_calm = QCalendarWidget()
-        self.cal_calm.setMaximumWidth(310)
+        self.cal_calm.setMaximumWidth(320)
         self.cal_calm.setGridVisible(True)
+        self.cal_calm.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_calm.setSelectedDate(data)
         self.cal_calm.setEnabled(False)

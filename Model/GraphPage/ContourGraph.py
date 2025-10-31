@@ -163,7 +163,16 @@ class ContourGraph(GraphsModule):
                 lat_grid = np.linspace(lats_arr.min(), lats_arr.max(), max(50, len(np.unique(lats_arr))*5))
                 X, Y = np.meshgrid(time_grid, lat_grid)
 
-                Z = griddata((times_num, lats_arr), vals_arr, (X, Y), method='cubic')
+                if len(np.unique(lats_arr)) == 1:
+                    # caso de uma estação
+                    lat = np.unique(lats_arr)[0]
+                    X, Y = np.meshgrid(time_grid, [lat - 0.001, lat + 0.001])
+                    vals_interp = np.interp(time_grid, np.unique(times_num), np.interp(times_num, times_num, vals_arr))
+                    Z = np.tile(vals_interp, (2, 1))
+                else:
+                    Z = griddata((times_num, lats_arr), vals_arr, (X, Y), method='cubic')
+
+                    
                 if Z is None or np.all(np.isnan(Z)):
                     Z = griddata((times_num, lats_arr), vals_arr, (X, Y), method='linear')
 

@@ -114,6 +114,7 @@ class SideOptionsUniversalCD(QWidget):
 
         self.cal_calm = QCalendarWidget()
         self.cal_calm.setGridVisible(True)
+        self.cal_calm.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
         hoje = QDate.currentDate()
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_calm.setSelectedDate(data)
@@ -134,6 +135,7 @@ class SideOptionsUniversalCD(QWidget):
 
         self.cal_disturb = QCalendarWidget()
         self.cal_disturb.setGridVisible(True)
+        self.cal_disturb.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
         hoje = QDate.currentDate()
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_disturb.setSelectedDate(data)
@@ -184,9 +186,11 @@ class SideOptionsUniversalCD(QWidget):
     # Limpa os calendários e listas
     def clean_all(self):
         self.selected_calm_dates.clear()
+        self.calm_date_list.clear()
         self.selected_disturb_dates.clear()
-        self.cal_calm.setSelectedDate(QDate.currentDate())
-        self.cal_disturb.setSelectedDate(QDate.currentDate())
+        self.disturb_date_list.clear()
+        self.update_calendar_selection(self.selected_calm_dates, self.cal_calm)
+        self.update_calendar_selection(self.selected_disturb_dates, self.cal_disturb)
 
     def date_selected(self, date, selected_dates, date_list, calendar):
         """
