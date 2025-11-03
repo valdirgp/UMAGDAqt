@@ -3,6 +3,8 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from Model.Custom.CustomToolBar import CustomToolbar
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+from cartopy.io.shapereader import Reader
+from cartopy.feature import ShapelyFeature
 import matplotlib.pyplot as plt
 import re
 

@@ -134,41 +134,46 @@ class MainControl:
         if access_allow:
             magnetic_eq_coords = self.util.calculate_inclination(self.year)
 
-            self.DownloadPage = DownloadsControl(self.root, self.lang, self.year, self.drive, magnetic_eq_coords)
-            self.DownloadPage.load_widgets()
+            self.DownloadControl = DownloadsControl(self.root, self.lang, self.year, self.drive, magnetic_eq_coords)
+            self.DownloadControl.load_widgets()
+            self.DownloadPage = self.DownloadControl.get_widget()
         
-            self.GraphPage = GraphControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
-            self.GraphPage.load_widgets()
+            self.GraphControl = GraphControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
+            self.GraphControl.load_widgets()
+            self.GraphPage = self.GraphControl.get_widget()
 
-            self.CalmDisturbPage = CalmDisturbControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
-            self.CalmDisturbPage.load_widgets()
+            self.CalmDisturbControl = CalmDisturbControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
+            self.CalmDisturbControl.load_widgets()
+            self.CalmDisturbPage = self.CalmDisturbControl.get_widget()
 
-            self.CalmPage = CalmControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
-            self.CalmPage.load_widgets()
+            self.CalmControl = CalmControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
+            self.CalmControl.load_widgets()
+            self.CalmPage = self.CalmControl.get_widget()
 
-            self.UniversalCDPage = UniversalCDPageControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
-            self.UniversalCDPage.load_widgets()
+            self.UniversalCDControl = UniversalCDPageControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
+            self.UniversalCDControl.load_widgets()
+            self.UniversalCDPage = self.UniversalCDControl.get_widget()
 
             self.AboutPage = AboutPage(self.root, self.lang)
             self.AboutPage.load_page()
 
             # adiciona páginas ao stack
-            self.stack.addWidget(self.DownloadPage.get_widget())
-            self.stack.addWidget(self.GraphPage.get_widget())
-            self.stack.addWidget(self.CalmDisturbPage.get_widget())
-            self.stack.addWidget(self.CalmPage.get_widget())
-            self.stack.addWidget(self.UniversalCDPage.get_widget())
+            self.stack.addWidget(self.DownloadPage)
+            self.stack.addWidget(self.GraphPage)
+            self.stack.addWidget(self.CalmDisturbPage)
+            self.stack.addWidget(self.CalmPage)
+            self.stack.addWidget(self.UniversalCDPage)
 
             self.stack.addWidget(self.AboutPage)
 
             # menu principal
             func_menu = QMenu(self.util.dict_language[self.lang]["menu_main"], self.root)
 
-            func_menu.addAction(self.util.dict_language[self.lang]["menu_dwd"], lambda: self.stack.setCurrentWidget(self.DownloadPage.get_widget()))
-            func_menu.addAction(self.util.dict_language[self.lang]["menu_graph"], lambda: self.stack.setCurrentWidget(self.GraphPage.get_widget()))
-            func_menu.addAction(self.util.dict_language[self.lang]['menu_cd'], lambda: self.stack.setCurrentWidget(self.CalmDisturbPage.get_widget()))
-            func_menu.addAction(self.util.dict_language[self.lang]['menu_c'], lambda: self.stack.setCurrentWidget(self.CalmPage.get_widget()))
-            func_menu.addAction(self.util.dict_language[self.lang]['menu_ucd'], lambda: self.stack.setCurrentWidget(self.UniversalCDPage.get_widget()))
+            func_menu.addAction(self.util.dict_language[self.lang]["menu_dwd"], lambda: self.stack.setCurrentWidget(self.DownloadPage))
+            func_menu.addAction(self.util.dict_language[self.lang]["menu_graph"], lambda: self.stack.setCurrentWidget(self.GraphPage))
+            func_menu.addAction(self.util.dict_language[self.lang]['menu_cd'], lambda: self.stack.setCurrentWidget(self.CalmDisturbPage))
+            func_menu.addAction(self.util.dict_language[self.lang]['menu_c'], lambda: self.stack.setCurrentWidget(self.CalmPage))
+            func_menu.addAction(self.util.dict_language[self.lang]['menu_ucd'], lambda: self.stack.setCurrentWidget(self.UniversalCDPage))
 
             # menu de configurações
             config_menu = QMenu(self.util.dict_language[self.lang]["menu_config"], self.root)
@@ -254,6 +259,17 @@ class MainControl:
             # Exemplo: ação ao trocar drive
             drive_combo.currentTextChanged.connect(lambda: self.util.change_drive(drive_combo.currentText()))
 
+            regioes_menu = QMenu(self.util.dict_language[self.lang]["menu_regiao"], self.root)
+            regioes_menu.addAction(self.util.dict_language[self.lang]["mundo"], lambda: self.setRegiao("mundo"))
+            regioes_menu.addAction(self.util.dict_language[self.lang]["america_do_norte"], lambda: self.setRegiao("america_do_norte"))
+            regioes_menu.addAction(self.util.dict_language[self.lang]["america_do_sul"], lambda: self.setRegiao("america_do_sul"))
+            regioes_menu.addAction(self.util.dict_language[self.lang]["africa"], lambda: self.setRegiao("africa"))
+            regioes_menu.addAction(self.util.dict_language[self.lang]["europa"], lambda: self.setRegiao("europa"))
+            regioes_menu.addAction(self.util.dict_language[self.lang]["asia"], lambda: self.setRegiao("asia"))
+            regioes_menu.addAction(self.util.dict_language[self.lang]["oceania"], lambda: self.setRegiao("oceania"))
+
+            config_menu.addMenu(regioes_menu)
+
             config_menu.addAction(self.util.dict_language[self.lang]["menu_reset"], lambda: self.reset())
 
             menubar.addMenu(func_menu)
@@ -261,7 +277,7 @@ class MainControl:
             menubar.addAction(self.util.dict_language[self.lang]["menu_about"], lambda: self.stack.setCurrentWidget(self.AboutPage))
 
             # abre página inicial
-            self.stack.setCurrentWidget(self.GraphPage.get_widget())
+            self.stack.setCurrentWidget(self.GraphPage)
 
             #path = "General/config.txt"
             #self.watcher.addPath(path)
@@ -299,8 +315,32 @@ class MainControl:
         if self.year != self.util.get_year_config() or self.final != self.util.get_final_config():
             self.initialize_app()
         
-    def restart_pages(self):
-        pass
+    def setRegiao(self, regiao):
+        regioes = {
+            "mundo": None,  # mostra o globo inteiro
+            "america_do_norte": [-170, -30, 5, 85],
+            "america_do_sul": [-82, -34, -56, 13],
+            "africa": [-20, 55, -35, 37],
+            "europa": [-25, 45, 34, 72],
+            "asia": [25, 180, -10, 80],
+            "oceania": [110, 180, -50, 10],
+        }
+
+        if regiao in regioes:
+            if regiao == "mundo":
+                #self.ax.set_global()
+                self.DownloadPage.map_widget.ax.set_global()
+                self.GraphPage.map_widget.ax.set_global()
+                self.CalmDisturbPage.map_widget.ax.set_global()
+                self.CalmPage.map_widget.ax.set_global()
+                self.UniversalCDPage.map_widget.ax.set_global()
+            else:
+                #self.ax.set_extent(regioes[regiao])
+                self.DownloadPage.map_widget.ax.set_extent(regioes[regiao])
+                self.GraphPage.map_widget.ax.set_extent(regioes[regiao])
+                self.CalmDisturbPage.map_widget.ax.set_extent(regioes[regiao])
+                self.CalmPage.map_widget.ax.set_extent(regioes[regiao])
+                self.UniversalCDPage.map_widget.ax.set_extent(regioes[regiao])
 
     def create_license_TopLevel(self):
         self.LicenseTopLevel.load_page()
