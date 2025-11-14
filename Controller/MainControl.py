@@ -11,7 +11,7 @@ from General.util import Util
 
 from PyQt5.QtWidgets import (
     QMainWindow, QMenuBar, QMenu, QStackedWidget, 
-    QWidgetAction, QComboBox, QDateEdit
+    QWidgetAction, QComboBox, QDateEdit, QMessageBox
 )
 from PyQt5.QtCore import QDate
 from PyQt5.QtGui import QIcon
@@ -26,16 +26,25 @@ class MainControl:
         self.root.setCentralWidget(self.stack)
 
     def initialize_app(self):
-        self.lang = self.util.get_language_config()
-        self.year = self.util.get_year_config()
-        self.final = self.util.get_final_config()
-        self.drive = self.util.get_drive_config()
-        self.root.setWindowTitle(self.util.dict_language[self.lang]["title"])
-        self.License = License(self.lang)
-        access_allow = self.License.verify_fisical_adress()
+        self.util.createConfig()
+        try:
+            self.lang = self.util.get_language_config()
+            self.year = self.util.get_year_config()
+            self.final = self.util.get_final_config()
+            self.drive = self.util.get_drive_config()
+            self.root.setWindowTitle(self.util.dict_language[self.lang]["title"])
+            self.License = License(self.lang)
+            access_allow = self.License.verify_fisical_adress()
 
-        menubar = QMenuBar(self.root)
-        self.root.setMenuBar(menubar)
+            menubar = QMenuBar(self.root)
+            self.root.setMenuBar(menubar)
+        except:
+            QMessageBox.information(
+                None,
+                "Error",
+                "config.txt not found"
+            )
+            return False
 
         if access_allow:
             magnetic_eq_coords = self.util.calculate_inclination(self.year)
@@ -212,9 +221,15 @@ class MainControl:
 
             self.stack.setCurrentWidget(self.InitialPage)
 
+        return True
+
     def update_listbox_on_change(self):
         if self.year != self.util.get_year_config() or self.final != self.util.get_final_config():
             self.initialize_app()
+    
+    def create_license_TopLevel(self):
+        self.LicenseTopLevel.load_page()
+        self.LicenseTopLevel.bind_get_new_user_info(self.License.create_lincense_request)
         
     def setRegiao(self, regiao):
         regioes = {
@@ -255,7 +270,7 @@ class MainControl:
         new_root = QMainWindow()
         new_root.resize(1920, 1080)
         new_root.showMaximized()
-        new_root.setWindowIcon(QIcon(self.util.resource_path('images/univap.ico')))
+        new_root.setWindowIcon(QIcon(self.util.resource_pathGeneral('images/univap.ico')))
         app = MainControl(new_root)
         app.initialize_app()
         new_root.show()

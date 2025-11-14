@@ -35,9 +35,6 @@ class SideOptionsCalmDisturb(QWidget):
     def create_calmdisturb_plot_options(self):
         self.frame_side_functions_calmdisturb = ScrollableFrame(self.window, 255, 325)
         self.frame_side_functions_calmdisturb.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        #self.frame_side_functions_calmdisturb.setMinimumWidth(255)
-        #self.frame_side_functions_calmdisturb.setMaximumWidth(330)
-        #self.frame_side_functions_calmdisturb.setFixedWidth(255)
         self.frame_side_functions_calmdisturb.setObjectName("sideOptionsCalmDisturbFrame")
 
         #layout = QVBoxLayout(self.frame_side_functions_calmdisturb.inner_frame)

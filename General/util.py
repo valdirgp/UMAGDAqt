@@ -269,6 +269,44 @@ class Util():
                         "progbar_dwd_readme":"+500+300"
                         }
 
+    def createConfig(self):
+        termos = ["lang:", "year:", "final:", "drive:"]
+        criar = False
+        config_path = self.resource_path("config.txt")
+
+        if os.path.isfile(config_path):
+            with open(config_path, "r", encoding="utf-8") as f:
+                conteudo = f.read().strip()
+
+            if not conteudo:
+                criar = True
+            else:
+                for termo in termos:
+                    if termo not in conteudo:
+                        criar = True
+                        break
+        else:
+            criar = True
+
+        if criar:
+            from datetime import datetime
+            import string
+
+            ano_atual = datetime.now().year - 1
+            mes_atual = datetime.now().month
+            dia_atual = datetime.now().day
+            yearEfinal = f"{dia_atual}/{mes_atual}/{ano_atual}"
+
+            drives = [f"{d}:\\" for d in string.ascii_uppercase]
+            drive = next((d for d in drives if os.path.exists(d)), None)
+
+            with open(config_path, "w", encoding="utf-8") as f:
+                config = ["en", yearEfinal, yearEfinal, drive]
+                for termo, valor in zip(termos, config):
+                    f.write(f"{termo} {valor}\n")
+
+                
+
     # get the languge in config txt
     def get_language_config(self):
         with open(self.resource_path("config.txt"), "r") as f:
@@ -399,6 +437,16 @@ class Util():
     # creates an absolute path
     @staticmethod
     def resource_path(relative_path):
+        try:
+            base_path = sys._MEIPASS
+            base_path = os.path.join(base_path, "")
+        except Exception:
+            base_path = os.path.abspath(".")
+            
+        return os.path.join(base_path, relative_path)
+    
+    @staticmethod
+    def resource_pathGeneral(relative_path):
         try:
             base_path = sys._MEIPASS
             base_path = os.path.join(base_path, "General")

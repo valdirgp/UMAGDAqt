@@ -29,9 +29,9 @@ class CalmControl():
     def resource_path(relative_path):
         try:
             base_path = sys._MEIPASS
-            base_path = os.path.join(base_path, "General")
+            base_path = os.path.join(base_path, "")
         except Exception:
-            base_path = os.path.abspath("./General")
+            base_path = os.path.abspath(".")
             
         return os.path.join(base_path, relative_path)
 

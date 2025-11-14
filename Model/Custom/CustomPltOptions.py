@@ -5,7 +5,7 @@ class CustomPltOptions(ToolToggleBase):
     default_keymap = 'm'  # keyboard shortcut
     description = 'Inform data collected'
     # O matplotlib aceita PNG para ícones em Qt, então use o PNG
-    image = Util.resource_path("images/info_icon.png")
+    image = Util.resource_pathGeneral("images/info_icon.png")
 
     def __init__(self, *args, inform_graph, **kwargs):
         self.inform_graph = inform_graph

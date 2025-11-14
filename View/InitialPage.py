@@ -36,7 +36,7 @@ class InitialPage(QWidget):
         layout.setAlignment(Qt.AlignCenter)
 
         # carregar imagem
-        img = Image.open(self.util.resource_path("images/magnetic_field.png"))
+        img = Image.open(self.util.resource_pathGeneral("images/magnetic_field.png"))
         img_resized = img.resize((int(img.width * (width/2) / width),
                                   int(img.height * (height/2) / height)))
         qt_image = self.pil_to_qimage(img_resized)
