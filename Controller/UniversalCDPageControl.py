@@ -22,7 +22,7 @@ class UniversalCDPageControl():
         path = self.resource_path("config.txt")
         self.watcher.addPath(path)
         #self.watcher.fileChanged.connect(self.update_listbox_on_change)
-        self.watcher.fileChanged.connect(lambda: self.get_search_stations_downloaded_filtred(self.drive))
+        self.watcher.fileChanged.connect(lambda: self.get_search_stations_downloaded_filtred(self.util.get_drive_config()))
 
     # creates an absolute path
     @staticmethod
@@ -50,6 +50,8 @@ class UniversalCDPageControl():
 
         self.Graphs.bind_plot_selected(self.plot_selected)
 
+        #self.Graphs.bind_updateMap(lambda: self.Graphs.updateMap())
+
     def plot_selected(self):
         selected_types = [dtype for dtype in self.Graphs.get_type_data() if dtype is not None or ""]
         self.selected_station = self.Graphs.get_selected_station()
@@ -76,7 +78,7 @@ class UniversalCDPageControl():
 
     # gets all the downloaded stations
     def get_search_stations_downloaded(self):
-        downloaded_data_stations, self.data_with_stations = self.Model.search_stations_downloaded(self.year)
+        downloaded_data_stations, self.data_with_stations = self.Model.search_stations_downloaded(self.year, self.drive)
         self.Graphs.bind_search_stations_downloaded(downloaded_data_stations)
 
     
@@ -85,10 +87,15 @@ class UniversalCDPageControl():
             self.year = self.util.get_year_config()
         if self.util.get_final_config() != self.final:
             self.final = self.util.get_final_config()
+        
+        self.drive = self.util.get_drive_config()
         downloaded_data_stations, self.data_with_stations = self.Model.search_stations_downloaded(self.year, drive)
         self.Graphs.bind_search_stations_downloaded(downloaded_data_stations)
         self.Graphs.year = self.year
         self.Graphs.final = self.final
+        self.Graphs.drive = self.drive
+        if self.Graphs.side_options.combo_download_location.currentText() != self.util.get_drive_config():
+            self.Graphs.updateDrive(self.util.get_drive_config())
         self.Graphs.update_data()
 
     def get_widget(self):

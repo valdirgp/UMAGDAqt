@@ -26,6 +26,8 @@ class SideOptionsPlot(QWidget):
         self.btn_contour_function = None
         self.local_downloads_function = None
 
+        #self.updateMap_function = None
+
         self.selected_dates = set()
 
     # Função de filtro
@@ -39,9 +41,6 @@ class SideOptionsPlot(QWidget):
     def create_plot_options(self):
         self.frame_side_functions = ScrollableFrame(self.window, 255, 330)
         self.frame_side_functions.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        #self.frame_side_functions.setMinimumWidth(255)
-        #self.frame_side_functions.setMaximumWidth(330)
-        #self.frame_side_functions.setFixedWidth(255)
         self.frame_side_functions.setObjectName("sideOptionsPlotFrame")
 
         #layout = QVBoxLayout(self.frame_side_functions.inner_frame)
@@ -148,16 +147,6 @@ class SideOptionsPlot(QWidget):
         layout.addWidget(self.options_frame)
 
         # Calm days calendar
-        '''lbl_calm = QLabel(self.util.dict_language[self.language]['lbl_calm'])
-        layout.addWidget(lbl_calm)
-        self.cal_calm = QCalendarWidget()
-        #self.cal_calm.setDisplayFormat('dd/MM/yyyy')
-        #self.cal_calm.setCalendarPopup(True)
-        self.cal_calm.setSelectionMode(QCalendarWidget.MultiSelection)
-        hoje = QDate.currentDate()
-        data = QDate(self.year[2], self.year[1], self.year[0])
-        self.cal_calm.setSelectedDate(data)
-        layout.addWidget(self.cal_calm)'''
         lbl_calm = QLabel(self.util.dict_language[self.language]['lbl_calm'])
         layout.addWidget(lbl_calm)
 
@@ -461,6 +450,12 @@ class SideOptionsPlot(QWidget):
     def change_local(self, index):
         if self.local_downloads_function:
             self.local_downloads_function()
+        if self.util.get_drive_config() != self.combo_download_location.currentText():
+            self.util.change_drive(self.combo_download_location.currentText())
+        '''if self.updateMap_function:
+            self.updateMap_function()'''
+        
+
 
     # fill a listbox with the given data
     def populate_list_options(self, listwidget, stations):
@@ -476,7 +471,6 @@ class SideOptionsPlot(QWidget):
             if any(sel.startswith(codigo) for sel in selecionados):
                 selecionar = listwidget.findItems(codigo, Qt.MatchContains)
                 selecionar[0].setSelected(True)
-                print(selecionar)
         self.filter_visible_items()
 
     # fill combobox that is chooses path
@@ -488,6 +482,7 @@ class SideOptionsPlot(QWidget):
         self.combo_download_location.clear()
         self.combo_download_location.addItems(combo_list)
         if combo_list:
+            #self.combo_download_location.setCurrentIndex(self.combo_download_location.findText(self.drive))
             self.combo_download_location.setCurrentIndex(0)
 
         index = self.combo_download_location.findText(self.drive)

@@ -22,6 +22,8 @@ class SideOptionsCalmDisturb(QWidget):
         self.combo_local_download = None
         self.local_downloads_function = None
 
+        #self.updateMap_function = None
+
     # Função de filtro
     def filter_visible_items(self):
         filter_text = self.search_input.text().lower()
@@ -283,3 +285,7 @@ class SideOptionsCalmDisturb(QWidget):
     def change_local(self, index):
         if self.local_downloads_function:
             self.local_downloads_function()
+        if self.util.get_drive_config() != self.combo_download_location.currentText():
+            self.util.change_drive(self.combo_download_location.currentText())
+        '''if self.updateMap_function:
+            self.updateMap_function()'''

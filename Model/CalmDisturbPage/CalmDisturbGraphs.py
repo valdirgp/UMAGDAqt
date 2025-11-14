@@ -78,15 +78,6 @@ class CalmDisturbModel(GraphsModule):
         calm_avgPstd = self.calculate_calm_averagePstd()
         calm_avgMstd = self.calculate_calm_averageMstd()
 
-        '''
-        lista_legal = []
-        for day in self.selected_disturb_date:
-            disturbed_date_data = self.get_data(day, self.station, self.data_with_stations[f'{self.station}'][0])
-
-            for _, disturb in enumerate(disturbed_date_data):
-                lista_legal.append(disturb['H'])
-        '''
-
         #time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages))]
         # Use o primeiro (ou único) dia perturbado como referência do eixo X
         disturbed_day = self.selected_disturb_date[0]
@@ -100,14 +91,6 @@ class CalmDisturbModel(GraphsModule):
             base_time = datetime.combine(disturbed_day, datetime.min.time())
 
         time = [base_time + timedelta(minutes=i) for i in range(len(calm_averages))]
-
-        
-        '''
-        ax.plot(time, calm_averages, label='Calm Days', color='black', linewidth=2)
-        ax.plot(time, calm_avgPstd, label='Calm Days avg + std dev', color='gray', linewidth=1)
-        ax.plot(time, calm_avgMstd, label='Calm Days avg - std dev', color='gray', linewidth=1)
-        ax.plot(time, lista_legal, label='Disturbed Day', color='red', linewidth=1.5)
-        '''
 
         ax.plot(time, calm_averages, label='Calm Days', color='black', linewidth=2)
         ax.plot(time, calm_avgPstd, label='Calm Days avg + std dev', color='gray', linewidth=1)

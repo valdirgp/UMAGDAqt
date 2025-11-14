@@ -1,10 +1,8 @@
 from Model.DownloadPage.DownloadsModule import DownloadModule
-from bs4 import BeautifulSoup
 import requests
 import os
 from datetime import timedelta
 from charset_normalizer import detect
-from urllib import request
 import threading as mt
 import queue
 from PyQt5.QtWidgets import QMessageBox
@@ -18,29 +16,6 @@ class Embrace(DownloadModule):
         super().__init__(language, root)
         self.util = Util()
     # creates a list with all stations from the Embrace network
-    '''
-    def create_stationlist(self):
-        try:
-            response = requests.get('https://embracedata.inpe.br/magnetometer/', timeout=15, verify=False)
-            soup = BeautifulSoup(response.content, 'html.parser')
-            links = soup.find_all('a')
-            stations = list()
-            for link in links:
-                station = link.get('href')
-                if station[0].isalpha() and station != 'readme_magnetometer.txt':   
-                    station = station.replace('/','')
-                    station = 'VSE' if station == 'VSS' else station
-                    stations.append(station)
-            return stations
-        except Exception as error:
-            QMessageBox.information(
-                self.root,
-                self.util.dict_language[self.lang]["mgbox_error"],
-                'Erro ao conectar-se com embrace'
-            )
-            return []
-
-    '''
 
     def obter_coordenadas_estacoes_embrace(self):
         """

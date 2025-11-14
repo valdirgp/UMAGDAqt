@@ -1,12 +1,9 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from Model.Custom.CustomToolBar import CustomToolbar
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-from cartopy.io.shapereader import Reader
-from cartopy.feature import ShapelyFeature
 import matplotlib.pyplot as plt
-import re
 
 class Map(QWidget):
     def __init__(self, root):
@@ -40,13 +37,6 @@ class Map(QWidget):
         # Main layout for the map frame
         self.map_frame = QWidget(self.page_frame)
         layout = QVBoxLayout(self.map_frame)
-        #self.map_frame.setLayout(layout)
-        '''if self.map_frame.layout() is None:
-            layout = QVBoxLayout(self)
-            self.setLayout(main_layout)
-        else:
-            main_layout = self.layout()  # usa o layout já existente'''
-
 
         # Create matplotlib figure and axis with Cartopy
         self.fig = plt.figure()
@@ -65,15 +55,8 @@ class Map(QWidget):
         self.canvas = FigureCanvas(self.fig)
 
         # Conecta o evento de redesenho para atualizar os nomes
-        '''self.canvas.mpl_connect('draw_event', lambda event: self.update_annotations())
-        self.canvas.mpl_connect('button_release_event', lambda event: self.update_annotations())  # pan/zoom com mouse
-        self.ax.callbacks.connect('xlim_changed', lambda ax: self.update_annotations())
-        self.ax.callbacks.connect('ylim_changed', lambda ax: self.update_annotations())'''
-        self.ax.callbacks.connect('xlim_changed', lambda ax: self.update_annotations())
-        self.ax.callbacks.connect('ylim_changed', lambda ax: self.update_annotations())
-
-
-        #self.toolbar = CustomToolbar(self.canvas, self.map_frame, total_locals=self.all_locals)
+        self.xlim_callback_id = self.ax.callbacks.connect('xlim_changed', lambda ax: self.update_annotations())
+        self.ylim_callback_id = self.ax.callbacks.connect('ylim_changed', lambda ax: self.update_annotations())
 
         self.toolbar = CustomToolbar(self.canvas, self.map_frame, map_instance=self)
 
@@ -95,19 +78,6 @@ class Map(QWidget):
         self.canvas.draw()
 
     # creates text in given coordinates in station_locals and its name
-    '''
-    def set_stationsname_map(self, station_locals):
-        for coord in station_locals:
-            text = self.ax.annotate(
-                text=coord['station'],
-                xy=(coord['longitude'], coord['latitude']),
-                xytext=(5, 5),
-                textcoords='offset points',
-                ha='right'
-            )
-            self.text_annotations.append(text)
-        self.canvas.draw()
-    '''
     def set_stationsname_map(self, station_locals):
         self.all_locals = station_locals  # Salva os dados para uso posterior
 

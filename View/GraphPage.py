@@ -1,7 +1,8 @@
 from View.Frames.SideOptionsPlot import SideOptionsPlot
 from View.Frames.Map import Map
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel
+from PyQt5.QtWidgets import QWidget, QHBoxLayout
 from PyQt5.QtCore import Qt, QDate
+import sip
 import re
 from General.util import Util
 import cartopy.crs as ccrs
@@ -46,17 +47,11 @@ class GraphPage(QWidget):
 
     # creates frames for the tool
     def create_page_frames(self):
-        # Layout principal horizontal
-        #main_layout = QHBoxLayout(self.root)
-        #self.setLayout(main_layout)
         if self.layout() is None:
             main_layout = QHBoxLayout(self)
             self.setLayout(main_layout)
         else:
-            main_layout = self.layout()  # usa o layout já existente
-
-
-        #self.util.destroy_existent_frames(self.root)
+            main_layout = self.layout()
 
         self.side_options.create_plot_options()
         self.side_options.btn_select_all.clicked.connect(self.set_all_selected)
@@ -118,21 +113,6 @@ class GraphPage(QWidget):
 
     # change map's status when listbox is selected
     def listbox_on_click(self):
-        '''
-        items_from_list = [self.side_options.list_all_stations.item(i).text() for i in range(self.side_options.list_all_stations.count())]
-        selected_indexes = [i for i in range(self.side_options.list_all_stations.count()) if self.side_options.list_all_stations.item(i).isSelected()]
-        self.colors = ['red'] * len(self.all_locals)
-        for i, local in enumerate(self.all_locals):
-            try:
-                selection = items_from_list.index(local['station'])
-                if selection in selected_indexes:
-                    self.colors[i] = 'lightgreen'
-            except ValueError:
-                continue
-        if hasattr(self.map_widget, 'scart'):
-            self.map_widget.scart.set_facecolors(self.colors)
-            self.map_widget.canvas.draw()
-        '''
         # Altera status do mapa quando a lista é selecionada
         selected_items = [item.text() for item in self.side_options.list_all_stations.selectedItems()]
         '''for i, local in enumerate(self.all_locals):
@@ -150,7 +130,6 @@ class GraphPage(QWidget):
 
     # change map's status and listbox's status when map's button is selected
     def map_on_click(self, event):
-        '''
         if event.inaxes is not None:
             selected_longitude, selected_latitude = event.xdata, event.ydata
             items_from_list = [self.side_options.list_all_stations.item(i).text() for i in range(self.side_options.list_all_stations.count())]
@@ -170,7 +149,6 @@ class GraphPage(QWidget):
                             self.map_widget.canvas.draw()
                     except ValueError:
                         continue
-        '''
 
         # Altera status do mapa e da lista quando um ponto do mapa é clicado
         if event.inaxes is not None:
@@ -194,7 +172,11 @@ class GraphPage(QWidget):
     def update_data(self):
         self.side_options.populate_list_options(self.side_options.list_all_stations, self.downloaded_data_stations)
         self.side_options.update_lists = self.update_min_sub_list
-        '''for scatter in self.map_widget.scart_plots:
+
+        self.map_widget.ax.callbacks.disconnect(self.map_widget.xlim_callback_id)
+        self.map_widget.ax.callbacks.disconnect(self.map_widget.ylim_callback_id)
+
+        for scatter in self.map_widget.scart_plots:
             scatter.remove()
         self.map_widget.scart_plots.clear()
         for text in self.map_widget.text_annotations:
@@ -203,7 +185,13 @@ class GraphPage(QWidget):
         
         self.get_downloaded_stations_location()
         self.map_widget.set_station_map(self.longitude, self.latitude)
-        self.map_widget.set_stationsname_map(self.all_locals)'''
+        self.map_widget.set_stationsname_map(self.all_locals)
+        
+        self.xlim_callback_id = self.map_widget.ax.callbacks.connect('xlim_changed', lambda ax: self.map_widget.update_annotations())
+        self.ylim_callback_id = self.map_widget.ax.callbacks.connect('ylim_changed', lambda ax: self.map_widget.update_annotations())
+
+        self.listbox_on_click()
+
 
         longitudes = np.linspace(-180, 180, 361)
 
@@ -215,21 +203,48 @@ class GraphPage(QWidget):
 
         self.side_options.year = self.year
         self.side_options.final = self.final
+        self.side_options.drive = self.drive
 
+        #self.updateDrive()
+            
         self.side_options.cal_calm.setSelectedDate(QDate(self.year[2], self.year[1], self.year[0]))
         if hasattr(self.side_options, 'startdate'):
-            self.side_options.startdate.setDate(QDate(self.year[2], self.year[1], self.year[0]))
+            widget = self.side_options.startdate
+            if widget is not None and not sip.isdeleted(widget):
+                self.side_options.startdate.setDate(QDate(self.year[2], self.year[1], self.year[0]))
         if hasattr(self.side_options, 'enddate'):
-            self.side_options.enddate.setDate(QDate(self.final[2], self.final[1], self.final[0]))
+            widget = self.side_options.startdate
+            if widget is not None and not sip.isdeleted(widget):
+                self.side_options.enddate.setDate(QDate(self.final[2], self.final[1], self.final[0]))
+
+    def updateDrive(self, drive):
+        self.side_options.combo_download_location.setCurrentText(drive)
+    
+    def updateMap(self):
+        self.map_widget.ax.callbacks.disconnect(self.map_widget.xlim_callback_id)
+        self.map_widget.ax.callbacks.disconnect(self.map_widget.ylim_callback_id)
+
+        for scatter in self.map_widget.scart_plots:
+            scatter.remove()
+        self.map_widget.scart_plots.clear()
+        for text in self.map_widget.text_annotations:
+            text.remove()
+        self.map_widget.text_annotations.clear() 
+        
+        self.get_downloaded_stations_location()
+        self.map_widget.set_station_map(self.longitude, self.latitude)
+        self.map_widget.set_stationsname_map(self.all_locals)
+        
+        self.xlim_callback_id = self.map_widget.ax.callbacks.connect('xlim_changed', lambda ax: self.map_widget.update_annotations())
+        self.ylim_callback_id = self.map_widget.ax.callbacks.connect('ylim_changed', lambda ax: self.map_widget.update_annotations())
+
+        self.listbox_on_click()
+
 
     def update_min_sub_list(self):
         self.side_options.populate_list_options(self.side_options.minuend_stations_list, self.downloaded_data_stations)
         self.side_options.populate_list_options(self.side_options.subtracted_stations_list, self.downloaded_data_stations)
-
-    #def onfile_changed(self, path):
-    #    self.side_options.list_all_stations.clear()
-    #    self.side_options.populate_list_options(self.side_options.list_all_stations, self.downloaded_data_stations)
-
+        
     def bind_single_graph(self, callback):
         self.side_options.btn_singleday_function = callback
 
@@ -246,7 +261,11 @@ class GraphPage(QWidget):
         self.downloaded_data_stations = callback
 
     def bind_local_downloaded(self, callback):
-        self.side_options.local_downloads_function = callback
+        #self.side_options.local_downloads_function = callback
+        self.local_downloads_function = callback
+
+    '''def bind_updateMap(self, callback):
+        self.side_options.updateMap_function = callback'''
 
     def get_local_download(self):
         return self.side_options.combo_download_location.currentText()

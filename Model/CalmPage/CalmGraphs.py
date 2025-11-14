@@ -1,5 +1,5 @@
 from Model.GraphPage.GraphsModule import GraphsModule
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from PyQt5.QtWidgets import QMessageBox
@@ -79,34 +79,6 @@ class CalmModel(GraphsModule):
             current_date += timedelta(days=1)
         return station_data
 
-    '''
-    # Plot the given data using H(nT)
-    def plot_calm_avg_H(self):
-        plt.close("all")
-        fig, ax = plt.subplots(figsize=(10, 6))
-        calm_averages_H = self.calculate_calm_average_H()
-        calm_avgPstd_H = self.calculate_calm_averagePstd_H()
-        calm_avgMstd_H = self.calculate_calm_averageMstd_H()
-
-        time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_H))]
-
-        ax.plot(time, calm_averages_H, label='Calm Days', color='black', linewidth=2)
-        ax.plot(time, calm_avgPstd_H, label='Calm Days avg + std dev', color='gray', linewidth=1)
-        ax.plot(time, calm_avgMstd_H, label='Calm Days avg - std dev', color='gray', linewidth=1)
-
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-        ax.set_ylabel('H(nT)')
-        ax.set_xlabel('Time')
-        ax.set_title(f"Station: {self.station}")
-        ax.grid(True)
-        ax.legend()
-        ax.set_xlim(left=time[0], right=time[-1])
-
-        fig.suptitle('Calm Days H(nT) Data')
-        plt.subplots_adjust(left=0.1)
-        plt.show()
-    '''
-
     def plot_calm_avg_H(self):
         plt.close("all")
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -141,34 +113,6 @@ class CalmModel(GraphsModule):
         fig.suptitle('Calm Days H(nT) Data')
         plt.subplots_adjust(left=0.1)
         plt.show()
-
-    '''    
-    # Plot the given data using Z(nT)
-    def plot_calm_avg_Z(self):
-        plt.close("all")
-        fig, ax = plt.subplots(figsize=(10, 6))
-        calm_averages_Z = self.calculate_calm_average_Z()
-        calm_avgPstd_Z = self.calculate_calm_averagePstd_Z()
-        calm_avgMstd_Z = self.calculate_calm_averageMstd_Z()
-
-        time = [self.start_date + timedelta(minutes=i) for i in range(len(calm_averages_Z))]
-
-        ax.plot(time, calm_averages_Z, label='Calm Days', color='black', linewidth=2)
-        ax.plot(time, calm_avgPstd_Z, label='Calm Days avg + std dev', color='gray', linewidth=1)
-        ax.plot(time, calm_avgMstd_Z, label='Calm Days avg - std dev', color='gray', linewidth=1)
-
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-        ax.set_ylabel('Z(nT)')
-        ax.set_xlabel('Time')
-        ax.set_title(f"Station: {self.station}")
-        ax.grid(True)
-        ax.legend()
-        ax.set_xlim(left=time[0], right=time[-1])
-
-        fig.suptitle('Calm Days Z(nT) Data')
-        plt.subplots_adjust(left=0.1)
-        plt.show()
-    '''
 
     def plot_calm_avg_Z(self):
         plt.close("all")

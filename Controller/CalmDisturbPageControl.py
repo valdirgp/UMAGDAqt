@@ -22,7 +22,7 @@ class CalmDisturbControl:
         path = self.resource_path("config.txt")
         self.watcher.addPath(path)
         #self.watcher.fileChanged.connect(self.update_listbox_on_change)
-        self.watcher.fileChanged.connect(lambda: self.get_search_stations_downloaded_filtred(self.drive))
+        self.watcher.fileChanged.connect(lambda: self.get_search_stations_downloaded_filtred(self.util.get_drive_config()))
 
     # creates an absolute path
     @staticmethod
@@ -47,8 +47,11 @@ class CalmDisturbControl:
             )
         )
 
+        #self.Graphs.bind_updateMap(lambda: self.Graphs.updateMap())
+
         # callback do botão confirmar (gera os gráficos)
         self.Graphs.bind_plot_graph(self.tryna_plot)
+
     
     def tryna_plot(self):
         self.station_selected = self.Graphs.get_selected_station()
@@ -73,7 +76,7 @@ class CalmDisturbControl:
 
     # busca todas as estações baixadas
     def get_search_stations_downloaded(self):
-        downloaded_data_stations, self.data_with_stations = self.Model.search_stations_downloaded(self.year)
+        downloaded_data_stations, self.data_with_stations = self.Model.search_stations_downloaded(self.year, self.drive)
         self.Graphs.bind_search_stations_downloaded(downloaded_data_stations)
 
     # busca estações filtrando pelo drive selecionado
@@ -82,12 +85,16 @@ class CalmDisturbControl:
             self.year = self.util.get_year_config()
         if self.util.get_final_config() != self.final:
             self.final = self.util.get_final_config()
+        
+        self.drive = self.util.get_drive_config()
         downloaded_data_stations, self.data_with_stations = self.Model.search_stations_downloaded(self.year, drive)
         self.Graphs.bind_search_stations_downloaded(downloaded_data_stations)
         self.Graphs.year = self.year
         self.Graphs.final = self.final
+        self.Graphs.drive = self.drive
+        if self.Graphs.side_options.combo_download_location.currentText() != self.util.get_drive_config():
+            self.Graphs.updateDrive(self.util.get_drive_config())
         self.Graphs.update_data()
-
 
     def get_widget(self):
         return self.Graphs

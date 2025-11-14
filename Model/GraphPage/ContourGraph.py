@@ -72,6 +72,20 @@ class ContourGraph(GraphsModule):
 
         plt.show()
 
+        year_config = self.util.get_year_config()
+        final_config = self.util.get_final_config()
+        
+        if self.start_date.day != year_config[0] or self.start_date.month != year_config[1] or self.start_date.year != year_config[2]:
+            print("GlobalGraph - plot_global_days")
+            print("start_date:", self.start_date)
+            print("year_config:", year_config)
+            self.util.change_year([self.start_date.day, self.start_date.month, self.start_date.year])
+        if self.end_date.day - 1 != final_config[0] or self.end_date.month != final_config[1] or self.end_date.year != final_config[2]:
+            print("GlobalGraph - plot_global_days")
+            print("end_date:", self.end_date - timedelta(days=1))
+            print("final_config:", final_config)
+            self.util.change_final([self.end_date.day - 1, self.end_date.month, self.end_date.year])
+
     def add_delta_dict(self, type):
         base_type = type.replace('d', '')
         delta = self.calculate_midnight_average(base_type)

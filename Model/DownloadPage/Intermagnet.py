@@ -5,14 +5,12 @@ import os
 from datetime import timedelta
 import re
 from charset_normalizer import detect
-from urllib import request
 import threading as mt
 import queue
 from PyQt5.QtWidgets import QMessageBox
 from General.util import Util
 import math
 from pyIGRF import igrf_value
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 class Intermagnet(DownloadModule):
@@ -21,97 +19,6 @@ class Intermagnet(DownloadModule):
         self.util = Util()
 
     # creates a list with all stations from the Intermagnet network
-    '''def create_stationlist(self):
-        try:
-            response = requests.get(
-                'https://imag-data.bgs.ac.uk/GIN_V1/GINForms2?observatoryIagaCode=AAE&publicationState=Best+available&dataStartDate=2024-06-09&dataDuration=1&submitValue=Bulk+Download+...&request=DataView&samplesPerDay=minute',
-                timeout=15,
-                verify=False)
-            soup = BeautifulSoup(response.content, 'html.parser')
-            print(response.content)
-            options = soup.find_all('option')
-            stations = list()
-            for option in options:
-                station = option.get('value')
-                if len(station) == 3 and station.isalpha():
-                    station = 'VSI' if station.upper() == 'VSS' else station
-                    stations.append(station.upper())
-            return stations
-        except Exception:
-            QMessageBox.information(
-                self.root,
-                self.util.dict_language[self.lang]["mgbox_error"], 
-                'Erro ao conectar-se com intermagnet')
-            return []'''
-    
-    '''def obter_coordenadas_estacoes(self, station):
-        url = 'https://imag-data.bgs.ac.uk/GIN_V1/GINForms2?observatoryIagaCode=AAE&publicationState=Best+available&dataStartDate=2024-06-09&dataDuration=1&samplesPerDay=minute&submitValue=Observatory+Details&request=DataView'
-        response = requests.get(url)
-        soup = BeautifulSoup(response.content, 'html.parser')
-
-        # Encontrar a tabela com as informações das estações
-        tabela = soup.find('table')
-        linhas = tabela.find_all('tr')[1:]  # Ignorar o cabeçalho
-
-        estacoes = {}
-        for linha in linhas:
-            colunas = linha.find_all('td')
-            if len(colunas) > 4:  # Verificar se a linha contém dados suficientes
-                codigo = colunas[0].text.strip()
-                if codigo.upper() != station.upper(): continue
-                nome = colunas[1].text.strip()
-                pais = colunas[2].text.strip()
-                latitude = float(colunas[3].text.strip())
-                longitude = float(colunas[4].text.strip())
-                elevacao = colunas[5].text.strip()
-
-                estacoes = {
-                    'codigo': codigo.upper(),
-                    'latitude': latitude,
-                    'longitude': longitude,
-                }
-
-                break
-
-        return estacoes
-        
-    def create_stationlist(self, ano):
-        self.ano = ano
-        try:
-            with requests.get(
-                'https://imag-data.bgs.ac.uk/GIN_V1/GINForms2?observatoryIagaCode=AAE&publicationState=Best+available&dataStartDate=2024-06-09&dataDuration=1&submitValue=Bulk+Download+...&request=DataView&samplesPerDay=minute',
-                timeout=15,
-                verify=False) as response:
-
-                soup = BeautifulSoup(response.content, 'html.parser')
-                options = soup.find_all('option')
-                stations = list()
-                self.longitude = []
-                self.latitude = []
-                self.dip = []
-
-                for option in options:
-                    station = option.get('value')
-                    if len(station) == 3 and station.isalpha():
-                        station = 'VSI' if station.upper() == 'VSS' else station
-                        
-                        stations.append(station.upper())
-            print(len(stations))
-            for i in range (0, len(stations)):
-                estacoes = self.obter_coordenadas_estacoes(stations[i])
-
-                result = igrf_value(estacoes["latitude"], estacoes["longitude"], 300, self.ano) 
-                dip = -math.degrees(math.atan((math.tan(math.radians(result[1]))/2)))  # Inclinação magnética
-
-                stations[i] = (f'{estacoes["codigo"]} ({estacoes["latitude"]}, {estacoes["longitude"]}, {dip})')
-            return stations
-                            
-        except Exception:
-            QMessageBox.information(
-                self.root,
-                self.util.dict_language[self.lang]["mgbox_error"], 
-                'Erro ao conectar-se com intermagnet')
-            return []'''
     
     def obter_coordenadas_estacoes(self, station):
         try:
@@ -131,7 +38,7 @@ class Intermagnet(DownloadModule):
                     latitude = float(colunas[3].text.strip())
                     longitude = float(colunas[4].text.strip())
                     return {
-                        'codigo': codigo.upper(),
+                        'station': codigo.upper(),
                         'latitude': latitude,
                         'longitude': longitude
                     }
@@ -200,7 +107,7 @@ class Intermagnet(DownloadModule):
                 self.longitude.append(estacoes["longitude"])
                 self.dip.append(dip)
 
-                return f'{estacoes["codigo"]} ({estacoes["latitude"]:.5f}, {estacoes["longitude"]:.5f}, {dip:.5f})'
+                return f'{estacoes["station"]} ({estacoes["latitude"]:.5f}, {estacoes["longitude"]:.5f}, {dip:.5f})'
 
             # 3. Executa threads
             from concurrent.futures import ThreadPoolExecutor
@@ -312,9 +219,3 @@ class Intermagnet(DownloadModule):
                     f"{self.util.dict_language[self.lang]["error_download"]} {request_item['station'].lower()}{request_item['date'].year}{request_item['date'].month:02}{request_item['date'].day:02}min.min ({error})",
                     self.responses
                 )
-            '''
-            finally:
-                #self.update_progressbar()
-
-                self.progress_signal.emit()   # <-- em vez de self.update_progressbar()
-            '''

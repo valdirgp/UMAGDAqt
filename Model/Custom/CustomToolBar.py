@@ -18,26 +18,6 @@ def on_zoom_done(ax, tl):
             )
 
 class CustomToolbar(NavigationToolbar2QT):
-    '''
-    def __init__(self, canvas, window, total_locals=None):
-        super().__init__(canvas, window)
-        self.total_locals = total_locals
-        self.util = Util()
-
-    def home(self):
-        super().home()
-        on_zoom_done(self.canvas.figure.gca(), self.total_locals)
-
-    def release_zoom(self, event):
-        super().release_zoom(event)
-        on_zoom_done(self.canvas.figure.gca(), self.total_locals)
-
-    def back(self):
-        super().back()
-        on_zoom_done(self.canvas.figure.gca(), self.total_locals)
-
-    def forward(self):
-        super().forward()'''
     
     def __init__(self, canvas, window, map_instance=None):
         super().__init__(canvas, window)

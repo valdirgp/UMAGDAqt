@@ -1,6 +1,6 @@
 from View.Frames.SideOptionsCalm import SideOptionsCalm
 from View.Frames.Map import Map
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel
+from PyQt5.QtWidgets import QWidget, QHBoxLayout
 from PyQt5.QtCore import QDate
 from General.util import Util
 import re
@@ -179,9 +179,12 @@ class CalmPage(QWidget):
             return False
 
     def update_data(self):
-        self.side_options.list_all_stations.clear()
         self.side_options.populate_list_options(self.side_options.list_all_stations, self.downloaded_data_stations)
-        '''for scatter in self.map_widget.scart_plots:
+        
+        self.map_widget.ax.callbacks.disconnect(self.map_widget.xlim_callback_id)
+        self.map_widget.ax.callbacks.disconnect(self.map_widget.ylim_callback_id)
+
+        for scatter in self.map_widget.scart_plots:
             scatter.remove()
         self.map_widget.scart_plots.clear()
         for text in self.map_widget.text_annotations:
@@ -190,7 +193,12 @@ class CalmPage(QWidget):
         
         self.get_downloaded_stations_location()
         self.map_widget.set_station_map(self.longitude, self.latitude)
-        self.map_widget.set_stationsname_map(self.all_locals)'''
+        self.map_widget.set_stationsname_map(self.all_locals)
+        
+        self.xlim_callback_id = self.map_widget.ax.callbacks.connect('xlim_changed', lambda ax: self.map_widget.update_annotations())
+        self.ylim_callback_id = self.map_widget.ax.callbacks.connect('ylim_changed', lambda ax: self.map_widget.update_annotations())
+
+        self.listbox_on_click()
 
         longitudes = np.linspace(-180, 180, 361)
 
@@ -200,9 +208,38 @@ class CalmPage(QWidget):
 
         self.map_widget.canvas.draw()
 
+        self.side_options.year = self.year
+        self.side_options.final = self.final
+        self.side_options.drive = self.drive
+            
+        #self.updateDrive()
+
         self.side_options.cal_calm.setSelectedDate(QDate(self.year[2], self.year[1], self.year[0]))
         self.side_options.startdate.setDate(QDate(self.year[2], self.year[1], self.year[0]))
         self.side_options.enddate.setDate(QDate(self.final[2], self.final[1], self.final[0]))
+    
+    def updateDrive(self, drive):
+        self.side_options.combo_download_location.setCurrentText(drive)
+    
+    def updateMap(self):
+        self.map_widget.ax.callbacks.disconnect(self.map_widget.xlim_callback_id)
+        self.map_widget.ax.callbacks.disconnect(self.map_widget.ylim_callback_id)
+
+        for scatter in self.map_widget.scart_plots:
+            scatter.remove()
+        self.map_widget.scart_plots.clear()
+        for text in self.map_widget.text_annotations:
+            text.remove()
+        self.map_widget.text_annotations.clear() 
+        
+        self.get_downloaded_stations_location()
+        self.map_widget.set_station_map(self.longitude, self.latitude)
+        self.map_widget.set_stationsname_map(self.all_locals)
+        
+        self.xlim_callback_id = self.map_widget.ax.callbacks.connect('xlim_changed', lambda ax: self.map_widget.update_annotations())
+        self.ylim_callback_id = self.map_widget.ax.callbacks.connect('ylim_changed', lambda ax: self.map_widget.update_annotations())
+
+        self.listbox_on_click()
 
     def bind_plot_graph_H(self, callback):
         self.side_options.btn_plot_confirm_H.clicked.connect(callback)
@@ -214,7 +251,11 @@ class CalmPage(QWidget):
         self.downloaded_data_stations = callback
 
     def bind_local_downloaded(self, callback):
-        self.side_options.local_downloads_function = callback
+        #self.side_options.local_downloads_function = callback
+        self.local_downloads_function = callback
+
+    '''def bind_updateMap(self, callback):
+        self.side_options.updateMap_function = callback'''
 
     def get_start_date(self):
         return self.side_options.startdate.date().toPyDate()

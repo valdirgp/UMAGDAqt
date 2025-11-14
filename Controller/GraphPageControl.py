@@ -33,7 +33,7 @@ class GraphControl():
         path = self.resource_path("config.txt")
         self.watcher.addPath(path)
         #self.watcher.fileChanged.connect(self.update_listbox_on_change)
-        self.watcher.fileChanged.connect(lambda: self.get_search_stations_downloaded_filtred(self.drive))
+        self.watcher.fileChanged.connect(lambda: self.get_search_stations_downloaded_filtred(self.util.get_drive_config()))
 
     # creates an absolute path
     @staticmethod
@@ -49,6 +49,7 @@ class GraphControl():
     # creates graph frames for the window and bind type of plots to variables
     def load_widgets(self):
         self.get_search_stations_downloaded()
+        #self.Graphs.bind_updateMap(lambda: self.Graphs.updateMap())
 
         self.Graphs.bind_local_downloaded(lambda: self.get_search_stations_downloaded_filtred(self.Graphs.get_local_download()))
         self.Graphs.bind_single_graph(self.call_graph_creation)
@@ -56,9 +57,10 @@ class GraphControl():
         self.Graphs.bind_many_graphs(self.call_graph_creation)
         self.Graphs.bind_contour_graph(self.call_graph_creation)
 
+
     # gets all the downloaded stations
     def get_search_stations_downloaded(self):
-        downloaded_data_stations, self.data_with_stations = self.Module.search_stations_downloaded(self.year)
+        downloaded_data_stations, self.data_with_stations = self.Module.search_stations_downloaded(self.year, self.drive)
         self.Graphs.bind_search_stations_downloaded(downloaded_data_stations)
         #self.Graphs.bind_search_stations_downloaded(self.data_with_stations)
         self.Graphs.create_page_frames()
@@ -69,11 +71,16 @@ class GraphControl():
             self.year = self.util.get_year_config()
         if self.util.get_final_config() != self.final:
             self.final = self.util.get_final_config()
+        
+        self.drive = self.util.get_drive_config()
         downloaded_data_stations, self.data_with_stations = self.Module.search_stations_downloaded(self.year, drive)
         self.Graphs.bind_search_stations_downloaded(downloaded_data_stations)
-        #self.Graphs.bind_search_stations_downloaded(self.data_with_stations)
+
         self.Graphs.year = self.year
         self.Graphs.final = self.final
+        self.Graphs.drive = self.drive
+        if self.Graphs.side_options.combo_download_location.currentText() != self.util.get_drive_config():
+            self.Graphs.updateDrive(self.util.get_drive_config())
         self.Graphs.update_data()
 
     # call graphs creation
