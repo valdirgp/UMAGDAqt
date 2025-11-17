@@ -54,20 +54,11 @@ class License():
         address = uuid.getnode()
         fisical_address  = ':'.join(['{:02x}'.format((address >> ele) & 0xff) for ele in range(0, 8*6, 8)][::-1])
         return fisical_address
-    
-    @staticmethod
-    def resource_path(relative_path):
-        try:
-            base_path = sys._MEIPASS
-        except Exception:
-            base_path = os.path.abspath("./")
-            
-        return os.path.join(base_path, relative_path)
 
     # validate fisical address
     def verify_fisical_adress(self):
         try:
-            with open(self.resource_path('license_UMAGDA.utc'), 'r') as file:
+            with open(self.util.resource_path('license_UMAGDA.utc'), 'r') as file:
                 file_text = file.read()
                 encoded_address = self.encode_address()
                 if re.search(encoded_address, file_text):

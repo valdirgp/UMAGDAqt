@@ -43,15 +43,6 @@ class GraphsModule():
         day_of_year = (dt_object - year_start).days
 
         return dt_object.year + (day_of_year / days_in_year)
-    
-    @staticmethod
-    def resource_path(relative_path):
-        try:
-            base_path = sys._MEIPASS
-        except Exception:
-            base_path = os.path.abspath(".")
-            
-        return os.path.join(base_path, relative_path)
 
     # Searches for downloaded stations from EMBRACE and INTERMAGNET data folders
     def search_stations_downloaded(self, year, drive_location="C:\\"):
@@ -80,8 +71,8 @@ class GraphsModule():
                         data_with_stations[station] = ['INTERMAGNET']
                         main_downloaded_stations.add(station)
 
-        if os.path.exists(self.resource_path('readme_stations.txt')):
-            with open(self.resource_path('readme_stations.txt'),'r') as file:
+        if os.path.exists(self.util.resource_path('readme_stations.txt')):
+            with open(self.util.resource_path('readme_stations.txt'),'r') as file:
                 lines = file.readlines()
                 lines.pop(0)
                 for line in lines:

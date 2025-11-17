@@ -6,6 +6,7 @@ from datetime import datetime
 import numpy as np
 from pyIGRF import igrf_value
 import math
+from PyQt5.QtWidgets import QMessageBox
 
 class Util():
     def __init__(self):
@@ -443,7 +444,8 @@ class Util():
         except Exception:
             base_path = os.path.abspath(".")
             
-        return os.path.join(base_path, relative_path)
+        #return os.path.join(base_path, relative_path)
+        return(relative_path)
     
     @staticmethod
     def resource_pathGeneral(relative_path):

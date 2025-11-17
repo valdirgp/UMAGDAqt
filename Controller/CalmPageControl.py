@@ -19,21 +19,10 @@ class CalmControl():
         self.watcher = QFileSystemWatcher()
         self.util = Util()
 
-        path = self.resource_path("config.txt")
+        path = self.util.resource_path("config.txt")
         self.watcher.addPath(path)
         #self.watcher.fileChanged.connect(self.update_listbox_on_change)
         self.watcher.fileChanged.connect(lambda: self.get_search_stations_downloaded_filtred(self.util.get_drive_config()))
-
-    # creates an absolute path
-    @staticmethod
-    def resource_path(relative_path):
-        try:
-            base_path = sys._MEIPASS
-            base_path = os.path.join(base_path, "")
-        except Exception:
-            base_path = os.path.abspath(".")
-            
-        return os.path.join(base_path, relative_path)
 
     # Creates graph frames for the window and binds plot functions to buttons
     def load_widgets(self):
