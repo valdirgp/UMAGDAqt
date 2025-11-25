@@ -6,7 +6,6 @@ from datetime import datetime
 import numpy as np
 from pyIGRF import igrf_value
 import math
-from PyQt5.QtWidgets import QMessageBox
 
 class Util():
     def __init__(self):
@@ -271,7 +270,7 @@ class Util():
                         }
 
     def createConfig(self):
-        termos = ["lang:", "year:", "final:", "drive:"]
+        termos = ["lang:", "year:", "final:", "drive:", "regions{"]
         criar = False
         config_path = self.resource_path("config.txt")
 
@@ -302,9 +301,12 @@ class Util():
             drive = next((d for d in drives if os.path.exists(d)), None)
 
             with open(config_path, "w", encoding="utf-8") as f:
-                config = ["en", yearEfinal, yearEfinal, drive]
+                config = ["en", yearEfinal, yearEfinal, drive, ""]
                 for termo, valor in zip(termos, config):
-                    f.write(f"{termo} {valor}\n")
+                    if termo != "regions{":
+                        f.write(f"{termo} {valor}\n")
+                    else:
+                        f.write(termo + valor + "}\n")
 
                 
 
@@ -434,6 +436,57 @@ class Util():
 
         with open(self.resource_path("config.txt"), "w") as f:
             f.writelines(lines)
+    
+    def insert_region(self, region, coordenadas):
+        lines = []
+        inserir= False
+        with open(self.resource_path("config.txt"), "r") as f:
+            for line in f:
+                if "regions{" not in line and '}' not in line:
+                    if '"' not in line:
+                        key, value = line.strip().split()
+                    else:
+                        key, value = line.strip().split(':')
+                        key += ':'
+                else:
+                    key = line.strip()
+                if key == "regions{":
+                    lines.append("regions{\n")
+                    inserir = True
+                elif inserir:
+                    if key != "}":
+                        lines.append(f"{key} {value}\n")
+                    else:
+                        lines.append(f'"{region}": {coordenadas};')
+                        inserir = False
+                else:
+                    lines.append(line)
+        with open(self.resource_path("config.txt"), "w") as f:
+            lines.append("\n}")
+            f.writelines(lines)
+    
+    def get_region(self):
+        with open(self.resource_path("config.txt"), "r") as f:
+            file = f.read()
+            if "regions{" in file:
+                data_list = file.replace("}", "")
+                data_list = data_list.replace("\n", "")
+                data_list = data_list.split("{")
+                key_value = data_list[1].split(";")
+                key_value.pop()
+                data = []
+                for item in key_value:
+                    item = item.split(":")
+                    item[0] = item[0].replace('"', '')
+                    item[0] = item[0].strip('\n')
+                    item[0] = item[0].strip()
+                    item[1] = item[1].strip()
+                    item[1] = item[1].strip('[')
+                    item[1] = item[1].strip(']')
+                    item[1] = item[1].split(',')
+                    data.append(item)
+            return data
+    
 
     # creates an absolute path
     @staticmethod
@@ -457,25 +510,11 @@ class Util():
             
         return os.path.join(base_path, relative_path)
     
-    # destroy every existent frame in the window
     def destroy_existent_frames(self, root):
-        # Em PyQt5, widgets filhos podem ser removidos assim:
         for widget in root.findChildren(type(root)):
             widget.setParent(None)
 
     def to_decimal_year(self, dt_object: datetime) -> float:
-        """
-        Converts a datetime object to a decimal year.
-        
-        This function correctly accounts for leap years.
-        
-        Args:
-            dt_object (datetime): The datetime object to convert.
-        
-        Returns:
-            float: The date and time as a decimal year.
-        """
-
         year_start = datetime(dt_object.year, 1, 1)
         year_end = datetime(dt_object.year + 1, 1, 1)
 
@@ -490,32 +529,7 @@ class Util():
         ano = datetime(ano[2], ano[1], ano[0])
         self.ano = self.to_decimal_year(ano)
         dip = []
-        #for long in range(-180, 181): 
-        #     lat_range = np.linspace(-90, 90, 543)
-        #     for lat in lat_range:
-        #         result = igrf_value(lat, long, 0.0, self.ano)
-        #         if abs(result[1]) <= 0.5:
-        #             dip.append(lat)
-        #             break
         for long in range(-180, 181):
-            result = igrf_value(0.0, long, 0.300, self.ano) 
+            result = igrf_value(0.0, long, 300, self.ano) 
             dip.append(-math.degrees(math.atan((math.tan(math.radians(result[1]))/2))))  # Inclinação magnética 
-            #dip.append(result[1])  # Inclinação magnética
         return dip
-    
-    '''def calculate_inclination(self):
-        self.ano = datetime.now().year
-        latitudes_equador_magnetico = []
-
-        for lon in range(-180, 181):  # 361 longitudes
-            lat_range = np.linspace(-90, 90, 543)
-
-            for lat in lat_range:
-                result = igrf_value(lat, lon, 0.0, self.ano)
-                inclination = result[1]  # Inclinação magnética
-
-                if abs(inclination) <= 0.5:
-                    latitudes_equador_magnetico.append(lat)
-                    break  # passa para a próxima longitude
-
-        return latitudes_equador_magnetico  # Só as latitudes!'''

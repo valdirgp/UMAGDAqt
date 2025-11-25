@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtGui import QIcon
 import sys
 from Controller.MainControl import MainControl
+from General.util import Util as util
 
 class UmagdaApp(QMainWindow):
     def __init__(self):
@@ -17,10 +18,10 @@ class UmagdaApp(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon('General/images/univap.ico'))
+    app.setWindowIcon(QIcon(util.resource_pathGeneral('images/univap.ico')))
     window = UmagdaApp()
     teste = window.test()
     if teste:
-        window.setWindowIcon(QIcon('General/images/univap.ico'))
+        window.setWindowIcon(QIcon(util.resource_pathGeneral('images/univap.ico')))
         window.showMaximized()
         sys.exit(app.exec_())

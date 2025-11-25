@@ -13,10 +13,11 @@ from PyQt5.QtWidgets import (
     QMainWindow, QMenuBar, QMenu, QStackedWidget, 
     QWidgetAction, QComboBox, QDateEdit, QMessageBox
 )
-from PyQt5.QtCore import QDate
+from PyQt5.QtCore import QDate, QFileSystemWatcher
 from PyQt5.QtGui import QIcon
 from datetime import datetime
 import psutil
+
 
 class MainControl:
     def __init__(self, root: QMainWindow):
@@ -24,6 +25,11 @@ class MainControl:
         self.util = Util()
         self.stack = QStackedWidget()
         self.root.setCentralWidget(self.stack)
+
+        self.watcher = QFileSystemWatcher()
+        path = self.util.resource_path("config.txt")
+        self.watcher.addPath(path)
+        self.watcher.fileChanged.connect(self.insertMap)
 
     def initialize_app(self):
         self.util.createConfig()
@@ -91,11 +97,11 @@ class MainControl:
             func_menu.addAction(self.util.dict_language[self.lang]['menu_ucd'], lambda: self.stack.setCurrentWidget(self.UniversalCDPage))
 
             # menu de configurações
-            config_menu = QMenu(self.util.dict_language[self.lang]["menu_config"], self.root)
+            self.config_menu = QMenu(self.util.dict_language[self.lang]["menu_config"], self.root)
             lang_menu = QMenu(self.util.dict_language[self.lang]["menu_lang"], self.root)
             lang_menu.addAction(self.util.dict_language[self.lang]["menu_en"], lambda: self.reset("en"))
             lang_menu.addAction(self.util.dict_language[self.lang]["menu_port"], lambda: self.reset("br"))
-            config_menu.addMenu(lang_menu)
+            self.config_menu.addMenu(lang_menu)
 
             # Criar submenu de data
             date_menu = QMenu(self.util.dict_language[self.lang]["menu_date"], self.root)
@@ -136,7 +142,7 @@ class MainControl:
             date_menu.addAction(date_action)
             date_menu.addAction(date_action_final)
             date_menu.addAction(self.util.dict_language[self.lang]["btn_confirm"], lambda: confirm_date())
-            config_menu.addMenu(date_menu)
+            self.config_menu.addMenu(date_menu)
 
             def confirm_date():
                 selected_date = date_edit.date()
@@ -169,26 +175,31 @@ class MainControl:
             drive_action.setDefaultWidget(drive_combo)
 
             drive_menu.addAction(drive_action)
-            config_menu.addMenu(drive_menu)
+            self.config_menu.addMenu(drive_menu)
 
             # Exemplo: ação ao trocar drive
             drive_combo.currentTextChanged.connect(lambda: self.util.change_drive(drive_combo.currentText()))
 
-            regioes_menu = QMenu(self.util.dict_language[self.lang]["menu_regiao"], self.root)
-            regioes_menu.addAction(self.util.dict_language[self.lang]["mundo"], lambda: self.setRegiao("mundo"))
-            regioes_menu.addAction(self.util.dict_language[self.lang]["america_do_norte"], lambda: self.setRegiao("america_do_norte"))
-            regioes_menu.addAction(self.util.dict_language[self.lang]["america_do_sul"], lambda: self.setRegiao("america_do_sul"))
-            regioes_menu.addAction(self.util.dict_language[self.lang]["africa"], lambda: self.setRegiao("africa"))
-            regioes_menu.addAction(self.util.dict_language[self.lang]["europa"], lambda: self.setRegiao("europa"))
-            regioes_menu.addAction(self.util.dict_language[self.lang]["asia"], lambda: self.setRegiao("asia"))
-            regioes_menu.addAction(self.util.dict_language[self.lang]["oceania"], lambda: self.setRegiao("oceania"))
+            self.regioes_menu = QMenu(self.util.dict_language[self.lang]["menu_regiao"], self.root)
+            regioes_padrao = ["mundo", "america_do_norte", "america_do_sul", "africa", "europa", "asia", "oceania"]
+            for regiao in regioes_padrao:
+                self.regioes_menu.addAction(self.util.dict_language[self.lang][regiao], lambda re=regiao: self.setRegiao(re))
 
-            config_menu.addMenu(regioes_menu)
+            dados = self.util.get_region()
+            regioes_diff = {}
+            for dado in dados:
+                if dado[0] not in regioes_padrao:
+                    regioes_diff[dado[0]] = dado[1]
+            for regiao, coordenadas in regioes_diff.items():
+                self.regioes_menu.addAction(regiao, lambda: self.setRegiao(regiao))
 
-            config_menu.addAction(self.util.dict_language[self.lang]["menu_reset"], lambda: self.reset())
+
+            self.config_menu.addMenu(self.regioes_menu)
+
+            self.config_menu.addAction(self.util.dict_language[self.lang]["menu_reset"], lambda: self.reset())
 
             menubar.addMenu(func_menu)
-            menubar.addMenu(config_menu)
+            menubar.addMenu(self.config_menu)
             menubar.addAction(self.util.dict_language[self.lang]["menu_about"], lambda: self.stack.setCurrentWidget(self.AboutPage))
 
             # abre página inicial
@@ -199,7 +210,6 @@ class MainControl:
             self.InitialPage.load_page()
 
             self.LicenseTopLevel = LicenseTopLevel(self.root, self.lang)
-            #self.LicenseTopLevel.load_page()
 
             self.AboutPage = AboutPage(self.root, self.lang)
             self.AboutPage.load_page()
@@ -223,35 +233,42 @@ class MainControl:
 
         return True
 
-    def update_listbox_on_change(self):
+    '''def update_listbox_on_change(self):
         if self.year != self.util.get_year_config() or self.final != self.util.get_final_config():
-            self.initialize_app()
+            self.initialize_app()'''
     
     def create_license_TopLevel(self):
         self.LicenseTopLevel.load_page()
         self.LicenseTopLevel.bind_get_new_user_info(self.License.create_lincense_request)
         
+    def insertMap(self):
+        data = self.util.get_region()
+        regioes_padrao = ["mundo", "america_do_norte", "america_do_sul", "africa", "europa", "asia", "oceania"]
+        regioes = {}
+        for dado in data:
+            regioes[dado[0]] = dado[1]
+        for dado in regioes.keys():
+            if dado in regioes_padrao:
+                continue
+            elif any(regiao.text() == dado for regiao in self.regioes_menu.actions()):
+                continue
+            else:
+                self.regioes_menu.addAction(dado, lambda: self.setRegiao(dado))
+    
     def setRegiao(self, regiao):
-        regioes = {
-            "mundo": None,  # mostra o globo inteiro
-            "america_do_norte": [-170, -30, 5, 85],
-            "america_do_sul": [-82, -34, -56, 13],
-            "africa": [-20, 55, -35, 37],
-            "europa": [-25, 45, 34, 72],
-            "asia": [25, 180, -10, 80],
-            "oceania": [110, 180, -50, 10],
-        }
+        dados = self.util.get_region()
+        regioes = {}
+        for dado in dados:
+            regioes[dado[0]] = dado[1]
 
-        if regiao in regioes:
+        if regiao in regioes.keys():
             if regiao == "mundo":
-                #self.ax.set_global()
                 self.DownloadPage.map_widget.ax.set_global()
                 self.GraphPage.map_widget.ax.set_global()
                 self.CalmDisturbPage.map_widget.ax.set_global()
                 self.CalmPage.map_widget.ax.set_global()
                 self.UniversalCDPage.map_widget.ax.set_global()
             else:
-                #self.ax.set_extent(regioes[regiao])
                 self.DownloadPage.map_widget.ax.set_extent(regioes[regiao])
                 self.GraphPage.map_widget.ax.set_extent(regioes[regiao])
                 self.CalmDisturbPage.map_widget.ax.set_extent(regioes[regiao])

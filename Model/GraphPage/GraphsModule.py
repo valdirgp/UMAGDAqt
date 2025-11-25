@@ -105,8 +105,8 @@ class GraphsModule():
         for i in range(0, len(main_downloaded_stations)):
             if len(data_with_stations[main_downloaded_stations[i]]) < 5:
                 continue
-            result = igrf_value(data_with_stations[main_downloaded_stations[i]][2], data_with_stations[main_downloaded_stations[i]][1], 0.300, year_date)
-            dip = -math.degrees(math.atan((math.tan(math.radians(result[1]))/2)))
+            result = igrf_value(data_with_stations[main_downloaded_stations[i]][2], data_with_stations[main_downloaded_stations[i]][1], 300, year_date)
+            dip = math.degrees(math.atan((math.tan(math.radians(result[1]))/2)))
             #dip = result[1]
             main_downloaded_stations[i] = f"{main_downloaded_stations[i]} ({data_with_stations[main_downloaded_stations[i]][2]:.5f}, {data_with_stations[main_downloaded_stations[i]][1]:.5f}, {dip:.5f})"
         return main_downloaded_stations, data_with_stations

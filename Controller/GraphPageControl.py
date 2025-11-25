@@ -8,7 +8,6 @@ from Model.GraphPage.ContourGraph import ContourGraph
 from View.GraphPage import GraphPage
 from PyQt5.QtCore import QFileSystemWatcher
 from General.util import Util
-import sys, os
 
 
 class GraphControl():
