@@ -300,13 +300,22 @@ class Util():
             drives = [f"{d}:\\" for d in string.ascii_uppercase]
             drive = next((d for d in drives if os.path.exists(d)), None)
 
+            regioes = '''
+        "mundo":                      None;
+        "america_do_norte":                      [-170, -30, 5, 85];
+        "america_do_sul":                      [-82, -34, -56, 13];
+        "africa":                      [-20, 55, -35, 37];
+        "europa":                      [-25, 45, 34, 72];
+        "asia":                      [25, 180, -10, 80];
+        "oceania":                      [110, 180, -50, 10];'''
+
             with open(config_path, "w", encoding="utf-8") as f:
-                config = ["en", yearEfinal, yearEfinal, drive, ""]
+                config = ["en", yearEfinal, yearEfinal, drive, regioes]
                 for termo, valor in zip(termos, config):
                     if termo != "regions{":
                         f.write(f"{termo} {valor}\n")
                     else:
-                        f.write(termo + valor + "}\n")
+                        f.write(termo + valor + "\n}\n")
 
                 
 
@@ -338,7 +347,15 @@ class Util():
         lines = []
         with open(self.resource_path("config.txt"), "r") as f:
             for line in f:
-                key, value = line.strip().split()
+                if "regions{" not in line and '}' not in line:
+                    if '"' not in line:
+                        key, value = line.strip().split()
+                    else:
+                        key, value = line.strip().split(':')
+                        key += ':'
+                else:
+                    key = line.strip()
+                #key, value = line.strip().split()
                 if key.strip() == "lang:":
                     lines.append(f"lang: {lang}\n")
                 else:
@@ -368,7 +385,15 @@ class Util():
         lines = []
         with open(self.resource_path("config.txt"), "r") as f:
             for line in f:
-                key, value = line.strip().split()
+                if "regions{" not in line and '}' not in line:
+                    if '"' not in line:
+                        key, value = line.strip().split()
+                    else:
+                        key, value = line.strip().split(':')
+                        key += ':'
+                else:
+                    key = line.strip()
+                #key, value = line.strip().split()
                 if key.strip() == "year:":
                     lines.append(f"year: {year[0]}/{year[1]}/{year[2]}\n")
                 else:
@@ -398,7 +423,15 @@ class Util():
         lines = []
         with open(self.resource_path("config.txt"), "r") as f:
             for line in f:
-                key, value = line.strip().split()
+                if "regions{" not in line and '}' not in line:
+                    if '"' not in line:
+                        key, value = line.strip().split()
+                    else:
+                        key, value = line.strip().split(':')
+                        key += ':'
+                else:
+                    key = line.strip()
+                #key, value = line.strip().split()
                 if key.strip() == "final:":
                     lines.append(f"final: {final[0]}/{final[1]}/{final[2]}\n")
                 else:
@@ -428,7 +461,15 @@ class Util():
         lines = []
         with open(self.resource_path("config.txt"), "r") as f:
             for line in f:
-                key, value = line.strip().split()
+                if "regions{" not in line and '}' not in line:
+                    if '"' not in line:
+                        key, value = line.strip().split()
+                    else:
+                        key, value = line.strip().split(':')
+                        key += ':'
+                else:
+                    key = line.strip()
+                #key, value = line.strip().split()
                 if key.strip() == "drive:":
                     lines.append(f"drive: {drive}\n")
                 else:

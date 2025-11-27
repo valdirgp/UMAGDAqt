@@ -184,7 +184,7 @@ class SideOptionsPlot(QWidget):
             cb.isChecked() for lbl, cb in self.checkboxes.items() if lbl.startswith('d')
         )
 
-        if self.combo_type_plot.currentIndex() not in (0, 5):
+        if self.combo_type_plot.currentIndex() != 0:
             self.cal_calm.setEnabled(d_checked)
         else:
             self.cal_calm.setEnabled(False)

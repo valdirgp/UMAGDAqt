@@ -3,6 +3,7 @@ import os, sys
 from datetime import datetime, timedelta, date as Date
 import math
 import re
+import numpy as np
 from General.util import Util
 from PyQt5.QtWidgets import (
     QMessageBox, QDialog, QVBoxLayout, QLabel, QCheckBox, QPushButton, QFileDialog, QWidget
@@ -113,6 +114,8 @@ class GraphsModule():
     
     # Retrieves the data for a given station and date from the corresponding file
     def get_data(self, day, station, network_station):
+        if isinstance(day, QDate):
+            day = day.toPyDate()
         day = datetime.combine(day, datetime.min.time())
         initial_day = day
         self.st = station
@@ -229,9 +232,9 @@ class GraphsModule():
     # verify if it's a invalid data
     def _parse_float(self, value):
         try:
-            return float(value) if float(value) != 99999.00 else None
+            return float(value) if float(value) != 99999.00 else np.nan
         except ValueError:
-            return None
+            return np.nan
 
     # collects data from a period
     def get_stations_data(self):
@@ -509,7 +512,8 @@ class GraphsModule():
 
     # creates the view to export info from graph
     def create_exporter_level_top(self, event, slct_types, is_difference = False):
-        if hasattr(event, "button") and event.button == Qt.RightButton:
+        #if hasattr(event, "button") and event.button == Qt.RightButton:
+        if event.button == 3:
             self.temp_window = QDialog(self.root)
             self.temp_window.setWindowTitle('Plot Downloader')
             self.temp_window.resize(200, 600)

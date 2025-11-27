@@ -21,29 +21,58 @@ class Intermagnet(DownloadModule):
     # creates a list with all stations from the Intermagnet network
     
     def obter_coordenadas_estacoes(self, station):
+        """
+        Obtém as coordenadas de uma estação, primeiro do arquivo local e depois da web.
+        """
+        # Tenta ler o arquivo local primeiro
+        if os.path.exists(self.util.resource_path('readme_stations.txt')):
+            try:
+                with open(self.util.resource_path('readme_stations.txt'), 'r') as f:
+                    for line in f:
+                        if 'INTERMAGNET' in line:
+                            parts = line.split()
+                            codigo = parts[0].upper()
+                            if codigo == station.upper():
+                                try:
+                                    longitude = float(parts[-3])
+                                    latitude = float(parts[-2])
+                                    return {
+                                        'station': codigo,
+                                        'latitude': latitude,
+                                        'longitude': longitude
+                                    }
+                                except (ValueError, IndexError):
+                                    continue # Pula para a próxima linha se o formato estiver incorreto
+            except Exception as e:
+                print(f"Erro ao ler readme_stations.txt: {e}")
+
+        # Se não encontrar no arquivo ou o arquivo não existir, busca da URL
         try:
             url = 'https://imag-data.bgs.ac.uk/GIN_V1/GINForms2?observatoryIagaCode=AAE&publicationState=Best+available&dataStartDate=2024-06-09&dataDuration=1&samplesPerDay=minute&submitValue=Observatory+Details&request=DataView'
-            response = requests.get(url, timeout=15)
+            response = requests.get(url, timeout=15, verify=False) # verify=False because of SSL issues sometimes
             soup = BeautifulSoup(response.content, 'html.parser')
 
             tabela = soup.find('table')
+            if not tabela:
+                return None
+            
             linhas = tabela.find_all('tr')[1:]  # Ignorar o cabeçalho
 
             for linha in linhas:
                 colunas = linha.find_all('td')
                 if len(colunas) > 4:
                     codigo = colunas[0].text.strip()
-                    if codigo.upper() != station.upper():
-                        continue
-                    latitude = float(colunas[3].text.strip())
-                    longitude = float(colunas[4].text.strip())
-                    return {
-                        'station': codigo.upper(),
-                        'latitude': latitude,
-                        'longitude': longitude
-                    }
+                    if codigo.upper() == station.upper():
+                        latitude = float(colunas[3].text.strip())
+                        longitude = float(colunas[4].text.strip())
+                        return {
+                            'station': codigo.upper(),
+                            'latitude': latitude,
+                            'longitude': longitude
+                        }
         except Exception as e:
-            print(f"Erro ao obter coordenadas da estação {station}: {e}")
+            print(f"Erro ao obter coordenadas da estação {station} da web: {e}")
+            
         return None  # Retorna None se falhar
 
     def to_decimal_year(self, dt_object: datetime) -> float:

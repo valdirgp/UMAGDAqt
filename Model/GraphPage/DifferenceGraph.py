@@ -98,6 +98,8 @@ class DifferenceGraph(GraphsModule):
         for station in self.stations:
             dates = []
             for date in self.slct_dates:
+                if isinstance(date, QDate):
+                    date = date.toPyDate()
                 dt = datetime.combine(date, datetime.min.time()) + timedelta(hours=self.data_with_stations[station][3], minutes=self.data_with_stations[station][4])
                 dates.append(dt.replace(hour=0, minute=0))
             especific_data = self.get_especific_dates(dates, station)

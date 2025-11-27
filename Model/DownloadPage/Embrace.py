@@ -19,34 +19,51 @@ class Embrace(DownloadModule):
 
     def obter_coordenadas_estacoes_embrace(self):
         """
-        Lê todas as estações EMBRACE a partir do readme oficial.
+        Lê todas as estações EMBRACE a partir do arquivo readme_stations.txt ou do readme oficial.
         """
-        url = 'https://embracedata.inpe.br/magnetometer/readme_magnetometer.txt'
         estacoes = {}
+        # Tenta ler o arquivo local primeiro
+        if os.path.exists(self.util.resource_path('readme_stations.txt')):
+            try:
+                with open(self.util.resource_path('readme_stations.txt'), 'r') as f:
+                    for line in f:
+                        if line.strip().endswith('EMBRACE'):
+                            parts = line.split()
+                            codigo = parts[0].upper()
+                            try:
+                                longitude = float(parts[-3])
+                                latitude = float(parts[-2])
+                                codigo = 'VSE' if codigo == 'VSS' else codigo
+                                estacoes[codigo] = {'latitude': latitude, 'longitude': longitude}
+                            except (ValueError, IndexError):
+                                continue
+                if estacoes:
+                    return estacoes
+            except Exception as e:
+                print(f"Erro ao ler readme_stations.txt: {e}")
+
+        # Se o arquivo local não existir ou falhar, busca da URL
+        url = 'https://embracedata.inpe.br/magnetometer/readme_magnetometer.txt'
         try:
             with requests.get(url, timeout=15, verify=False) as response:
                 text = response.text
                 for line in text.splitlines():
-                    # Ignora linhas vazias ou comentários
                     if not line.strip() or line.startswith('#') or line.startswith('For'):
                         continue
                     parts = line.split()
                     if len(parts) < 3:
                         continue
-
                     try:
-                        # Supondo que o formato seja: LATITUDE LONGITUDE CODIGO
                         longitude = float(parts[0].replace(',', '.'))
                         latitude = float(parts[1].replace(',', '.'))
                         codigo = parts[2].upper()
                         codigo = 'VSE' if codigo == 'VSS' else codigo
                         estacoes[codigo] = {'latitude': latitude, 'longitude': longitude}
                     except ValueError:
-                        # Linha que não contém números válidos, ignora
                         continue
             return estacoes
         except Exception as e:
-            print(f"Erro ao obter estações EMBRACE: {e}")
+            print(f"Erro ao obter estações EMBRACE da URL: {e}")
             return {}
         
     def to_decimal_year(self, dt_object: datetime) -> float:

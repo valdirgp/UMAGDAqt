@@ -213,7 +213,7 @@ class GraphPage(QWidget):
             if widget is not None and not sip.isdeleted(widget):
                 self.side_options.startdate.setDate(QDate(self.year[2], self.year[1], self.year[0]))
         if hasattr(self.side_options, 'enddate'):
-            widget = self.side_options.startdate
+            widget = self.side_options.enddate
             if widget is not None and not sip.isdeleted(widget):
                 self.side_options.enddate.setDate(QDate(self.final[2], self.final[1], self.final[0]))
 

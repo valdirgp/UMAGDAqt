@@ -66,6 +66,9 @@ class CustomToolbar(NavigationToolbar2QT):
         if self.map_instance:
             self.map_instance.update_annotations()
     
+    '''def set_message(self, message):
+        self.window.statusBar().showMessage(message)'''
+
     def save_zoom_clicked(self):
         if self.map_instance:
             self.map_instance.save_current_zoom()
