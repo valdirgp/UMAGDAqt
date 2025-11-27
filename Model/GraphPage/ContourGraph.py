@@ -20,7 +20,7 @@ class ContourGraph(GraphsModule):
         super().__init__(self.lang)
 
     def plot_contour(self, local_downloaded, stations, selected_types, bold_text, grid_graph,
-                          start, end, selected_dates, data_with_stations):
+                          start, end, selected_dates, data_with_stations, contornoMap):
         """
         Gera gráfico de contorno a partir de múltiplas estações.
         O eixo Y representa as estações (em suas latitudes).
@@ -37,6 +37,25 @@ class ContourGraph(GraphsModule):
         self.slct_types = selected_types
 
         self._original_clim = None
+
+        if contornoMap != None:
+            self.regiao = contornoMap[0]
+            self.title = contornoMap[1]
+            self.min_scale = contornoMap[2]
+            self.max_scale = contornoMap[3]
+            self.ticks = contornoMap[4]
+            self.start_time = contornoMap[5]
+            self.end_time = contornoMap[6]
+            self.interval = contornoMap[7]
+        else:
+            self.regiao = None
+            self.title = None
+            self.min_scale = None
+            self.max_scale = None
+            self.ticks = None
+            self.start_time = None
+            self.end_time = None
+            self.interval = None
 
         self.start_date, self.end_date = self.format_dates(start, end)
         self.end_date += timedelta(days=1)

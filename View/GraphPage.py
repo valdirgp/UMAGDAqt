@@ -28,6 +28,11 @@ class GraphPage(QWidget):
         self.longitude = []
         self.latitude = []
 
+        self.ContornoMap = None
+        from General.signalbus import bus
+        bus.contorno_ready.connect(self._receber_contorno)
+
+
     def ensure_array(self, y, x):
         """
         Garante que y seja um array do mesmo tamanho que x.
@@ -43,6 +48,9 @@ class GraphPage(QWidget):
             if y.shape != x.shape:
                 raise ValueError(f"y deve ter o mesmo tamanho que x. x:{x.shape}, y:{y.shape}")
             return y
+    
+    def _receber_contorno(self, dados):
+        self.ContornoMap = dados
 
 
     # creates frames for the tool

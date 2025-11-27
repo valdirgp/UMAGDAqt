@@ -164,7 +164,8 @@ class GraphControl():
                     self.Graphs.get_start_date(),
                     self.Graphs.get_end_date(),
                     self.Graphs.get_selected_dates(),
-                    self.data_with_stations
+                    self.data_with_stations,
+                    self.Graphs.ContornoMap
                 )
     
     # expõe o widget para ser adicionado ao QStackedWidget
