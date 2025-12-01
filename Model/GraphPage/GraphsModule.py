@@ -455,6 +455,10 @@ class GraphsModule():
     def format_dates(self, start, end):
         #start_date = datetime.strptime(start, r'%d/%m/%Y')
         #end_date = datetime.strptime(end, r'%d/%m/%Y')
+        if isinstance(start, QDate):
+            start = start.toPyDate()
+        if isinstance(end, QDate):
+            end = end.toPyDate()
         start_date = start
         end_date = end
         if start_date > end_date:

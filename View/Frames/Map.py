@@ -176,6 +176,11 @@ class Map(QWidget):
                 label2.setFont(font_bold)
                 self.input2 = QLineEdit()
                 self.input2.setFont(font_normal)
+                validator_max = QDoubleValidator()
+                validator_max.setBottom(-100000.0)
+                validator_max.setTop(100000.0)
+                validator_max.setDecimals(4)
+                self.input2.setValidator(validator_max)
                 form.addRow(label2, self.input2)
 
                 label3 = QLabel("Números de ticks para a escala:")
@@ -221,9 +226,12 @@ class Map(QWidget):
         dialogo = MultiInputDialog()
         from General.signalbus import bus
         if dialogo.exec_():
+            if dialogo.input0.text() == "" or dialogo.input1.text() == "" or dialogo.input2.text() == "" or dialogo.input3.text() == "" or dialogo.input4.text() == "" or dialogo.input5.text() == "" or dialogo.input6.text() == "":
+                bus.contorno_ready.emit(None)
+                return
             titulo = dialogo.input0.text()
-            minEscala = int(dialogo.input1.text())
-            maxEscala = int(dialogo.input2.text())
+            minEscala = float(dialogo.input1.text().replace(',', '.')) # Correção: Ler como float
+            maxEscala = float(dialogo.input2.text().replace(',', '.')) # Correção: Ler como float
             ticks = int(dialogo.input3.text())
             inicio = dialogo.input4.time().toString("HH:mm")
             fim = dialogo.input5.time().toString("HH:mm")
