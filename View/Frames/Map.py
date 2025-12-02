@@ -1,15 +1,14 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QDialog, QLabel, 
-                             QLineEdit, QPushButton, QFormLayout, QTextEdit, 
+                             QLineEdit, QCheckBox, QFormLayout, QTextEdit, 
                              QHBoxLayout, QInputDialog, QTimeEdit, 
                              QDialogButtonBox, QSpinBox)
-from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtGui import QFont, QDoubleValidator, QCursor
+from PyQt5.QtCore import pyqtSignal, QTime
+from PyQt5.QtGui import QFont, QDoubleValidator
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from Model.Custom.CustomToolBar import CustomToolbar
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
 from General.util import Util
 from PyQt5.QtCore import pyqtSignal
 
@@ -131,17 +130,29 @@ class Map(QWidget):
     
     def mapa_contorno(self):
         self.dadosContorno = pyqtSignal(tuple)
-        xlim = self.ax.get_xlim()
-        ylim = self.ax.get_ylim()
-        self.saved_extent = [float(xlim[0]), float(xlim[1]), float(ylim[0]), float(ylim[1])]
+
+        # Atributos para armazenar os últimos valores digitados
+        if not hasattr(self, "_ultimos_valores"):
+            self._ultimos_valores = {
+                "titulo": "",
+                "minEscala": "",
+                "maxEscala": "",
+                "ticks": 0,
+                "inicio": QTime(0, 0),
+                "fim": QTime(0, 0),
+                "intervalo": QTime(0, 0),
+                "chk_nome": True,
+                "chk_pontos": True
+            }
+
         class MultiInputDialog(QDialog):
             def __init__(self, parent=None):
                 super().__init__(parent)
-                self.setWindowTitle("Definições para Contorno")
+                self.lang = Util().get_language_config()
+                self.setWindowTitle(Util().dict_language[self.lang]["lbl_Contorno"])
                 self.setMinimumWidth(350)
 
                 layout = QVBoxLayout(self)
-
                 form = QFormLayout()
                 form.setSpacing(10)
                 form.setContentsMargins(10, 10, 10, 10)
@@ -154,25 +165,27 @@ class Map(QWidget):
                 font_normal.setPointSize(11)
 
                 # --- Campos ---
-                label0 = QLabel("Título da Análise:")
+                label0 = QLabel(Util().dict_language[self.lang]["lbl_title"])
                 label0.setFont(font_bold)
                 self.input0 = QLineEdit()
                 self.input0.setFont(font_normal)
+                self.input0.setText(self.parent()._ultimos_valores["titulo"])  # Preenche último valor
                 form.addRow(label0, self.input0)
 
-                label1 = QLabel("Valor mínimo para escala:")
+                label1 = QLabel(Util().dict_language[self.lang]["lbl_min_escala"])
                 label1.setFont(font_bold)
                 self.input1 = QLineEdit()
                 self.input1.setFont(font_normal)
                 validator = QDoubleValidator()
-                validator.setBottom(-10000.0)  
-                validator.setTop(10000.0)     
-                validator.setDecimals(4)       
+                validator.setBottom(-10000.0)
+                validator.setTop(10000.0)
+                validator.setDecimals(4)
                 validator.setNotation(QDoubleValidator.StandardNotation)
                 self.input1.setValidator(validator)
+                self.input1.setText(str(self.parent()._ultimos_valores["minEscala"]))
                 form.addRow(label1, self.input1)
 
-                label2 = QLabel("Valor máximo para escala:")
+                label2 = QLabel(Util().dict_language[self.lang]["lbl_max_escala"])
                 label2.setFont(font_bold)
                 self.input2 = QLineEdit()
                 self.input2.setFont(font_normal)
@@ -181,65 +194,98 @@ class Map(QWidget):
                 validator_max.setTop(100000.0)
                 validator_max.setDecimals(4)
                 self.input2.setValidator(validator_max)
+                self.input2.setText(str(self.parent()._ultimos_valores["maxEscala"]))
                 form.addRow(label2, self.input2)
 
-                label3 = QLabel("Números de ticks para a escala:")
+                label3 = QLabel(Util().dict_language[self.lang]["lbl_ticks"])
                 label3.setFont(font_bold)
                 self.input3 = QSpinBox()
                 self.input3.setMinimum(0)
                 self.input3.setMaximum(1000)
                 self.input3.setSingleStep(1)
                 self.input3.setFont(font_normal)
+                self.input3.setValue(self.parent()._ultimos_valores["ticks"])
                 form.addRow(label3, self.input3)
 
-                label4 = QLabel("Horário Inicial:")
+                label4 = QLabel(Util().dict_language[self.lang]["lbl_hora_inicial"])
                 label4.setFont(font_bold)
                 self.input4 = QTimeEdit()
                 self.input4.setDisplayFormat("HH:mm")
                 self.input4.setFont(font_normal)
+                self.input4.setTime(self.parent()._ultimos_valores["inicio"])
                 form.addRow(label4, self.input4)
 
-                label5 = QLabel("Horário Final:")
+                label5 = QLabel(Util().dict_language[self.lang]["lbl_hora_final"])
                 label5.setFont(font_bold)
                 self.input5 = QTimeEdit()
                 self.input5.setDisplayFormat("HH:mm")
                 self.input5.setFont(font_normal)
+                self.input5.setTime(self.parent()._ultimos_valores["fim"])
                 form.addRow(label5, self.input5)
 
-                label6 = QLabel("Intervalo entre análises:")
+                label6 = QLabel(Util().dict_language[self.lang]["lbl_intervalo"])
                 label6.setFont(font_bold)
                 self.input6 = QTimeEdit()
                 self.input6.setDisplayFormat("HH:mm")
                 self.input6.setFont(font_normal)
+                self.input6.setTime(self.parent()._ultimos_valores["intervalo"])
                 form.addRow(label6, self.input6)
 
+                label7 = QLabel(Util().dict_language[self.lang]["lbl_exibir_nome_estacoes"])
+                label7.setFont(font_bold)
+                self.input7 = QCheckBox()
+                self.input7.setChecked(self.parent()._ultimos_valores["chk_nome"])
+                self.input7.setFont(font_normal)
+                form.addRow(label7, self.input7)
+
+                label8 = QLabel(Util().dict_language[self.lang]["lbl_exibir_pontos_estacoes"])
+                label8.setFont(font_bold)
+                self.input8 = QCheckBox()
+                self.input8.setChecked(self.parent()._ultimos_valores["chk_pontos"])
+                self.input8.setFont(font_normal)
+                form.addRow(label8, self.input8)
                 layout.addLayout(form)
 
-                buttons = QDialogButtonBox(
-                    QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-                )
+                buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
                 buttons.setFont(font_normal)
                 buttons.accepted.connect(self.accept)
                 buttons.rejected.connect(self.reject)
                 layout.addWidget(buttons)
 
-        dialogo = MultiInputDialog()
+        dialogo = MultiInputDialog(self)
+
         from General.signalbus import bus
         if dialogo.exec_():
-            if dialogo.input0.text() == "" or dialogo.input1.text() == "" or dialogo.input2.text() == "" or dialogo.input3.text() == "" or dialogo.input4.text() == "" or dialogo.input5.text() == "" or dialogo.input6.text() == "":
+            if (dialogo.input0.text() == "" or dialogo.input1.text() == "" or
+                dialogo.input2.text() == "" or dialogo.input3.text() == "" or
+                dialogo.input4.text() == "" or dialogo.input5.text() == "" or
+                dialogo.input6.text() == ""):
                 bus.contorno_ready.emit(None)
                 return
-            titulo = dialogo.input0.text()
-            minEscala = float(dialogo.input1.text().replace(',', '.')) # Correção: Ler como float
-            maxEscala = float(dialogo.input2.text().replace(',', '.')) # Correção: Ler como float
-            ticks = int(dialogo.input3.text())
-            inicio = dialogo.input4.time().toString("HH:mm")
-            fim = dialogo.input5.time().toString("HH:mm")
-            intervalo = dialogo.input6.time().toString("HH:mm")
+
+            # Salva os valores digitados
+            self._ultimos_valores = {
+                "titulo": dialogo.input0.text(),
+                "minEscala": float(dialogo.input1.text().replace(',', '.')),
+                "maxEscala": float(dialogo.input2.text().replace(',', '.')),
+                "ticks": int(dialogo.input3.text()),
+                "inicio": dialogo.input4.time(),
+                "fim": dialogo.input5.time(),
+                "intervalo": dialogo.input6.time(),
+                "chk_nome": dialogo.input7.isChecked(),
+                "chk_pontos": dialogo.input8.isChecked()
+            }
+
             bus.contorno_ready.emit(
-                (self.saved_extent, titulo, minEscala, maxEscala, ticks, inicio, fim, intervalo)
+                (self._ultimos_valores["titulo"],
+                self._ultimos_valores["minEscala"],
+                self._ultimos_valores["maxEscala"],
+                self._ultimos_valores["ticks"],
+                self._ultimos_valores["inicio"].toString("HH:mm"),
+                self._ultimos_valores["fim"].toString("HH:mm"),
+                self._ultimos_valores["intervalo"].toString("HH:mm"),
+                self._ultimos_valores["chk_nome"],
+                self._ultimos_valores["chk_pontos"])
             )
-        else:
-            bus.contorno_ready.emit(
-                None
-            )
+        '''else:
+            bus.contorno_ready.emit(None)'''

@@ -265,6 +265,9 @@ class GraphPage(QWidget):
     def bind_contour_graph(self, callback):
         self.side_options.btn_contour_function = callback
 
+    def bind_map_graph(self, callback):
+        self.side_options.btn_mapcontour_function = callback
+
     def bind_search_stations_downloaded(self, callback):
         self.downloaded_data_stations = callback
 

@@ -94,6 +94,7 @@ class Util():
                                     "combo_tide": "Maré",
                                     "combo_difference": "Diferença",
                                     "combo_contorno": "Contorno",
+                                    "combo_map_contour": "Mapa de Contorno",
 
                                     "progbar_dwd_Embrace": "Progresso Embrace",
                                     "progbar_dwd_Intermagnet": "Progresso Intermagnet",
@@ -135,7 +136,26 @@ class Util():
 
                                     "download_complete": "Download concluído:",
                                     "error_no_readable_data": "Erro no download (sem dados legíveis):",
-                                    "error_download": "Erro no download:"
+                                    "error_download": "Erro no download:",
+
+                                    "mgbox_imagens_salvas": "imagem(ns) de contorno salva(s) em:",
+                                    "mgbox_imagens_nao_geradas": "Não foi possível gerar as imagens de contorno.\n\n"
+                                    "Motivo provável: Não foram encontrados dados de estações "
+                                    "para os intervalos de tempo definidos. Verifique a formatação da hora nos arquivos de dados"
+                                    "e a disponibilidade dos dados para o período selecionado.",
+                                    "mgbox_interpolacao": "Não foi possível interpolar valores para",
+                                    "mgbox_interpolacao2": "(poucos pontos).",
+
+                                    "lbl_Contorno": "Definições para Contorno",
+                                    "lbl_title": "Título da Análise:",
+                                    "lbl_min_escala": "Valor mínimo para escala:",
+                                    "lbl_max_escala": "Valor máximo para escala:",
+                                    "lbl_ticks": "Número de divisões na escala:",
+                                    "lbl_hora_inicial": "Horário Inicial:",
+                                    "lbl_hora_final": "Horário Final:",
+                                    "lbl_intervalo": "Intervalo entre análises:",
+                                    "lbl_exibir_nome_estacoes": "Exibir nome das estações no mapa",
+                                    "lbl_exibir_pontos_estacoes": "Exibir pontos das estações no mapa"
                                     },
                             "en": {
                                     "title": "UMAGDA - Univap Magnetometer Data Analysis - FAPESP Project: 2022/14815-5 & 2024/05909-1",
@@ -217,6 +237,7 @@ class Util():
                                     "combo_tide": "Tide",
                                     "combo_difference": "Difference",
                                     "combo_contorno": "Contour",
+                                    "combo_map_contour": "Map Contour",
 
                                     "progbar_dwd_Embrace": "Embrace Progress",
                                     "progbar_dwd_Intermagnet": "Intermagnet Progress",
@@ -259,7 +280,26 @@ class Util():
                                     "msgbox_info": "Information",
                                     "download_complete": "Download completed:",
                                     "error_no_readable_data": "Download error (data not readable):",
-                                    "error_download": "Error during download:"
+                                    "error_download": "Error during download:",
+
+                                    "mgbox_imagens_salvas": "image(s) of contour saved in:",
+                                    "mgbox_imagens_nao_geradas": "Was not possible to generate contour images.\n\n"
+                                    "Motivo provável: Data from stations was not found "
+                                    "for defined time intervals. Check the time formatting in data files "
+                                    "and the availability of data for the selected period.",
+                                    "mgbox_interpolacao": "Was not possible to interpolate values for",
+                                    "mgbox_interpolacao2": "(few points).",
+
+                                    "lbl_Contorno": "Definitions for Contour",
+                                    "lbl_title": "Title of Analysis:",
+                                    "lbl_min_escala": "Minimum value for scale:",
+                                    "lbl_max_escala": "Maximum value for scale:",
+                                    "lbl_ticks": "Number of divisions in scale:",
+                                    "lbl_hora_inicial": "Initial Time:",
+                                    "lbl_hora_final": "Final Time:",
+                                    "lbl_intervalo": "Interval between analyses:",
+                                    "lbl_exibir_nome_estacoes": "Show station names on map",
+                                    "lbl_exibir_pontos_estacoes": "Show station points on map"
                                     }
                             }
         
@@ -317,7 +357,6 @@ class Util():
                     else:
                         f.write(termo + valor + "\n}\n")
 
-                
 
     # get the languge in config txt
     def get_language_config(self):

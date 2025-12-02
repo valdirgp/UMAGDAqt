@@ -24,6 +24,7 @@ class SideOptionsPlot(QWidget):
         self.btn_globaldays_function = None
         self.btn_manydays_function = None
         self.btn_contour_function = None
+        self.btn_mapcontour_function = None
         self.local_downloads_function = None
 
         #self.updateMap_function = None
@@ -134,7 +135,8 @@ class SideOptionsPlot(QWidget):
             self.util.dict_language[self.language]['combo_many'],
             self.util.dict_language[self.language]['combo_tide'],
             self.util.dict_language[self.language]['combo_difference'],
-            self.util.dict_language[self.language]['combo_contorno']
+            self.util.dict_language[self.language]['combo_contorno'],
+            self.util.dict_language[self.language]['combo_map_contour']
         ])
         self.combo_type_plot.currentIndexChanged.connect(self.change_parameters)
         layout.addWidget(self.combo_type_plot)
@@ -419,6 +421,36 @@ class SideOptionsPlot(QWidget):
 
         self.startdate.dateChanged.connect(lambda new_date: self.sync_calendar_month_year(self.cal_calm, self.startdate))
 
+    def create_mapcontorno_options(self):
+        self.clear_options_frame()
+
+        lbl_initial_date = QLabel(self.util.dict_language[self.language]['lbl_init_dt'])
+        self.options_layout.addWidget(lbl_initial_date)
+        self.startdate = QDateEdit()
+        self.startdate.setDisplayFormat('dd/MM/yyyy')
+        self.startdate.setCalendarPopup(True)
+        hoje = QDate.currentDate()
+        data = QDate(self.year[2], self.year[1], self.year[0])
+        self.startdate.setDate(data)
+        self.options_layout.addWidget(self.startdate)
+
+        lbl_final_date = QLabel(self.util.dict_language[self.language]['lbl_fin_dt'])
+        self.options_layout.addWidget(lbl_final_date)
+        self.enddate = QDateEdit()
+        self.enddate.setDisplayFormat('dd/MM/yyyy')
+        self.enddate.setCalendarPopup(True)
+        hoje = QDate.currentDate()
+        data = QDate(self.final[2], self.final[1], self.final[0])
+        self.enddate.setDate(data)
+        self.options_layout.addWidget(self.enddate)
+
+        self.btn_mapcontour_confirm = QPushButton(self.util.dict_language[self.language]['btn_confirm'])
+        if self.btn_mapcontour_function:
+            self.btn_mapcontour_confirm.clicked.connect(self.btn_mapcontour_function)
+        self.options_layout.addWidget(self.btn_mapcontour_confirm)
+
+        self.startdate.dateChanged.connect(lambda new_date: self.sync_calendar_month_year(self.cal_calm, self.startdate))
+
     # changes kind of options plotting
     def change_parameters(self, index):
         match index:
@@ -443,6 +475,9 @@ class SideOptionsPlot(QWidget):
                 self.list_all_stations.setSelectionMode(QAbstractItemView.NoSelection)
             case 6:
                 self.create_contorno_options()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+            case 7:
+                self.create_mapcontorno_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
         self.on_checkbox_changed()
 
