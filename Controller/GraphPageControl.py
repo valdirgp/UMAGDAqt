@@ -137,8 +137,7 @@ class GraphControl():
                     self.Graphs.get_selected_dates(),
                     self.Graphs.get_cal_selection(),
                     self.data_with_stations,
-                )
-            
+                )           
             case 5: # DIFFERENCE GRAPH
                 if not self.Module.verify_inputs(type_selected=self.Graphs.get_type_data()): return
 

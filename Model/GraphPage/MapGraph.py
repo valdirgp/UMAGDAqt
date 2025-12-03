@@ -116,6 +116,34 @@ class MapGraph(GraphsModule):
 
             self.pontos_station = bool(contornoMap[8])
 
+            # Validação de dados por estação
+            valid_stations = []
+            removed_stations = []
+            for station_code in [s.split()[0] for s in self.stations]:
+                station_data = self.all_data.get(station_code)
+                if not station_data:
+                    removed_stations.append(station_code)
+                    continue
+
+                has_valid_data = any(
+                    val is not None and not np.isnan(val)
+                    for day_data in station_data.values()
+                    for time_data in day_data.values()
+                    for val in time_data.values()
+                )
+                if has_valid_data:
+                    valid_stations.append(next(s for s in self.stations if s.startswith(station_code)))
+                else:
+                    removed_stations.append(station_code)
+
+            if not valid_stations:
+                QMessageBox.warning(None, "Sem Dados", "Nenhuma das estações selecionadas possui dados para o período e tipo de dado escolhidos.")
+                return
+
+            if removed_stations:
+                QMessageBox.information(None, "Estações Removidas", f"As seguintes estações foram removidas por não possuírem dados no período: {', '.join(removed_stations)}")
+
+            self.stations = valid_stations # Atualiza a lista de estações para conter apenas as válidas
             self.save_contour_map_sequence(map_widget, selected_types[0])
     
     def save_contour_map_sequence(self, map_widget, plot_type):
@@ -254,6 +282,8 @@ class MapGraph(GraphsModule):
                         mask = (dist_to_line > path_width) | (t < 0) | (t > 1)
                         Z[mask.reshape(X.shape)] = np.nan
 
+                    # Isso força o uso de todo o colormap e corrige a barra de cores.
+                    Z = np.clip(Z, self.min_scale, self.max_scale)
                     Z_masked = np.ma.masked_invalid(Z)
                     norm = Normalize(vmin=self.min_scale, vmax=self.max_scale)
                     if len(lons) == 2:
@@ -273,12 +303,10 @@ class MapGraph(GraphsModule):
 
                 ax.set_title(f"{self.title}\n{current_time_dt.strftime('%d/%m/%Y %H:%M')} UT", weight='bold')
 
-                from matplotlib.ticker import MaxNLocator
                 cbar = fig.colorbar(mappable, ax=ax, orientation='vertical', shrink=0.6) # O norm já está no mappable
                 cbar.set_label(f'Componente {plot_type.upper()} (nT)')
                 if self.ticks > 0:
-                    locator = MaxNLocator(nbins=self.ticks, prune='both')
-                    cbar.locator = locator
+                    cbar.set_ticks(np.linspace(self.min_scale, self.max_scale, self.ticks))
                     cbar.update_ticks()
 
                 filename = f"{self.title}_{current_time_dt.strftime('%Y%m%d_%H%M')}.png"
