@@ -6,6 +6,7 @@ from Model.GraphPage.TideGraph import TideGraph
 from Model.GraphPage.DifferenceGraph import DifferenceGraph
 from Model.GraphPage.ContourGraph import ContourGraph
 from Model.GraphPage.MapGraph import MapGraph
+from Model.GraphPage.ElectricGraph import ElectricGraph
 from View.GraphPage import GraphPage
 from PyQt5.QtCore import QFileSystemWatcher
 from General.util import Util
@@ -27,6 +28,7 @@ class GraphControl():
         self.DifferenceModule = DifferenceGraph(self.root, self.lang)
         self.ContourModule = ContourGraph(self.root, self.lang)
         self.MapModule = MapGraph(self.root, self.lang)
+        self.ElectricModule = ElectricGraph(self.root, self.lang)
 
         self.watcher = QFileSystemWatcher()
         self.util = Util()
@@ -183,7 +185,26 @@ class GraphControl():
                     self.Graphs.ContornoMap,
                     self.Graphs.map_widget
                 )
-    
+            case 8: # ELECTRIC FIELD
+                #if not self.Module.verify_inputs(station_selected=self.Graphs.get_stations_selected(), type_selected=self.Graphs.get_type_data()): return
+                self.ElectricModule.plot_electric_field(
+                    self.Graphs.get_bold_text(),
+                    self.Graphs.get_grid_graph(),
+                    self.Graphs.get_start_date(),
+                    self.Graphs.get_end_date(),
+                    self.Graphs.get_files_selection(),
+                    True
+                )
+            case 9: #VERTICAL DRIFT
+                self.ElectricModule.plot_electric_field(
+                    self.Graphs.get_bold_text(),
+                    self.Graphs.get_grid_graph(),
+                    self.Graphs.get_start_date(),
+                    self.Graphs.get_end_date(),
+                    self.Graphs.get_files_selection(),
+                    False
+                )
+     
     # expõe o widget para ser adicionado ao QStackedWidget
     def get_widget(self):
         return self.Graphs

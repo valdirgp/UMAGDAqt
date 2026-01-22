@@ -95,6 +95,8 @@ class Util():
                                     "combo_difference": "Diferença",
                                     "combo_contorno": "Contorno",
                                     "combo_map_contour": "Mapa de Contorno",
+                                    "combo_electric_field": "Campo Elétrico",
+                                    "combo_vertical_drift": "Vertical Drift",
 
                                     "progbar_dwd_Embrace": "Progresso Embrace",
                                     "progbar_dwd_Intermagnet": "Progresso Intermagnet",
@@ -127,6 +129,7 @@ class Util():
                                     "mgbox_error_type":"Erro de tipo na estação",
                                     "mgbox_err_plot": "Não foi possivel criar o gráfico, não há dados",
                                     "mgbox_err_warn": "Por favor, escolha uma estação antes de plotar o gráfico.",
+                                    "mgbox_electric_field_no_delta": "Todos os tipos dados devem ser delta ('d') para plotar o gráfico de campo elétrico.",
                                     
                                     "mgbox_success": "Sucesso",
                                     "mgbox_success_reqlc": "Pedido de licença gerado com sucesso",
@@ -238,6 +241,8 @@ class Util():
                                     "combo_difference": "Difference",
                                     "combo_contorno": "Contour",
                                     "combo_map_contour": "Map Contour",
+                                    "combo_electric_field": "Electric Field",
+                                    "combo_vertical_drift": "Vertical Drift",
 
                                     "progbar_dwd_Embrace": "Embrace Progress",
                                     "progbar_dwd_Intermagnet": "Intermagnet Progress",
@@ -270,6 +275,7 @@ class Util():
                                     "mgbox_error_type":"Type error in station",
                                     "mgbox_err_plot": "Couldn't plot graph, no available data",
                                     "mgbox_err_warn": "Please select a station before plotting the graph.",
+                                    "mgbox_electric_field_no_delta": "All given types must be delta ('d') to plot the electric field graph.",
                                     
                                     "mgbox_success": "Success",
                                     "mgbox_success_reqlc": "License request generated successfully",

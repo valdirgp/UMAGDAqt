@@ -213,7 +213,6 @@ class GraphPage(QWidget):
         self.side_options.final = self.final
         self.side_options.drive = self.drive
 
-        #self.updateDrive()
             
         self.side_options.cal_calm.setSelectedDate(QDate(self.year[2], self.year[1], self.year[0]))
         if hasattr(self.side_options, 'startdate'):
@@ -225,8 +224,6 @@ class GraphPage(QWidget):
             if widget is not None and not sip.isdeleted(widget):
                 self.side_options.enddate.setDate(QDate(self.final[2], self.final[1], self.final[0]))
 
-    def updateDrive(self, drive):
-        self.side_options.combo_download_location.setCurrentText(drive)
     
     def updateMap(self):
         self.map_widget.ax.callbacks.disconnect(self.map_widget.xlim_callback_id)
@@ -272,11 +269,7 @@ class GraphPage(QWidget):
         self.downloaded_data_stations = callback
 
     def bind_local_downloaded(self, callback):
-        #self.side_options.local_downloads_function = callback
         self.local_downloads_function = callback
-
-    '''def bind_updateMap(self, callback):
-        self.side_options.updateMap_function = callback'''
 
     def get_local_download(self):
         return self.side_options.combo_download_location.currentText()
@@ -286,7 +279,6 @@ class GraphPage(QWidget):
         for i in range(self.side_options.list_all_stations.count()):
             item = self.side_options.list_all_stations.item(i)
             if item.isSelected():
-                #selected_stations.add(item.text())
                 selected_stations.add(item.data(Qt.UserRole))
         return list(selected_stations)
     
@@ -330,7 +322,6 @@ class GraphPage(QWidget):
         return self.side_options.startdate.date().toPyDate()
 
     def get_start_date(self):
-        #return self.side_options.startdate.date().toPyDate()
         return self.side_options.startdate.date()
 
     def get_end_date(self):
@@ -347,6 +338,13 @@ class GraphPage(QWidget):
 
     def get_cal_selection(self):
         return self.side_options.cal_calm
+    
+    def get_files_selection(self):
+        files = []
+        if hasattr(self.side_options, 'list_files_widget') and self.side_options.list_files_widget:
+            for i in range(self.side_options.list_files_widget.count()):
+                files.append(self.side_options.list_files_widget.item(i).text())
+        return files
 
     def get_bold_text(self):
         return self.side_options.is_bold_text.isChecked()

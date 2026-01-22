@@ -2,7 +2,7 @@ from Model.Custom.CustomttkFrame import ScrollableFrame
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QListWidget, QAbstractItemView,
     QPushButton, QCheckBox, QDateEdit, QSizePolicy, QScrollBar, QFrame, QListWidgetItem, 
-    QLineEdit, QCalendarWidget
+    QLineEdit, QCalendarWidget, QFileDialog
 )
 from PyQt5.QtCore import QDate, Qt
 from PyQt5.QtGui import QWheelEvent
@@ -28,9 +28,6 @@ class SideOptionsPlot(QWidget):
         self.local_downloads_function = None
 
         #self.updateMap_function = None
-
-        self.selected_dates = set()
-
     # Função de filtro
     def filter_visible_items(self):
         filter_text = self.search_input.text().lower()
@@ -136,7 +133,9 @@ class SideOptionsPlot(QWidget):
             self.util.dict_language[self.language]['combo_tide'],
             self.util.dict_language[self.language]['combo_difference'],
             self.util.dict_language[self.language]['combo_contorno'],
-            self.util.dict_language[self.language]['combo_map_contour']
+            self.util.dict_language[self.language]['combo_map_contour'],
+            self.util.dict_language[self.language]['combo_electric_field'],
+            self.util.dict_language[self.language]['combo_vertical_drift']
         ])
         self.combo_type_plot.currentIndexChanged.connect(self.change_parameters)
         layout.addWidget(self.combo_type_plot)
@@ -201,11 +200,8 @@ class SideOptionsPlot(QWidget):
         """
         date_str = date.toString("dd/MM/yyyy")
 
-        # Verifica se a data já está na lista
         if date in self.selected_dates:
-            # Remove a data da lista
             self.selected_dates.remove(date)
-            # Remove a data da lista visual (QListWidget)
             for i in range(self.date_list.count()):
                 item = self.date_list.item(i)
                 if item.text() == date_str:
@@ -229,13 +225,10 @@ class SideOptionsPlot(QWidget):
         date = date_str.split("/")
         date = QDate(int(date[2]), int(date[1]), int(date[0]))
 
-        # Remover a data da lista de datas selecionadas
         if date in self.selected_dates:
             self.selected_dates.remove(date)
-            # Remover o item da QListWidget
             self.date_list.takeItem(self.date_list.row(item))
 
-        # Atualiza o calendário para refletir a remoção
         self.update_calendar_selection()
 
     def update_calendar_selection(self):
@@ -244,7 +237,6 @@ class SideOptionsPlot(QWidget):
         """
         from PyQt5.QtGui import QTextCharFormat, QColor
         from PyQt5.QtCore import QDate, Qt
-        # Criar uma lista de QDate a partir das datas selecionadas
         #selected_qdates = [QDate.fromString(date, "dd/MM/yyyy") for date in self.selected_dates]
         selected_qdates = [date for date in self.selected_dates]
         # Criar um formato de texto para as datas selecionadas (cor vermelha)
@@ -277,9 +269,7 @@ class SideOptionsPlot(QWidget):
         self.update_calendar_selection()  # Atualiza o calendário (desmarcando todas as datas)
 
     def sync_calendar_month_year(self, calendar, dateedit):
-            # Pega o dia atualmente selecionado no calendário
             dia = calendar.selectedDate().day()
-            # Cria uma nova data com o ano/mês do QDateEdit, mantendo o dia atual do calendário
             nova_data = QDate(dateedit.date().year(), dateedit.date().month(), dia)
             calendar.setSelectedDate(nova_data)
 
@@ -451,6 +441,49 @@ class SideOptionsPlot(QWidget):
 
         self.startdate.dateChanged.connect(lambda new_date: self.sync_calendar_month_year(self.cal_calm, self.startdate))
 
+    def create_eletricfield_options(self):
+        self.clear_options_frame()
+        lbl_initial_date = QLabel(self.util.dict_language[self.language]['lbl_init_dt'])
+        self.options_layout.addWidget(lbl_initial_date)
+        self.startdate = QDateEdit()
+        self.startdate.setDisplayFormat('dd/MM/yyyy')
+        self.startdate.setCalendarPopup(True)
+        hoje = QDate.currentDate()
+        data = QDate(self.year[2], self.year[1], self.year[0])
+        self.startdate.setDate(data)
+        self.options_layout.addWidget(self.startdate)
+
+        lbl_final_date = QLabel(self.util.dict_language[self.language]['lbl_fin_dt'])
+        self.options_layout.addWidget(lbl_final_date)
+        self.enddate = QDateEdit()
+        self.enddate.setDisplayFormat('dd/MM/yyyy')
+        self.enddate.setCalendarPopup(True)
+        hoje = QDate.currentDate()
+        data = QDate(self.final[2], self.final[1], self.final[0])
+        self.enddate.setDate(data)
+        self.options_layout.addWidget(self.enddate)
+
+        self.btn_select_files = QPushButton("Selecionar Arquivos")
+        self.btn_select_files.clicked.connect(self.open_file_dialog)
+        self.options_layout.addWidget(self.btn_select_files)
+
+        self.list_files_widget = QListWidget()
+        self.list_files_widget.setMaximumHeight(100)
+        self.options_layout.addWidget(self.list_files_widget)
+
+        self.btn_globaldays_confirm = QPushButton(self.util.dict_language[self.language]['btn_confirm'])
+        if self.btn_globaldays_function:
+            self.btn_globaldays_confirm.clicked.connect(self.btn_globaldays_function)
+        self.options_layout.addWidget(self.btn_globaldays_confirm)
+
+        self.startdate.dateChanged.connect(lambda new_date: self.sync_calendar_month_year(self.cal_calm, self.startdate))
+
+    def open_file_dialog(self):
+        files, _ = QFileDialog.getOpenFileNames(self, "Selecionar Arquivos")
+        if files:
+            self.list_files_widget.clear()
+            self.list_files_widget.addItems(files)
+
     # changes kind of options plotting
     def change_parameters(self, index):
         match index:
@@ -478,6 +511,12 @@ class SideOptionsPlot(QWidget):
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
             case 7:
                 self.create_mapcontorno_options()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+            case 8:
+                self.create_eletricfield_options()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+            case 9:
+                self.create_eletricfield_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
         self.on_checkbox_changed()
 

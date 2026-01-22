@@ -376,7 +376,6 @@ class GraphsModule():
                         self.util.dict_language[self.lang]["mgbox_error"], 
                         f'{self.util.dict_language[self.lang]["mgbox_error_inval_info"]} {date.day:02}/{date.month:02}/{date.year} - {station} - {type}')
                     self.slct_dates.remove(date)
-                    # self.cal_selection.calevent_remove(date=date) # Remover ou adaptar para PyQt5
                     self.can_plot = False
                     return
                 
@@ -453,8 +452,6 @@ class GraphsModule():
 
     # validate given dates and format them into datetime 
     def format_dates(self, start, end):
-        #start_date = datetime.strptime(start, r'%d/%m/%Y')
-        #end_date = datetime.strptime(end, r'%d/%m/%Y')
         if isinstance(start, QDate):
             start = start.toPyDate()
         if isinstance(end, QDate):
@@ -515,8 +512,7 @@ class GraphsModule():
         return True
 
     # creates the view to export info from graph
-    def create_exporter_level_top(self, event, slct_types, is_difference = False):
-        #if hasattr(event, "button") and event.button == Qt.RightButton:
+    def create_exporter_level_top(self, event, slct_types, is_difference = False, is_field = True):
         if event.button == 3:
             self.temp_window = QDialog(self.root)
             self.temp_window.setWindowTitle('Plot Downloader')
@@ -532,7 +528,7 @@ class GraphsModule():
                 self.checkboxes[type_name] = cb
 
             btn_confirm = QPushButton(self.util.dict_language[self.lang]['btn_confirm'])
-            btn_confirm.clicked.connect(lambda: self.export_file(is_difference))
+            btn_confirm.clicked.connect(lambda: self.export_file(is_difference, is_field))
             layout.addWidget(btn_confirm)
 
             self.temp_window.setLayout(layout)
@@ -540,7 +536,7 @@ class GraphsModule():
             self.temp_window.exec_()
 
     # reads all info and creates custom file
-    def export_file(self, is_difference=False):
+    def export_file(self, is_difference=False, is_field=True):
         save_file_path = QFileDialog.getExistingDirectory(self.temp_window, "Select Directory")
         if not save_file_path:
             return
@@ -548,14 +544,98 @@ class GraphsModule():
         all_types = [t for t, cb in self.checkboxes.items() if cb.isChecked()]
         header = 'Hour    ' + '          '.join(all_types)
 
+        if hasattr(self, 'sorted_files') and self.sorted_files:
+            for file_list in self.sorted_files:
+                if not file_list: continue
+                
+                first_filename = os.path.basename(file_list[0])
+                match = re.search(r'(\d{8})', first_filename)
+                station = first_filename[:match.start()] if match else "Unknown"
+
+                for file_path in file_list:
+                    filename = os.path.basename(file_path)
+                    match = re.search(r'(\d{8})', filename)
+                    if not match: continue
+                    
+                    date_str = match.group(1)
+                    try:
+                        current_date = datetime.strptime(date_str, '%Y%m%d').date()
+                    except ValueError: continue
+
+                    lines = ''
+                    try:
+                        with open(file_path, 'r') as f:
+                            file_lines = f.readlines()
+                            for line in file_lines:
+                                parts = line.split()
+                                if len(parts) < 2: continue
+                                
+                                time_str = parts[0]
+                                try:
+                                    val = float(parts[1])
+                                except ValueError: continue
+                                
+                                t_time = None
+                                if ':' in time_str:
+                                    try:
+                                        t_time = datetime.strptime(time_str, '%H:%M').time()
+                                    except ValueError:
+                                        try:
+                                            t_time = datetime.strptime(time_str, '%H:%M:%S').time()
+                                        except ValueError: pass
+                                else:
+                                    try:
+                                        h_dec = float(time_str)
+                                        h = int(h_dec)
+                                        m = int((h_dec - h) * 60)
+                                        t_time = (datetime.min + timedelta(hours=h, minutes=m)).time()
+                                    except ValueError: pass
+                                
+                                if t_time is None: continue
+
+                                dt = datetime.combine(current_date, t_time)
+                                
+                                ef_val = None
+                                if hasattr(self, 'vertical_drift') and hasattr(self, 'geo_index_handler'):
+                                    try:
+                                        lt_dt = self.lt_transformer(dt)
+                                        lt_hour = lt_dt.hour + lt_dt.minute / 60.0
+                                        doy = self.doy_transformer(dt)
+                                        year = dt.year
+                                        
+                                        indices = self.geo_index_handler.get_indices(dt)
+                                        if indices and not (math.isnan(indices['f107']) or math.isnan(indices['f107a'])):
+                                            vd = self.vertical_drift(val, lt_hour, year, indices['f107'], indices['f107a'], indices['ap'], indices['kp'], doy)
+                                            if is_field:
+                                                ef_val = vd / 40.0
+                                            else:
+                                                ef_val = vd
+                                    except Exception: pass
+                                
+                                lines += f"{t_time.strftime('%H:%M')}    "
+                                for _ in all_types:
+                                    lines += f"{ef_val:.4f}    " if ef_val is not None else "None    "
+                                lines += '\n'
+                        
+                        if lines:
+                            out_filename = f'{station.lower()}{current_date.strftime("%Y%m%d")}.txt'
+                            with open(os.path.join(save_file_path, out_filename), 'w+') as f_out:
+                                f_out.write(header + '\n' + lines)
+                    except Exception as e:
+                        print(f"Error processing {file_path}: {e}")
+            
+            self.temp_window.accept()
+            return
+
         if not is_difference:
             for station in self.stations:
                 for day, times in self.all_data[station].items():
                     t = timedelta(hours=0, minutes=0)
                     lines = ''
                     for time in times:
-                        hh = t.total_seconds() / 3600
-                        lines += f'{hh:.2f}    '
+                        total_seconds = int(t.total_seconds())
+                        hours, minutes = divmod(total_seconds // 60, 60)
+                        lines += f'{hours:02}:{minutes:02}    '
                         t += timedelta(minutes=1)
 
                         for type in all_types:
@@ -572,8 +652,9 @@ class GraphsModule():
                 t = timedelta(hours=0, minutes=0)
                 lines = ''
                 for time in times:
-                    hh = t.total_seconds() / 3600
-                    lines += f'{hh:.2f}    '
+                    total_seconds = int(t.total_seconds())
+                    hours, minutes = divmod(total_seconds // 60, 60)
+                    lines += f'{hours:02}:{minutes:02}    '
                     t += timedelta(minutes=1)
 
                     for type in all_types:

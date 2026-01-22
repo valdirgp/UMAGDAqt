@@ -287,5 +287,3 @@ class Map(QWidget):
                 self._ultimos_valores["chk_nome"],
                 self._ultimos_valores["chk_pontos"])
             )
-        '''else:
-            bus.contorno_ready.emit(None)'''

@@ -99,7 +99,7 @@ class MapGraph(GraphsModule):
             self.regiao = self.saved_extent
 
             self.title = str(contornoMap[0])
-            # Correção: Converter os valores de escala para float.
+            
             self.min_scale = float(contornoMap[1])
 
             self.max_scale = float(contornoMap[2])
@@ -137,7 +137,7 @@ class MapGraph(GraphsModule):
                     removed_stations.append(station_code)
 
             if not valid_stations:
-                QMessageBox.warning(None, "Sem Dados", "Nenhuma das estações selecionadas possui dados para o período e tipo de dado escolhidos.")
+                QMessageBox.warning(None, self.util.dict_language[self.lang]["lbl_no_data"], self.util.dict_language[self.lang]["mgbox_error_noinfo_period"])
                 return
 
             if removed_stations:
@@ -145,6 +145,18 @@ class MapGraph(GraphsModule):
 
             self.stations = valid_stations # Atualiza a lista de estações para conter apenas as válidas
             self.save_contour_map_sequence(map_widget, selected_types[0])
+
+            year_config = self.util.get_year_config()
+
+            final_config = self.util.get_final_config()
+            
+            if self.start_date.day != year_config[0] or self.start_date.month != year_config[1] or self.start_date.year != year_config[2]:
+
+                self.util.change_year([self.start_date.day, self.start_date.month, self.start_date.year])
+
+            if (self.end_date - timedelta(days=1)).day != final_config[0] or (self.end_date - timedelta(days=1)).month != final_config[1] or (self.end_date - timedelta(days=1)).year != final_config[2]:
+
+                self.util.change_final([(self.end_date - timedelta(days=1)).day, (self.end_date - timedelta(days=1)).month, (self.end_date - timedelta(days=1)).year])
     
     def save_contour_map_sequence(self, map_widget, plot_type):
         from matplotlib.colors import LinearSegmentedColormap
@@ -224,11 +236,9 @@ class MapGraph(GraphsModule):
                 ax.add_feature(cfeature.BORDERS)
                 
                 ax.set_extent(self.regiao, crs=ccrs.PlateCarree())
-
-                # Redesenha as estações no mapa temporário
-                #ax.scatter([s['longitude'] for s in map_widget.all_locals if s['station'].split()[0] in [st.split()[0] for st in self.stations]], [s['latitude'] for s in map_widget.all_locals if s['station'].split()[0] in [st.split()[0] for st in self.stations]], s=50, c='red', marker='8', transform=ccrs.PlateCarree(), edgecolors='black', zorder=5)
+                
                 if self.name_station:
-                    for coord in active_stations: ax.annotate(text=coord['station'], xy=(coord['longitude'], coord['latitude']), xytext=(5, 5), textcoords='offset points', ha='right', color='white', bbox=dict(boxstyle="round,pad=0.2", fc="black", alpha=0.5), zorder=6)
+                    for coord in active_stations: ax.annotate(text=coord['station'], xy=(coord['longitude'], coord['latitude']), xytext=(5, 5), textcoords='offset points', ha='right', color='white', bbox=dict(boxstyle="round,pad=0.1", fc="black", alpha=0.5), zorder=3, fontsize=6)
                 
                 plotted_items = []
                 if len(lons) < 2:
@@ -236,7 +246,7 @@ class MapGraph(GraphsModule):
                     norm = Normalize(vmin=self.min_scale, vmax=self.max_scale)
                     # Se tiver apenas 1 ponto, plota o ponto.
                     if self.pontos_station:
-                        scatter = ax.scatter(lons, lats, c=vals, cmap=cmap_custom, norm=norm, s=50, transform=ccrs.PlateCarree(), edgecolors='black')
+                        scatter = ax.scatter(lons, lats, c=vals, cmap=cmap_custom, norm=norm, s=10, transform=ccrs.PlateCarree(), edgecolors='black')
                     mappable = scatter
                     plotted_items.append(scatter)
 
@@ -298,7 +308,7 @@ class MapGraph(GraphsModule):
                     # O tamanho (s=200) e a borda (edgecolors) garantem a visibilidade.
                     # Correção: zorder=4 para que o círculo fique atrás do marcador da estação (zorder=5) e do nome (zorder=6).
                     if self.pontos_station:
-                        ax.scatter(lons, lats, c=vals, s=200, marker='o', cmap=cmap_custom, norm=norm, transform=ccrs.PlateCarree(), edgecolors='white', linewidth=1.5, zorder=4)
+                        ax.scatter(lons, lats, c=vals, s=10, marker='o', cmap=cmap_custom, norm=norm, transform=ccrs.PlateCarree(), edgecolors='white', linewidth=1.5, zorder=4)
                     mappable = contour
 
                 ax.set_title(f"{self.title}\n{current_time_dt.strftime('%d/%m/%Y %H:%M')} UT", weight='bold')

@@ -1,12 +1,12 @@
 from Model.GraphPage.GraphsModule import GraphsModule
-from Model.Custom.CustomPltOptions import CustomPltOptions
+#from Model.Custom.CustomPltOptions import CustomPltOptions
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QDate
-import os
-import re
+#import os
+#import re
 
 class ManyGraphs(GraphsModule):
     def __init__(self, root, language):
@@ -124,7 +124,6 @@ class ManyGraphs(GraphsModule):
         try:
             final_date = self.end_date - timedelta(days=1)
             plt.close('all')
-            #plt.rcParams['toolbar'] = 'toolmanager' # allows custom tools mode
             self.fig, axs = plt.subplots(number_rows, number_columns)
             self.axs = axs.flatten()
             self.filtred_values = []  
@@ -132,20 +131,6 @@ class ManyGraphs(GraphsModule):
 
             for plot_type in slct_types:
                 control_reference = True
-                '''for station in self.stations:
-                    for dy, (day, times) in enumerate(self.all_data[station].items()):
-                        plot_values = []
-                        for time in times:
-                            data = self.all_data[station][day][time][plot_type]
-                            if data is not None: self.filtred_values.append(data)
-                            plot_values.append(data)
-
-                        time = [self.start_date + timedelta(minutes=min) for min in range(1440)]
-                        if 'reference' in plot_type:
-                            if control_reference: # controle para que o mesmo tipo de referencia não se repita
-                                self.axs[dy].plot(time, plot_values, label=plot_type)
-                        else:
-                            self.axs[dy].plot(time, plot_values, label=f'{station}-{plot_type}')'''
                 # Extract all days to plot (assuming same days for all stations)
                 days = list(self.all_data[self.stations[0]].keys())
                 for dy, day in enumerate(days):
@@ -162,8 +147,6 @@ class ManyGraphs(GraphsModule):
                         day_datetime = datetime.strptime(day, "%d/%m/%Y")  # ou "%d/%m/%Y", dependendo do formato da chave
                         time = [day_datetime + timedelta(minutes=m) for m in range(1440)]
 
-
-                        #time = [self.start_date + timedelta(minutes=min) for min in range(1440)]
                         if 'reference' in plot_type:
                             if control_reference:
                                 self.axs[dy].plot(time, plot_values, label=plot_type)
@@ -177,7 +160,6 @@ class ManyGraphs(GraphsModule):
                     self.axs[dy].tick_params(axis='x', which='both', top=True, labeltop=False, bottom=True, labelbottom=True)
                     self.axs[dy].tick_params(axis='y', which='both', right=True, labelright=False, left=True, labelleft=True)
 
-                    #self.axs[dy].set_xlim(self.start_date, self.start_date+timedelta(hours=24))
                     self.axs[dy].set_xlim(day_datetime, day_datetime + timedelta(hours=24))
 
                     if self.filtred_values:
@@ -207,7 +189,6 @@ class ManyGraphs(GraphsModule):
 
                     self.fig.suptitle(f'{plot_type} {self.start_date.strftime("%d/%m/%Y")} - {final_date.strftime("%d/%m/%Y")}')
                     plt.tight_layout()
-                    #plt.subplots_adjust(wspace=0.4, hspace=0.4)
                     control_reference = False
                     
             self.fig.canvas.mpl_connect('button_press_event', lambda event: self.create_exporter_level_top(event, slct_types))

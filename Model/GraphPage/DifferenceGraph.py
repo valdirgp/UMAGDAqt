@@ -2,7 +2,6 @@ from Model.GraphPage.GraphsModule import GraphsModule
 from datetime import timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import re
 from datetime import datetime
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QDate
@@ -146,50 +145,6 @@ class DifferenceGraph(GraphsModule):
         
         return averages
 
-    # plot the given data
-    '''
-    def add_plots(self, all_types):
-        plt.close('all')
-        self.fig, self.ax = plt.subplots()
-        self.filtred_values = []
-        if isinstance(self.start_date, QDate):
-            self.start_date = self.start_date.toPyDate()
-        if isinstance(self.end_date, QDate):
-            self.end_date = self.end_date.toPyDate()
-        difference = (self.end_date - self.start_date).days
-        self.diff_data = {}
-
-        for day, times in self.all_data[self.min_station].items():
-            date = {}
-            for time in times:
-                current_data = {}
-                for slct_type in all_types:
-                    if 'reference' not in slct_type:
-                        try:
-                            data = self.all_data[self.min_station][day][time][slct_type] - self.all_data[self.sub_station][day][time][slct_type]
-                        except Exception:
-                            data = None
-                    else:
-                        data = self.all_data[self.min_station][day][time][slct_type]
-                    current_data[slct_type] = data
-                date[time] = current_data
-            self.diff_data[day] = date
-
-        for slct_type in all_types:
-            plot_values = []
-            for day, times in self.diff_data.items():
-                for time in times:
-                    data = self.diff_data[day][time][slct_type]
-                    if data is not None: self.filtred_values.append(data)
-                    plot_values.append(data)
-
-            time = [self.start_date + timedelta(minutes=i) for i in range(difference * 1440)]
-            if 'reference' in slct_type:
-                self.ax.plot(time, plot_values, label=slct_type)
-            else:
-                self.ax.plot(time, plot_values, label=f'{self.min_station}-{self.sub_station} {slct_type}')
-    '''
-
     def add_plots(self, all_types):
         plt.close('all')
         self.fig, self.ax = plt.subplots()
@@ -241,49 +196,6 @@ class DifferenceGraph(GraphsModule):
                 self.ax.plot(time_axis, plot_values, label=label)
 
         self.ax.legend()
-
-
-
-    # configure graph specifications
-    '''
-    def config_graph(self, plot_type, station):
-        final_date = self.end_date - timedelta(days=1)
-        timeday = [self.start_date + timedelta(days=i) for i in range((self.end_date - self.start_date).days+1)]
-        self.ax.set_xticks(timeday, minor=False)
-        self.ax.xaxis.set_major_formatter(mdates.DateFormatter(f'%d'))
-
-        self.ax.tick_params(axis='x', which='both', top=True, labeltop=False, bottom=True, labelbottom=True)
-        self.ax.tick_params(axis='y', which='both', right=True, labelright=False, left=True, labelleft=True)
-
-        self.ax.set_xlim(self.start_date, self.end_date)
-        if self.filtred_values:
-            self.ax.set_ylim(min(self.filtred_values), max(self.filtred_values))
-        else:
-            QMessageBox.information(
-                None,
-                self.util.dict_language[self.lang]["mgbox_error"],
-                self.util.dict_language[self.lang]["mgbox_error_noinfo_period"]
-            )
-            self.can_plot = False
-            return
-
-        self.ax.set_ylabel(f'{", ".join(plot_type)} ({self.get_measure(plot_type)})')
-        self.ax.set_xlabel('UT')
-        self.ax.set_title(f'{station} {self.start_date.day:02}/{self.start_date.month:02}/{self.start_date.year} - {final_date.day:02}/{final_date.month:02}/{final_date.year}')
-        self.ax.legend()
-
-        if self.bold_text:
-            self.ax.xaxis.label.set_weight('bold')
-            self.ax.yaxis.label.set_weight('bold')
-            self.ax.title.set_weight('bold')
-            for label in self.ax.get_xticklabels() + self.ax.get_yticklabels():
-                label.set_fontweight('bold')
-
-        if self.grid_graph:
-            self.ax.grid()
-
-        self.fig.canvas.mpl_connect('button_press_event', lambda event: self.create_exporter_level_top(event, plot_type, is_difference=True))
-    '''
 
     def config_graph(self, plot_type, station):
         final_date = self.end_date - timedelta(days=1)
