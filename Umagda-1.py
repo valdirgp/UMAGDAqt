@@ -1,12 +1,8 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtGui import QIcon
-#from PyQt5.QtCore import QTimer
 import sys
 from Controller.MainControl import MainControl
 from General.util import Util as util
-
-#from Model.TelaCarregamento.loading_screen import LoadingScreen
-#from Model.TelaCarregamento.init_thread import InitThread
 
 class UmagdaApp(QMainWindow):
     def __init__(self):

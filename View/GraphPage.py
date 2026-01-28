@@ -224,7 +224,9 @@ class GraphPage(QWidget):
             if widget is not None and not sip.isdeleted(widget):
                 self.side_options.enddate.setDate(QDate(self.final[2], self.final[1], self.final[0]))
 
-    
+    def updateDrive(self, drive):
+        self.side_options.combo_download_location.setCurrentText(drive)
+
     def updateMap(self):
         self.map_widget.ax.callbacks.disconnect(self.map_widget.xlim_callback_id)
         self.map_widget.ax.callbacks.disconnect(self.map_widget.ylim_callback_id)

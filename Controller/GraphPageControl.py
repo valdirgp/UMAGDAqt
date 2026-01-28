@@ -72,8 +72,8 @@ class GraphControl():
         self.Graphs.year = self.year
         self.Graphs.final = self.final
         self.Graphs.drive = self.drive
-        if self.Graphs.side_options.combo_download_location.currentText() != self.util.get_drive_config():
-            self.Graphs.updateDrive(self.util.get_drive_config())
+        #if self.Graphs.side_options.combo_download_location.currentText() != self.util.get_drive_config():
+            #self.Graphs.updateDrive(self.util.get_drive_config())
         self.Graphs.update_data()
 
     # call graphs creation

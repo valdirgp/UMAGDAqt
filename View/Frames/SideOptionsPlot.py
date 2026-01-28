@@ -463,7 +463,7 @@ class SideOptionsPlot(QWidget):
         self.enddate.setDate(data)
         self.options_layout.addWidget(self.enddate)
 
-        self.btn_select_files = QPushButton("Selecionar Arquivos")
+        self.btn_select_files = QPushButton(self.util.dict_language[self.language]['btn_select_files'])
         self.btn_select_files.clicked.connect(self.open_file_dialog)
         self.options_layout.addWidget(self.btn_select_files)
 

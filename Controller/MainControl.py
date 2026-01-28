@@ -232,10 +232,6 @@ class MainControl:
             self.stack.setCurrentWidget(self.InitialPage)
 
         return True
-
-    '''def update_listbox_on_change(self):
-        if self.year != self.util.get_year_config() or self.final != self.util.get_final_config():
-            self.initialize_app()'''
     
     def create_license_TopLevel(self):
         self.LicenseTopLevel.load_page()

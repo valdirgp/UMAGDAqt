@@ -10,7 +10,7 @@ import math
 class Util():
     def __init__(self):
         self.dict_language = {"br": {
-                                    "title": "UMAGDA - Univap Análise de dados de magnetômetros - FAPESP Project: 2022/14815-5 & 2024/05909-1",
+                                    "title": "UMAGDA - Univap Análise de dados de magnetômetros - FAPESP Project: 2022/14815-5 & 2025/14992-2",
 
                                     "menu_main": "Páginas",
                                     "menu_dwd": "Downloads",
@@ -84,6 +84,7 @@ class Util():
                                     "btn_dwd": "Confirmar Download",
                                     "btn_readme": "Criar Arquivo Readme",
                                     "btn_confirm": "Confirmar",
+                                    "btn_select_files": "Selecionar Arquivos",
 
                                     "combo_day": "Dia(s)",
                                     "combo_month": "Mês(es)",
@@ -161,7 +162,7 @@ class Util():
                                     "lbl_exibir_pontos_estacoes": "Exibir pontos das estações no mapa"
                                     },
                             "en": {
-                                    "title": "UMAGDA - Univap Magnetometer Data Analysis - FAPESP Project: 2022/14815-5 & 2024/05909-1",
+                                    "title": "UMAGDA - Univap Magnetometer Data Analysis - FAPESP Project: 2022/14815-5 & 2025/14992-2",
 
                                     "menu_main": "Pages",
                                     "menu_dwd": "Downloads",
@@ -221,6 +222,7 @@ class Util():
                                     "btn_dwd": "Confirm Download",
                                     "btn_readme": "Create Readme File",
                                     "btn_confirm": "Confirm",
+                                    "btn_select_files": "Select Files",
 
                                     "btn_confirm_H": "Plot H(nT) values",
                                     "btn_confirm_Z": "Plot Z(nT) values",
@@ -376,19 +378,6 @@ class Util():
 
     # change language config according to given lang <------- will have to be changed for future configs
     def change_lang(self, lang):
-        '''
-        with open(self.resource_path("config.txt"), "r") as f:
-            file = f.read()
-            data_list = file.split()
-            data_list[1] = lang
-
-        with open(self.resource_path("config.txt"), "w") as f:
-            for index, info in enumerate(data_list):
-                if index % 2 == 0:
-                    f.write(f"{info} ")
-                else:
-                    f.write(f"{info}\n")
-        '''
         lines = []
         with open(self.resource_path("config.txt"), "r") as f:
             for line in f:
