@@ -276,13 +276,19 @@ class GraphPage(QWidget):
     def get_local_download(self):
         return self.side_options.combo_download_location.currentText()
 
-    def get_stations_selected(self):
+    def get_stations_selected(self): # LIST
         selected_stations = set()
         for i in range(self.side_options.list_all_stations.count()):
             item = self.side_options.list_all_stations.item(i)
             if item.isSelected():
                 selected_stations.add(item.data(Qt.UserRole))
         return list(selected_stations)
+    
+    def get_selected_station(self): # PRO CALM AND DISTURB
+        selected_items = self.side_options.list_all_stations.selectedItems()
+        if selected_items:
+            return selected_items[0].text()
+        return None
     
     def get_minuend_station_selected(self):
         selected = self.side_options.minuend_stations_list.selectedItems()
@@ -340,6 +346,12 @@ class GraphPage(QWidget):
 
     def get_cal_selection(self):
         return self.side_options.cal_calm
+    
+    def get_selected_disturb_dates(self):
+        return self.side_options.selected_disturb_dates
+    
+    def get_cal_disturb_selection(self):
+        return self.side_options.cal_disturb
     
     def get_files_selection(self):
         files = []

@@ -1282,7 +1282,7 @@ class UniversalCDModel(GraphsModule):
         Mantém as mesmas entradas da versão original.
         """
         self.lcl_downloaded = local_downloaded
-        self.station = station[0]
+        self.station = station.split()[0]
         self.data_with_stations = data_with_stations
         self.selected_calm_dates = calm_dates
         self.selected_disturb_date = disturb_date

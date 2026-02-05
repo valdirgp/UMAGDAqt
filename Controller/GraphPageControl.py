@@ -4,6 +4,9 @@ from Model.GraphPage.GlobalGraph import GlobalGraph
 from Model.GraphPage.ManyGraphs import ManyGraphs
 from Model.GraphPage.TideGraph import TideGraph
 from Model.GraphPage.DifferenceGraph import DifferenceGraph
+from Model.CalmDisturbPage.CalmDisturbGraphs import CalmDisturbModel
+from Model.CalmPage.CalmGraphs import CalmModel
+from Model.UniversalCDPage.UniversalCDGraphs import UniversalCDModel
 from Model.GraphPage.ContourGraph import ContourGraph
 from Model.GraphPage.MapGraph import MapGraph
 from Model.GraphPage.ElectricGraph import ElectricGraph
@@ -26,6 +29,9 @@ class GraphControl():
         self.ManyModule = ManyGraphs(self.root, self.lang)
         self.TideModule = TideGraph(self.root, self.lang)
         self.DifferenceModule = DifferenceGraph(self.root, self.lang)
+        self.CDModel = CalmDisturbModel(self.root, self.lang)
+        self.CModel = CalmModel(self.root, self.lang)
+        self.CDUModel = UniversalCDModel(self.root, self.lang)
         self.ContourModule = ContourGraph(self.root, self.lang)
         self.MapModule = MapGraph(self.root, self.lang)
         self.ElectricModule = ElectricGraph(self.root, self.lang)
@@ -157,11 +163,65 @@ class GraphControl():
                     self.data_with_stations,
                 )
             case 6: # CALM AND DISTURB GRAPH
-                pass
+                self.station_selected = self.Graphs.get_selected_station()
+                self.calm_date = list(self.Graphs.get_selected_dates())
+                self.disturb_date = list(self.Graphs.get_selected_disturb_dates())
+
+                if not self.Module.verify_inputs(
+                    station_selected= self.station_selected,
+                    calm_dates_selected= self.calm_date,
+                    disturb_dates_selected= self.disturb_date
+                ): return
+
+                self.CDModel.create_graphics_calm_dist(
+                    self.Graphs.get_local_download(),
+                    self.Graphs.get_start_date(),
+                    self.Graphs.get_end_date(),
+                    self.station_selected,
+                    self.data_with_stations,
+                    self.calm_date,
+                    self.disturb_date,
+                )
             case 7: # CALM GRAPH
-                pass
+                selected_types = [dtype for dtype in self.Graphs.get_type_data() if dtype is not None or ""]
+                self.station_selected = self.Graphs.get_selected_station()
+                self.calm_date = list(self.Graphs.get_selected_dates())
+                if not self.Module.verify_inputs(
+                    station_selected= self.station_selected,
+                    calm_dates_selected= self.calm_date
+                ): return
+                self.CModel.create_graphics_calm(
+                                            self.Graphs.get_local_download(),
+                                            self.Graphs.get_start_date(),
+                                            self.Graphs.get_end_date(),
+                                            self.station_selected,
+                                            self.data_with_stations,
+                                            self.calm_date,
+                                            selected_types[0]
+                                            )
             case 8: # UNIVERSAL CALM AND DISTURB GRAPH
-                pass
+                selected_types = [dtype for dtype in self.Graphs.get_type_data() if dtype is not None or ""]
+                self.selected_station = self.Graphs.get_selected_station()
+                self.calm_date = list(self.Graphs.get_selected_dates())
+                self.disturb_date = list(self.Graphs.get_selected_disturb_dates())
+                if not self.Module.verify_inputs(
+                    station_selected= self.selected_station,
+                    type_selected= selected_types,
+                    calm_dates_selected= self.calm_date,
+                    disturb_dates_selected= self.disturb_date
+                ): return
+                for dtype in selected_types:
+
+                    self.CDUModel.create_graphics_calm_distU(
+                        dtype,  # componente (H, X, Y, Z, D, F, I, G)
+                        self.Graphs.get_local_download(),
+                        self.Graphs.get_start_date(),
+                        self.Graphs.get_end_date(),
+                        self.selected_station,
+                        self.data_with_stations,
+                        self.calm_date,
+                        self.disturb_date
+                    )
             case 9: # CONTOUR GRAPH
                 if not self.Module.verify_inputs(station_selected=self.Graphs.get_stations_selected(), type_selected=self.Graphs.get_type_data()): return
 

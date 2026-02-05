@@ -19,7 +19,7 @@ class SideOptionsPlot(QWidget):
         self.final = final
         self.drive = drive
         self.selected_dates = set()
-        self.selected_disturb_dates = []
+        self.selected_disturb_dates = set()
 
         self.btn_singleday_function = None
         self.btn_globaldays_function = None
@@ -162,20 +162,20 @@ class SideOptionsPlot(QWidget):
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_calm.setSelectedDate(data)
         self.cal_calm.setEnabled(False)
-        self.cal_calm.clicked.connect(self.date_selected)  # Conectar o evento de clique ao método
+        self.cal_calm.clicked.connect(lambda date: self.date_selected(date, self.selected_dates, self.date_list, self.cal_calm))  # Conectar o evento de clique ao método
         layout.addWidget(self.cal_calm)
 
         # Lista para exibir as datas selecionadas
         self.date_list = QListWidget()
         self.date_list.setMaximumWidth(310)
         self.date_list.setSelectionMode(QListWidget.MultiSelection)  # Permite selecionar múltiplos itens
-        self.date_list.itemClicked.connect(self.remove_date_from_list)  # Conectar evento de clique na lista
+        self.date_list.itemClicked.connect(lambda item: self.remove_date_from_list(item, self.selected_dates, self.date_list, self.cal_calm))  # Conectar evento de clique na lista
         layout.addWidget(self.date_list)
 
         # Botões para adicionar e remover datas diretamente da lista
         btn_layout = QHBoxLayout()
-        self.btn_clear = QPushButton("Limpar Seleção")
-        self.btn_clear.clicked.connect(self.clear_selection)
+        self.btn_clear = QPushButton(self.util.dict_language[self.language]['btn_clr'])
+        self.btn_clear.clicked.connect(lambda: self.clear_selection(self.cal_calm, self.date_list, self.selected_dates))
         btn_layout.addWidget(self.btn_clear)
         layout.addLayout(btn_layout)
 
@@ -190,37 +190,40 @@ class SideOptionsPlot(QWidget):
         )
 
         if self.combo_type_plot.currentIndex() != 0:
-            self.cal_calm.setEnabled(d_checked)
+            if self.combo_type_plot.currentIndex() in [6, 7, 8]:
+                self.cal_calm.setEnabled(True)
+            else:
+                self.cal_calm.setEnabled(d_checked)
         else:
             self.cal_calm.setEnabled(False)
     
     def create_none_options(self):
         self.clear_options_frame()
     
-    def date_selected(self, date):
+    def date_selected(self, date, selected_dates, date_list, calendar):
         """
         Esse método será chamado quando uma data for clicada no QCalendarWidget.
         Ele adiciona ou remove a data da lista de datas selecionadas.
         """
         date_str = date.toString("dd/MM/yyyy")
 
-        if date in self.selected_dates:
-            self.selected_dates.remove(date)
-            for i in range(self.date_list.count()):
-                item = self.date_list.item(i)
+        if date in selected_dates:
+            selected_dates.remove(date)
+            for i in range(date_list.count()):
+                item = date_list.item(i)
                 if item.text() == date_str:
-                    self.date_list.takeItem(i)
+                    date_list.takeItem(i)
                     break
         else:
             # Adiciona a data à lista de datas selecionadas
-            self.selected_dates.add(date)
+            selected_dates.add(date)
             # Adiciona a data ao QListWidget
-            self.date_list.addItem(date_str)
+            date_list.addItem(date_str)
 
         # Atualiza as datas destacadas no calendário
-        self.update_calendar_selection()
+        self.update_calendar_selection(selected_dates, calendar)
 
-    def remove_date_from_list(self, item):
+    def remove_date_from_list(self, item, selected_dates, date_list, calendar):
         """
         Esse método será chamado quando um item for clicado na QListWidget.
         Ele remove a data clicada tanto da lista quanto do QCalendarWidget.
@@ -229,13 +232,12 @@ class SideOptionsPlot(QWidget):
         date = date_str.split("/")
         date = QDate(int(date[2]), int(date[1]), int(date[0]))
 
-        if date in self.selected_dates:
-            self.selected_dates.remove(date)
-            self.date_list.takeItem(self.date_list.row(item))
+        if date in selected_dates:
+            selected_dates.remove(date)
+            date_list.takeItem(date_list.row(item))
+        self.update_calendar_selection(selected_dates, calendar)
 
-        self.update_calendar_selection()
-
-    def update_calendar_selection(self):
+    '''def update_calendar_selection(self):
         """
         Atualiza as datas selecionadas visualmente no QCalendarWidget.
         """
@@ -262,15 +264,44 @@ class SideOptionsPlot(QWidget):
         # Aplicar a cor vermelha para as datas selecionadas
         for selected_date in selected_qdates:
             if first_date <= selected_date <= last_date:
-                self.cal_calm.setDateTextFormat(selected_date, text_format)
+                self.cal_calm.setDateTextFormat(selected_date, text_format)'''
 
-    def clear_selection(self):
+    def update_calendar_selection(self, selected_dates, calendar):
+        """
+        Atualiza as datas selecionadas visualmente no QCalendarWidget.
+        """
+        from PyQt5.QtGui import QTextCharFormat, QColor
+        from PyQt5.QtCore import QDate, Qt
+        #selected_qdates = [QDate.fromString(date, "dd/MM/yyyy") for date in self.selected_dates]
+        selected_qdates = [date for date in selected_dates]
+        # Criar um formato de texto para as datas selecionadas (cor vermelha)
+        text_format = QTextCharFormat()
+        text_format.setForeground(QColor(0, 128, 0))  # Define a cor do texto como vermelho
+
+        # Criar um formato de texto normal (sem cor)
+        normal_format = QTextCharFormat()
+
+        # Iterar sobre as datas do mês visível
+        first_date = calendar.selectedDate().addDays(-calendar.selectedDate().day() + 1)
+        last_date = first_date.addMonths(1).addDays(-1)
+
+        # Limpar as formatações anteriores (se necessário)
+        for day in range(first_date.day(), last_date.day() + 1):
+            date = QDate(first_date.year(), first_date.month(), day)
+            calendar.setDateTextFormat(date, normal_format)
+
+        # Aplicar a cor vermelha para as datas selecionadas
+        for selected_date in selected_qdates:
+            if first_date <= selected_date <= last_date:
+                calendar.setDateTextFormat(selected_date, text_format)
+
+    def clear_selection(self, calendar, date_list, selected_dates):
         """
         Limpa todas as datas selecionadas, tanto no calendário quanto na lista.
         """
-        self.selected_dates.clear()  # Limpa o conjunto de datas selecionadas
-        self.date_list.clear()  # Limpa a lista visível no QListWidget
-        self.update_calendar_selection()  # Atualiza o calendário (desmarcando todas as datas)
+        selected_dates.clear()  # Limpa o conjunto de datas selecionadas
+        date_list.clear()  # Limpa a lista visível no QListWidget
+        self.update_calendar_selection(selected_dates, calendar)  # Atualiza o calendário (desmarcando todas as datas)
 
     def sync_calendar_month_year(self, calendar, dateedit):
             dia = calendar.selectedDate().day()
@@ -386,8 +417,6 @@ class SideOptionsPlot(QWidget):
         self.update_lists()
     
     def add_disturbance_widget(self):
-        lbl_disturb = QLabel(self.util.dict_language[self.language]['lbl_disturb'])
-        self.options_layout.addWidget(lbl_disturb)
         lbl_disturb_date = QLabel(self.util.dict_language[self.language]['lbl_disturb'])
         self.options_layout.addWidget(lbl_disturb_date)
         self.cal_disturb = QCalendarWidget()
@@ -406,6 +435,8 @@ class SideOptionsPlot(QWidget):
             # Cria uma nova data com o ano/mês do QDateEdit, mantendo o dia atual do calendário
             nova_data = QDate(dateedit.date().year(), dateedit.date().month(), dia)
             calendar.setSelectedDate(nova_data)
+
+        
         
 
         # Conecta ao dateChanged do QDateEdit
@@ -418,7 +449,7 @@ class SideOptionsPlot(QWidget):
 
         # Clear all button
         self.btn_clear_all = QPushButton(self.util.dict_language[self.language]['btn_clr'])
-        self.btn_clear_all.clicked.connect(self.clean_all)
+        self.btn_clear_all.clicked.connect(lambda: self.clear_selection(self.cal_disturb, self.disturb_date_list, self.selected_disturb_dates))
         self.options_layout.addWidget(self.btn_clear_all)
     
     def create_contorno_options(self):

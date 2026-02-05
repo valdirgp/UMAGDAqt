@@ -268,13 +268,19 @@ class UniversalCDPage(QWidget):
         return self.side_options.enddate.date()
     
 
-    def get_selected_station(self):
+    '''def get_selected_station(self):
         selected_stations = set()
         for i in range(self.side_options.list_all_stations.count()):
             item = self.side_options.list_all_stations.item(i)
             if item.isSelected():
                 selected_stations.add(item.text().split()[0])
-        return list(selected_stations)
+        return list(selected_stations)'''
+    
+    def get_selected_station(self): # PRO CALM AND DISTURB
+        selected_items = self.side_options.list_all_stations.selectedItems()
+        if selected_items:
+            return selected_items[0].text()
+        return None
     
 
     def get_selected_calm_dates(self):
