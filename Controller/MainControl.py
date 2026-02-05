@@ -4,9 +4,6 @@ from View.LicenseTopLevel import LicenseTopLevel
 from View.AboutPage import AboutPage
 from Controller.DownloadsControl import DownloadsControl
 from Controller.GraphPageControl import GraphControl
-from Controller.CalmDisturbPageControl import CalmDisturbControl
-from Controller.CalmPageControl import CalmControl
-from Controller.UniversalCDPageControl import UniversalCDPageControl
 from General.util import Util
 
 from PyQt5.QtWidgets import (
@@ -63,28 +60,12 @@ class MainControl:
             self.GraphControl.load_widgets()
             self.GraphPage = self.GraphControl.get_widget()
 
-            self.CalmDisturbControl = CalmDisturbControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
-            self.CalmDisturbControl.load_widgets()
-            self.CalmDisturbPage = self.CalmDisturbControl.get_widget()
-
-            self.CalmControl = CalmControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
-            self.CalmControl.load_widgets()
-            self.CalmPage = self.CalmControl.get_widget()
-
-            self.UniversalCDControl = UniversalCDPageControl(self.root, self.lang, self.year, self.final, self.drive, magnetic_eq_coords)
-            self.UniversalCDControl.load_widgets()
-            self.UniversalCDPage = self.UniversalCDControl.get_widget()
-
             self.AboutPage = AboutPage(self.root, self.lang)
             self.AboutPage.load_page()
 
             # adiciona páginas ao stack
             self.stack.addWidget(self.DownloadPage)
             self.stack.addWidget(self.GraphPage)
-            self.stack.addWidget(self.CalmDisturbPage)
-            self.stack.addWidget(self.CalmPage)
-            self.stack.addWidget(self.UniversalCDPage)
-
             self.stack.addWidget(self.AboutPage)
 
             # menu principal
@@ -92,9 +73,6 @@ class MainControl:
 
             func_menu.addAction(self.util.dict_language[self.lang]["menu_dwd"], lambda: self.stack.setCurrentWidget(self.DownloadPage))
             func_menu.addAction(self.util.dict_language[self.lang]["menu_graph"], lambda: self.stack.setCurrentWidget(self.GraphPage))
-            func_menu.addAction(self.util.dict_language[self.lang]['menu_cd'], lambda: self.stack.setCurrentWidget(self.CalmDisturbPage))
-            func_menu.addAction(self.util.dict_language[self.lang]['menu_c'], lambda: self.stack.setCurrentWidget(self.CalmPage))
-            func_menu.addAction(self.util.dict_language[self.lang]['menu_ucd'], lambda: self.stack.setCurrentWidget(self.UniversalCDPage))
 
             # menu de configurações
             self.config_menu = QMenu(self.util.dict_language[self.lang]["menu_config"], self.root)
@@ -261,15 +239,9 @@ class MainControl:
             if regiao == "mundo":
                 self.DownloadPage.map_widget.ax.set_global()
                 self.GraphPage.map_widget.ax.set_global()
-                self.CalmDisturbPage.map_widget.ax.set_global()
-                self.CalmPage.map_widget.ax.set_global()
-                self.UniversalCDPage.map_widget.ax.set_global()
             else:
                 self.DownloadPage.map_widget.ax.set_extent(regioes[regiao])
                 self.GraphPage.map_widget.ax.set_extent(regioes[regiao])
-                self.CalmDisturbPage.map_widget.ax.set_extent(regioes[regiao])
-                self.CalmPage.map_widget.ax.set_extent(regioes[regiao])
-                self.UniversalCDPage.map_widget.ax.set_extent(regioes[regiao])
 
     def reset(self, lang="", *args, **kwargs):
         if lang not in ("", "en", "br"):
