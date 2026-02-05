@@ -156,7 +156,13 @@ class GraphControl():
                     self.Graphs.get_cal_selection(),
                     self.data_with_stations,
                 )
-            case 6: # CONTOUR GRAPH
+            case 6: # CALM AND DISTURB GRAPH
+                pass
+            case 7: # CALM GRAPH
+                pass
+            case 8: # UNIVERSAL CALM AND DISTURB GRAPH
+                pass
+            case 9: # CONTOUR GRAPH
                 if not self.Module.verify_inputs(station_selected=self.Graphs.get_stations_selected(), type_selected=self.Graphs.get_type_data()): return
 
                 self.ContourModule.plot_contour(
@@ -170,7 +176,7 @@ class GraphControl():
                     self.Graphs.get_selected_dates(),
                     self.data_with_stations,
                 )
-            case 7: # MAP CONTOUR
+            case 10: # MAP CONTOUR
                 if not self.Module.verify_inputs(station_selected=self.Graphs.get_stations_selected(), type_selected=self.Graphs.get_type_data()): return
                 self.MapModule.plot_map_contour(
                     self.Graphs.get_local_download(),
@@ -185,7 +191,7 @@ class GraphControl():
                     self.Graphs.ContornoMap,
                     self.Graphs.map_widget
                 )
-            case 8: # ELECTRIC FIELD
+            case 11: # ELECTRIC FIELD
                 #if not self.Module.verify_inputs(station_selected=self.Graphs.get_stations_selected(), type_selected=self.Graphs.get_type_data()): return
                 self.ElectricModule.plot_electric_field(
                     self.Graphs.get_bold_text(),
@@ -195,7 +201,7 @@ class GraphControl():
                     self.Graphs.get_files_selection(),
                     True
                 )
-            case 9: #VERTICAL DRIFT
+            case 12: #VERTICAL DRIFT
                 self.ElectricModule.plot_electric_field(
                     self.Graphs.get_bold_text(),
                     self.Graphs.get_grid_graph(),

@@ -19,6 +19,7 @@ class SideOptionsPlot(QWidget):
         self.final = final
         self.drive = drive
         self.selected_dates = set()
+        self.selected_disturb_dates = []
 
         self.btn_singleday_function = None
         self.btn_globaldays_function = None
@@ -132,6 +133,9 @@ class SideOptionsPlot(QWidget):
             self.util.dict_language[self.language]['combo_many'],
             self.util.dict_language[self.language]['combo_tide'],
             self.util.dict_language[self.language]['combo_difference'],
+            self.util.dict_language[self.language]['combo_calm_disturb'],
+            self.util.dict_language[self.language]['combo_calm'],
+            self.util.dict_language[self.language]['combo_universal'],
             self.util.dict_language[self.language]['combo_contorno'],
             self.util.dict_language[self.language]['combo_map_contour'],
             self.util.dict_language[self.language]['combo_electric_field'],
@@ -381,6 +385,42 @@ class SideOptionsPlot(QWidget):
         self.options_layout.addWidget(self.subtracted_stations_list)
         self.update_lists()
     
+    def add_disturbance_widget(self):
+        lbl_disturb = QLabel(self.util.dict_language[self.language]['lbl_disturb'])
+        self.options_layout.addWidget(lbl_disturb)
+        lbl_disturb_date = QLabel(self.util.dict_language[self.language]['lbl_disturb'])
+        self.options_layout.addWidget(lbl_disturb_date)
+        self.cal_disturb = QCalendarWidget()
+        self.cal_disturb.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
+        self.cal_disturb.setGridVisible(True)
+        hoje = QDate.currentDate()
+        data = QDate(self.year[2], self.year[1], self.year[0])
+        self.cal_disturb.setSelectedDate(data)
+        #self.add_date(self.cal_disturb, self.selected_disturb_dates)
+        self.cal_disturb.clicked.connect(lambda date: self.date_selected(date=date, selected_dates=self.selected_disturb_dates, date_list=self.disturb_date_list, calendar=self.cal_disturb))
+        self.cal_disturb.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        def sync_calendar_month_year(calendar, dateedit):
+            # Pega o dia atualmente selecionado no calendário
+            dia = calendar.selectedDate().day()
+            # Cria uma nova data com o ano/mês do QDateEdit, mantendo o dia atual do calendário
+            nova_data = QDate(dateedit.date().year(), dateedit.date().month(), dia)
+            calendar.setSelectedDate(nova_data)
+        
+
+        # Conecta ao dateChanged do QDateEdit
+        self.startdate.dateChanged.connect(lambda new_date: sync_calendar_month_year(self.cal_disturb, self.startdate))
+        self.disturb_date_list = QListWidget()
+        self.disturb_date_list.setSelectionMode(QListWidget.MultiSelection)  # Permite selecionar múltiplos itens
+        self.disturb_date_list.itemClicked.connect(lambda item: self.remove_date_from_list(item=item, selected_dates=self.selected_disturb_dates, date_list=self.disturb_date_list, calendar=self.cal_disturb))  # Conectar evento de clique na lista
+        self.options_layout.addWidget(self.cal_disturb)
+        self.options_layout.addWidget(self.disturb_date_list)
+
+        # Clear all button
+        self.btn_clear_all = QPushButton(self.util.dict_language[self.language]['btn_clr'])
+        self.btn_clear_all.clicked.connect(self.clean_all)
+        self.options_layout.addWidget(self.btn_clear_all)
+    
     def create_contorno_options(self):
         self.clear_options_frame()
 
@@ -507,15 +547,26 @@ class SideOptionsPlot(QWidget):
                 self.add_subtractions_widget()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.NoSelection)
             case 6:
-                self.create_contorno_options()
+                self.create_manydays_options()
+                self.add_disturbance_widget()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
             case 7:
-                self.create_mapcontorno_options()
+                self.create_manydays_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
             case 8:
-                self.create_eletricfield_options()
+                self.create_manydays_options()
+                self.add_disturbance_widget()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
             case 9:
+                self.create_contorno_options()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+            case 10:
+                self.create_mapcontorno_options()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+            case 11:
+                self.create_eletricfield_options()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+            case 12:
                 self.create_eletricfield_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
         self.on_checkbox_changed()
