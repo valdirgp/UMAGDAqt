@@ -26,6 +26,7 @@ class DownloadPage(QWidget):
         self.map_widget = Map(self)                               # idem
         self.embrace_stations = []
         self.intermagnet_stations = []
+        self.lisn_stations = []
         
 
     def ensure_array(self, y, x):
@@ -53,17 +54,18 @@ class DownloadPage(QWidget):
             main_layout = self.layout()  # usa o layout já existente
 
         self.side_options.create_download_options()
-        self.side_options.btn_select_all.clicked.connect(self.set_all_selected)
-        self.side_options.btn_clear_all.clicked.connect(self.set_all_clear)
+        #self.side_options.btn_select_all.clicked.connect(self.set_all_selected)
+        #self.side_options.btn_clear_all.clicked.connect(self.set_all_clear)
         self.side_options.populate_combo_local()
         self.side_options.populate_stations_listbox(
             self.side_options.list_all_stations,
-            sorted(self.embrace_stations + self.intermagnet_stations)
+            sorted(self.embrace_stations + self.intermagnet_stations + self.lisn_stations)
         )
         self.side_options.list_all_stations.itemSelectionChanged.connect(self.listbox_on_click)
 
         self.get_stations_location() # gera o self.all_locals, self.longitude, self.latitude
         self.map_widget.create_map()
+        self.map_widget.range_changed.connect(self.update_range_filters)
         # inicializa as cores com base nas estações carregadas
         self.colors = ['red'] * len(self.all_locals)
         self.map_widget.set_station_map(self.longitude, self.latitude)
@@ -76,8 +78,15 @@ class DownloadPage(QWidget):
 
         self.map_widget.fig.canvas.mpl_connect('button_press_event', self.map_on_click)
 
-        main_layout.addWidget(self.side_options.options_frame)
-        main_layout.addWidget(self.map_widget.map_frame)
+        # Aplicamos a mesma lógica de stretch proporcional aqui
+        main_layout.addWidget(self.side_options.options_frame, 1)
+        main_layout.addWidget(self.map_widget.map_frame, 4)
+
+    def update_range_filters(self, lat_min, lat_max, lon_min, lon_max):
+        self.side_options.set_filter_values(
+            min(lat_min, lat_max), max(lat_min, lat_max),
+            min(lon_min, lon_max), max(lon_min, lon_max)
+        )
 
     # select all stations from map and listbox
     def set_all_selected(self):
@@ -100,7 +109,11 @@ class DownloadPage(QWidget):
             
             text = item.text()
             # Regex para capturar SIGLA, latitude, longitude e dip
-            match = re.match(r'^([A-Z]{3}) \(([-\d.]+), ([-\d.]+), ([-\d.]+)\)', text)
+            teste = text.split()[0]
+            if len(teste) == 3:
+                match = re.match(r'^([A-Z]{3}) \(([-\d.]+), ([-\d.]+), ([-\d.]+)\)', text)
+            else:
+                match = re.match(r'^([A-Z]{4}) \(([-\d.]+), ([-\d.]+), ([-\d.]+)\)', text)
             if match:
                 sigla = match.group(1)
                 lat = float(match.group(2))
@@ -146,7 +159,10 @@ class DownloadPage(QWidget):
         self.embrace_stations = callback
 
     def set_intermagnet_options(self, callback):
-        self.intermagnet_stations = callback    
+        self.intermagnet_stations = callback   
+
+    def set_lisn_options(self, callback):
+        self.lisn_stations = callback   
 
     def bind_download(self, callback):
         self.side_options.btn_confirm.clicked.connect(callback)
@@ -160,7 +176,6 @@ class DownloadPage(QWidget):
     def get_local_download(self):
         return self.side_options.combo_download_location.currentText()
 
-
     def get_stations_selected(self):
         selected_stations = set()
         for i in range(self.side_options.list_all_stations.count()):
@@ -168,16 +183,6 @@ class DownloadPage(QWidget):
             if item.isSelected():
                 selected_stations.add((item.text()).split()[0])
         return list(selected_stations)
-
-    '''def get_stations_selected(self):
-        selected_stations = set()
-        for i in range(self.side_options.list_all_stations.count()):
-            item = self.side_options.list_all_stations.item(i)
-            if item.isSelected():
-                # extrai apenas o código da estação (os 3 primeiros caracteres)
-                code = item.text()[:3]
-                selected_stations.add(code)
-        return list(selected_stations)'''
         
     def get_duration_chosen(self):
         return self.side_options.ent_durationchosen.text()

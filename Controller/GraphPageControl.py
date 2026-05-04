@@ -10,6 +10,7 @@ from Model.UniversalCDPage.UniversalCDGraphs import UniversalCDModel
 from Model.GraphPage.ContourGraph import ContourGraph
 from Model.GraphPage.MapGraph import MapGraph
 from Model.GraphPage.ElectricGraph import ElectricGraph
+from Model.GraphPage.RotGraph import RotGraph
 from View.GraphPage import GraphPage
 from PyQt5.QtCore import QFileSystemWatcher
 from General.util import Util
@@ -35,6 +36,7 @@ class GraphControl():
         self.ContourModule = ContourGraph(self.root, self.lang)
         self.MapModule = MapGraph(self.root, self.lang)
         self.ElectricModule = ElectricGraph(self.root, self.lang)
+        self.RotModule = RotGraph(self.root, self.lang)
 
         self.watcher = QFileSystemWatcher()
         self.util = Util()
@@ -146,23 +148,7 @@ class GraphControl():
                     self.Graphs.get_cal_selection(),
                     self.data_with_stations,
                 )           
-            case 5: # DIFFERENCE GRAPH
-                if not self.Module.verify_inputs(type_selected=self.Graphs.get_type_data()): return
-
-                self.DifferenceModule.plot_difference(
-                    self.Graphs.get_local_download(),
-                    self.Graphs.get_minuend_station_selected(),
-                    self.Graphs.get_subtracted_station_selected(),
-                    self.Graphs.get_type_data(),
-                    self.Graphs.get_bold_text(),
-                    self.Graphs.get_grid_graph(),
-                    self.Graphs.get_start_date(),
-                    self.Graphs.get_end_date(),
-                    self.Graphs.get_selected_dates(),
-                    self.Graphs.get_cal_selection(),
-                    self.data_with_stations,
-                )
-            case 6: # CALM AND DISTURB GRAPH
+            case 5: # CALM AND DISTURB GRAPH
                 self.station_selected = self.Graphs.get_selected_station()
                 self.calm_date = list(self.Graphs.get_selected_dates())
                 self.disturb_date = list(self.Graphs.get_selected_disturb_dates())
@@ -182,7 +168,7 @@ class GraphControl():
                     self.calm_date,
                     self.disturb_date,
                 )
-            case 7: # CALM GRAPH
+            case 6: # CALM GRAPH
                 selected_types = [dtype for dtype in self.Graphs.get_type_data() if dtype is not None or ""]
                 self.station_selected = self.Graphs.get_selected_station()
                 self.calm_date = list(self.Graphs.get_selected_dates())
@@ -199,7 +185,7 @@ class GraphControl():
                                             self.calm_date,
                                             selected_types[0]
                                             )
-            case 8: # UNIVERSAL CALM AND DISTURB GRAPH
+            case 7: # UNIVERSAL CALM AND DISTURB GRAPH
                 selected_types = [dtype for dtype in self.Graphs.get_type_data() if dtype is not None or ""]
                 self.selected_station = self.Graphs.get_selected_station()
                 self.calm_date = list(self.Graphs.get_selected_dates())
@@ -222,7 +208,7 @@ class GraphControl():
                         self.calm_date,
                         self.disturb_date
                     )
-            case 9: # CONTOUR GRAPH
+            case 8: # CONTOUR GRAPH
                 if not self.Module.verify_inputs(station_selected=self.Graphs.get_stations_selected(), type_selected=self.Graphs.get_type_data()): return
 
                 self.ContourModule.plot_contour(
@@ -236,7 +222,7 @@ class GraphControl():
                     self.Graphs.get_selected_dates(),
                     self.data_with_stations,
                 )
-            case 10: # MAP CONTOUR
+            case 9: # MAP CONTOUR
                 if not self.Module.verify_inputs(station_selected=self.Graphs.get_stations_selected(), type_selected=self.Graphs.get_type_data()): return
                 self.MapModule.plot_map_contour(
                     self.Graphs.get_local_download(),
@@ -251,6 +237,22 @@ class GraphControl():
                     self.Graphs.ContornoMap,
                     self.Graphs.map_widget
                 )
+            case 10: # DIFFERENCE GRAPH
+                if not self.Module.verify_inputs(type_selected=self.Graphs.get_type_data()): return
+
+                self.DifferenceModule.plot_difference(
+                    self.Graphs.get_local_download(),
+                    self.Graphs.get_minuend_station_selected(),
+                    self.Graphs.get_subtracted_station_selected(),
+                    self.Graphs.get_type_data(),
+                    self.Graphs.get_bold_text(),
+                    self.Graphs.get_grid_graph(),
+                    self.Graphs.get_start_date(),
+                    self.Graphs.get_end_date(),
+                    self.Graphs.get_selected_dates(),
+                    self.Graphs.get_cal_selection(),
+                    self.data_with_stations,
+                )
             case 11: # ELECTRIC FIELD
                 #if not self.Module.verify_inputs(station_selected=self.Graphs.get_stations_selected(), type_selected=self.Graphs.get_type_data()): return
                 self.ElectricModule.plot_electric_field(
@@ -261,7 +263,7 @@ class GraphControl():
                     self.Graphs.get_files_selection(),
                     True
                 )
-            case 12: #VERTICAL DRIFT
+            case 12: # VERTICAL DRIFT
                 self.ElectricModule.plot_electric_field(
                     self.Graphs.get_bold_text(),
                     self.Graphs.get_grid_graph(),
@@ -270,6 +272,34 @@ class GraphControl():
                     self.Graphs.get_files_selection(),
                     False
                 )
+            case 13: # ROT - dH
+                selected_types = [dtype for dtype in self.Graphs.get_type_data() if dtype is not None or ""]
+                self.selected_station = self.Graphs.get_selected_station()
+                self.calm_date = list(self.Graphs.get_selected_dates())
+                if not self.Module.verify_inputs(
+                    station_selected= self.selected_station,
+                    type_selected= selected_types,
+                    calm_dates_selected= self.calm_date,
+                ): return
+
+                if self.Graphs.get_skiptime_text() != "":
+
+                    self.RotModule.plot_rot(
+                        self.Graphs.get_local_download(),
+                        self.Graphs.get_stations_selected(),
+                        self.Graphs.get_type_data(),
+                        self.Graphs.get_bold_text(),
+                        self.Graphs.get_grid_graph(),
+                        self.Graphs.get_start_date(),
+                        self.Graphs.get_end_date(),
+                        self.Graphs.get_selected_dates(),
+                        self.Graphs.get_cal_selection(),
+                        self.data_with_stations,
+                        self.Graphs.get_skiptime_text(),
+                        self.Graphs.get_check_roti(),
+                        self.Graphs.get_roti_skiptime_text() if self.Graphs.get_roti_skiptime_text() != "" else 0
+                    )
+
      
     # expõe o widget para ser adicionado ao QStackedWidget
     def get_widget(self):

@@ -97,6 +97,7 @@ class ElectricGraph(GraphsModule):
         try:
             plt.close('all')
             self.fig, self.ax = plt.subplots()
+            self.problematic_data = []
 
             if isinstance(self.start_date, QDate):
                 self.start_date = self.start_date.toPyDate()
@@ -156,19 +157,24 @@ class ElectricGraph(GraphsModule):
                                     continue
                                 
                                 vd = self.vertical_drift(val, lt_hour, year, indices['f107'], indices['f107a'], indices['ap'], indices['kp'], doy)
-                                x_vals.append(dt)
                                 if self.field:
                                     ef = vd / 40.0
-                                    y_vals.append(ef)
-                                    self.filtred_values.append(ef)
+                                    if not math.isnan(ef) and not math.isinf(ef):
+                                        x_vals.append(dt)
+                                        y_vals.append(ef)
+                                        self.filtred_values.append(ef)
                                 else:
-                                    y_vals.append(vd)
-                                    self.filtred_values.append(vd)
+                                    if not math.isnan(vd) and not math.isinf(vd):
+                                        x_vals.append(dt)
+                                        y_vals.append(vd)
+                                        self.filtred_values.append(vd)
                     
                     if x_vals and y_vals:
                         sorted_data = sorted(zip(x_vals, y_vals))
                         x_sorted, y_sorted = zip(*sorted_data)
                         self.ax.plot(x_sorted, y_sorted, label=f'{station}')
+                    else:
+                        self.problematic_data.append(f"{station}")
 
         except Exception as e:
             QMessageBox.information(
@@ -192,8 +198,13 @@ class ElectricGraph(GraphsModule):
         self.ax.tick_params(axis='y', which='both', right=True, labelright=False, left=True, labelleft=True)
 
         self.ax.set_xlim(self.start_date, self.end_date)
+        valid_values = [v for v in self.filtred_values if v is not None and not math.isnan(v) and not math.isinf(v)]
         try:
-            self.ax.set_ylim(min(self.filtred_values), max(self.filtred_values))
+            all_problems = set(self.problematic_data + getattr(self, 'problematic_calm_days', []))
+            if all_problems:
+                msg = self.util.dict_language[self.lang]["mgbox_error_noinfo_period"] + ":\n" + "\n".join(all_problems)
+                QMessageBox.warning(None, self.util.dict_language[self.lang]["lbl_warn"], msg)
+            self.ax.set_ylim(min(valid_values), max(valid_values))
         except ValueError:
             QMessageBox.information(
                 None,

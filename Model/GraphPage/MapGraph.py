@@ -342,7 +342,6 @@ class MapGraph(GraphsModule):
         base_type = type.replace('d', '')
         delta = self.calculate_midnight_average(base_type)
 
-
         for station, st in zip(self.stations, range(len(self.stations))):
             for day, times in self.all_data[station].items():
                 for time in times:

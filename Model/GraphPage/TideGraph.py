@@ -1,3 +1,5 @@
+import math
+
 from Model.GraphPage.GraphsModule import GraphsModule
 from Model.Custom.CustomPltOptions import CustomPltOptions
 from datetime import datetime, timedelta
@@ -142,6 +144,7 @@ class TideGraph(GraphsModule):
             #plt.rcParams['toolbar'] = 'toolmanager'
             self.fig, self.ax = plt.subplots()
             self.filtred_values = []
+            self.problematic_data = []
 
             day_zero = datetime(2000, 1, 1)  # Base para normalizar o eixo X
 
@@ -150,11 +153,16 @@ class TideGraph(GraphsModule):
                 for station in self.stations:
                     for day, times in self.all_data[station].items():
                         plot_values = []
+                        day_has_valid = False
                         for time in times:
                             data = self.all_data[station][day][time].get(plot_type)
-                            if data is not None:
+                            if data is not None and not math.isnan(data) and not math.isinf(data):
                                 self.filtred_values.append(data)
+                                day_has_valid = True
                             plot_values.append(data)
+                        
+                        if not day_has_valid and 'reference' not in plot_type:
+                            self.problematic_data.append(f"{station} ({day})")
 
                         # Eixo X: sempre de 00:00 até 23:59 num mesmo dia fictício
                         x_times = [day_zero + timedelta(minutes=m) for m in range(1440)]
@@ -236,8 +244,13 @@ class TideGraph(GraphsModule):
 
         self.ax.set_xlim(day_zero, day_zero + timedelta(hours=24))
 
-        if self.filtred_values:
-            self.ax.set_ylim(min(self.filtred_values), max(self.filtred_values))
+        valid_values = [v for v in self.filtred_values if v is not None and not math.isnan(v) and not math.isinf(v)]
+        if valid_values:
+            all_problems = set(self.problematic_data + getattr(self, 'problematic_calm_days', []))
+            if all_problems:
+                msg = self.util.dict_language[self.lang]["mgbox_error_noinfo_period"] + ":\n" + "\n".join(all_problems)
+                QMessageBox.warning(None, self.util.dict_language[self.lang]["lbl_warn"], msg)
+            self.ax.set_ylim(min(valid_values), max(valid_values))
         else:
             QMessageBox.information(
                 None,

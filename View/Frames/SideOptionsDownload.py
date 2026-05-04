@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QPushButton, QDateEdit, QSizePolicy, QScrollBar, QLineEdit, QListWidgetItem
 )
 from PyQt5.QtCore import QDate, Qt
-from PyQt5.QtGui import QIntValidator
+from PyQt5.QtGui import QIntValidator, QDoubleValidator
 import psutil
 from General.util import Util
 
@@ -15,25 +15,83 @@ class SideOptionsDownload(QWidget):
         self.year = year
         self.drive = drive
         self.util = Util()
-        #self.page_frame = root
         self.options_frame = None
 
     # Função de filtro
     def filter_visible_items(self):
-        filter_text = self.search_input.text().lower()
+        def parse_val(text):
+            try:
+                if not text: return None
+                return float(text.replace(',', '.'))
+            except ValueError:
+                return None
+
+        try:
+            lat_min = parse_val(self.lat_min.text())
+            lat_max = parse_val(self.lat_max.text())
+            lon_min = parse_val(self.lon_min.text())
+            lon_max = parse_val(self.lon_max.text())
+            dip_min = parse_val(self.dip_min.text())
+            dip_max = parse_val(self.dip_max.text())
+            search_text = self.search_input.text().lower()
+        except AttributeError:
+            # Caso os widgets ainda não tenham sido criados
+            return
+
         for i in range(self.list_all_stations.count()):
             item = self.list_all_stations.item(i)
-            item.setHidden(filter_text not in item.text().lower())
+            txt = item.text()
+            # Formato esperado: "CODE (lat, lon, dip)"
+            hidden = False
+            if search_text and search_text not in txt.lower():
+                hidden = True
+
+            if not hidden:
+                try:
+                    start = txt.find('(')
+                    end = txt.find(')')
+                    if start != -1 and end != -1:
+                        parts = txt[start+1:end].split(',')
+                        if len(parts) >= 3:
+                            lat = float(parts[0])
+                            lon = float(parts[1])
+                            dip = float(parts[2])
+
+                            if lat_min is not None and lat < lat_min: hidden = True
+                            if lat_max is not None and lat > lat_max: hidden = True
+                            if lon_min is not None and lon < lon_min: hidden = True
+                            if lon_max is not None and lon > lon_max: hidden = True
+                            if dip_min is not None and dip < dip_min: hidden = True
+                            if dip_max is not None and dip > dip_max: hidden = True
+                except ValueError:
+                    pass
+            item.setHidden(hidden)
+
+    def set_filter_values(self, lat_min, lat_max, lon_min, lon_max):
+        self.lat_min.blockSignals(True)
+        self.lat_max.blockSignals(True)
+        self.lon_min.blockSignals(True)
+        self.lon_max.blockSignals(True)
+
+        self.lat_min.setText(f"{lat_min:.2f}")
+        self.lat_max.setText(f"{lat_max:.2f}")
+        self.lon_min.setText(f"{lon_min:.2f}")
+        self.lon_max.setText(f"{lon_max:.2f}")
+
+        self.lat_min.blockSignals(False)
+        self.lat_max.blockSignals(False)
+        self.lon_min.blockSignals(False)
+        self.lon_max.blockSignals(False)
+        
+        self.filter_visible_items()
 
 
     # create download widget
     def create_download_options(self):
         # Parent do ScrollableFrame agora é self, e não DownloadPage
-        #self.options_frame = ScrollableFrame(self.page_frame, 255)
-        #self.options_frame = ScrollableFrame(self, 255)
-        #self.options_frame.setStyleSheet("background-color: #2c2c2c;")
 
-        self.options_frame = ScrollableFrame(self, 255, 255)
+        # Antes era fixo em 255. Agora permitimos que encolha até 200 e cresça até 380.
+        self.options_frame = ScrollableFrame(self, 200, 380)
         layout = self.options_frame.inner_layout  # pega o layout do scroll
         layout.setContentsMargins(5,5,5,5)
         layout.setSpacing(8)
@@ -45,10 +103,45 @@ class SideOptionsDownload(QWidget):
         self.populate_combo_local()
         layout.addWidget(self.combo_download_location)
 
-        # campo para digitar filtro
+        # Search text
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Filtrar estações...")
+        self.search_input.setPlaceholderText("Filtrar por texto...")
+        self.search_input.textChanged.connect(self.filter_visible_items)
         layout.addWidget(self.search_input)
+
+        # Filtros Lat/Lon/Dip
+        filter_layout = QVBoxLayout()
+        filter_layout.setSpacing(2)
+
+        # Latitude
+        row_lat = QHBoxLayout()
+        row_lat.addWidget(QLabel("Lat:"))
+        self.lat_min = QLineEdit(); self.lat_min.setPlaceholderText("Min"); self.lat_min.setValidator(QDoubleValidator())
+        self.lat_max = QLineEdit(); self.lat_max.setPlaceholderText("Max"); self.lat_max.setValidator(QDoubleValidator())
+        row_lat.addWidget(self.lat_min); row_lat.addWidget(self.lat_max)
+        filter_layout.addLayout(row_lat)
+
+        # Longitude
+        row_lon = QHBoxLayout()
+        row_lon.addWidget(QLabel("Lon:"))
+        self.lon_min = QLineEdit(); self.lon_min.setPlaceholderText("Min"); self.lon_min.setValidator(QDoubleValidator())
+        self.lon_max = QLineEdit(); self.lon_max.setPlaceholderText("Max"); self.lon_max.setValidator(QDoubleValidator())
+        row_lon.addWidget(self.lon_min); row_lon.addWidget(self.lon_max)
+        filter_layout.addLayout(row_lon)
+
+        # Dip
+        row_dip = QHBoxLayout()
+        row_dip.addWidget(QLabel("Dip:"))
+        self.dip_min = QLineEdit(); self.dip_min.setPlaceholderText("Min"); self.dip_min.setValidator(QDoubleValidator())
+        self.dip_max = QLineEdit(); self.dip_max.setPlaceholderText("Max"); self.dip_max.setValidator(QDoubleValidator())
+        row_dip.addWidget(self.dip_min); row_dip.addWidget(self.dip_max)
+        filter_layout.addLayout(row_dip)
+
+        layout.addLayout(filter_layout)
+
+        # Conectar sinais
+        for w in [self.lat_min, self.lat_max, self.lon_min, self.lon_max, self.dip_min, self.dip_max]:
+            w.textChanged.connect(self.filter_visible_items)
 
         # Station selection
         lbl_station = QLabel(self.util.dict_language[self.language]["lbl_st"])
@@ -59,8 +152,6 @@ class SideOptionsDownload(QWidget):
         self.scrollbar = QScrollBar()
         self.list_all_stations.setVerticalScrollBar(self.scrollbar)
 
-        # Conectar filtro em tempo real
-        self.search_input.textChanged.connect(self.filter_visible_items)
 
         # Select/Clear all buttons
         btns_layout = QHBoxLayout()
@@ -77,6 +168,7 @@ class SideOptionsDownload(QWidget):
         layout.addWidget(lbl_duration)
         duration_layout = QHBoxLayout()
         self.ent_durationchosen = QLineEdit()
+        self.ent_durationchosen.setText("0")
         self.ent_durationchosen.setPlaceholderText("1")
         self.ent_durationchosen.setFixedWidth(60)
         # Adicionando validador para aceitar apenas números inteiros
@@ -147,8 +239,20 @@ class SideOptionsDownload(QWidget):
 
     # select all station's list
     def select_all_list(self):
-        self.list_all_stations.selectAll()
+        self.list_all_stations.blockSignals(True)
+        for i in range(self.list_all_stations.count()):
+            item = self.list_all_stations.item(i)
+            if not item.isHidden():
+                item.setSelected(True)
+        self.list_all_stations.blockSignals(False)
+        self.list_all_stations.itemSelectionChanged.emit()
 
     # clear all station's list
     def clear_all_list(self):
-        self.list_all_stations.clearSelection()
+        self.list_all_stations.blockSignals(True)
+        for i in range(self.list_all_stations.count()):
+            item = self.list_all_stations.item(i)
+            if not item.isHidden():
+                item.setSelected(False)
+        self.list_all_stations.blockSignals(False)
+        self.list_all_stations.itemSelectionChanged.emit()

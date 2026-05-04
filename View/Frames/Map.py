@@ -14,6 +14,7 @@ from PyQt5.QtCore import pyqtSignal
 
 
 class Map(QWidget):
+    range_changed = pyqtSignal(float, float, float, float)
     def __init__(self, root):
         super().__init__(root)
         self.util = Util()
@@ -33,6 +34,8 @@ class Map(QWidget):
     def update_annotations(self):
         xlim = self.ax.get_xlim()
         ylim = self.ax.get_ylim()
+
+        self.range_changed.emit(ylim[0], ylim[1], xlim[0], xlim[1])
 
         for i, coord in enumerate(self.all_locals):
             text = self.text_annotations[i]

@@ -1,3 +1,5 @@
+import math
+
 from Model.GraphPage.GraphsModule import GraphsModule
 #from Model.Custom.CustomPltOptions import CustomPltOptions
 from datetime import datetime, timedelta
@@ -127,6 +129,7 @@ class ManyGraphs(GraphsModule):
             self.fig, axs = plt.subplots(number_rows, number_columns)
             self.axs = axs.flatten()
             self.filtred_values = []  
+            self.problematic_data = []
             self.current_date = self.start_date
 
             for plot_type in slct_types:
@@ -135,13 +138,15 @@ class ManyGraphs(GraphsModule):
                 days = list(self.all_data[self.stations[0]].keys())
                 for dy, day in enumerate(days):
                     self.filtred_values = []
+                    day_has_valid = False
                     for station in self.stations:
                         times = self.all_data[station][day]
                         plot_values = []
                         for time in times:
                             data = times[time].get(plot_type)
-                            if data is not None:
+                            if data is not None and not math.isnan(data) and not math.isinf(data):
                                 self.filtred_values.append(data)
+                                day_has_valid = True
                             plot_values.append(data)
                         
                         day_datetime = datetime.strptime(day, "%d/%m/%Y")  # ou "%d/%m/%Y", dependendo do formato da chave
@@ -162,16 +167,11 @@ class ManyGraphs(GraphsModule):
 
                     self.axs[dy].set_xlim(day_datetime, day_datetime + timedelta(hours=24))
 
-                    if self.filtred_values:
-                        self.axs[dy].set_ylim(min(self.filtred_values), max(self.filtred_values))
-                    else:
-                        QMessageBox.information(
-                            None,
-                            self.util.dict_language[self.lang]["mgbox_error"],
-                            self.util.dict_language[self.lang]["mgbox_error_noinfo_period"]
-                        )
-                        self.can_plot = False
-                        return
+                    valid_values = [v for v in self.filtred_values if v is not None and not math.isnan(v) and not math.isinf(v)]
+                    if valid_values:
+                        self.axs[dy].set_ylim(min(valid_values), max(valid_values))
+                    elif 'reference' not in plot_type:
+                        self.problematic_data.append(f"{day}")
 
                     self.axs[dy].set_ylabel(f'{plot_type} ({self.get_measure(plot_type)})')
                     self.axs[dy].set_xlabel('UT')
@@ -186,10 +186,18 @@ class ManyGraphs(GraphsModule):
                         for label in self.axs[dy].get_xticklabels() + self.axs[dy].get_yticklabels(): label.set_fontweight('bold')
 
                     if self.grid_graph: self.axs[dy].grid()
+            
+            all_problems = set(self.problematic_data + getattr(self, 'problematic_calm_days', []))
+            if all_problems:
+                msg = self.util.dict_language[self.lang]["mgbox_error_noinfo_period"] + ":\n" + "\n".join(all_problems)
+                QMessageBox.warning(None, self.util.dict_language[self.lang]["lbl_warn"], msg)
 
-                    self.fig.suptitle(f'{plot_type} {self.start_date.strftime("%d/%m/%Y")} - {final_date.strftime("%d/%m/%Y")}')
-                    plt.tight_layout()
-                    control_reference = False
+            if not any(ax.lines for ax in self.axs):
+                self.can_plot = False
+
+                self.fig.suptitle(f'{plot_type} {self.start_date.strftime("%d/%m/%Y")} - {final_date.strftime("%d/%m/%Y")}')
+                plt.tight_layout()
+                control_reference = False
                     
             self.fig.canvas.mpl_connect('button_press_event', lambda event: self.create_exporter_level_top(event, slct_types))
 

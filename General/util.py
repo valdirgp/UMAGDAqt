@@ -1,6 +1,4 @@
 import os, sys
-# Remover importação do ttk do tkinter
-# from tkinter import ttk
 
 from datetime import datetime
 import numpy as np
@@ -64,6 +62,8 @@ class Util():
                                     "lbl_no_data": "Sem Dados",
                                     "lbl_err_plot": "Erro ao plotar",
                                     "lbl_warn": "Lembrete",
+                                    "lbl_timeskip": "Pulo de Tempo (em minutos)",
+                                    "lbl_roti_threshold": "Desvio para ROTI (em minutos)",
 
                                     "btn_slt": "Selecionar Todos",
                                     "btn_clr": "Limpar Tudo",
@@ -101,6 +101,7 @@ class Util():
                                     "combo_map_contour": "Mapa de Contorno",
                                     "combo_electric_field": "Campo Elétrico",
                                     "combo_vertical_drift": "Vertical Drift",
+                                    "combo_rot": "ROT - dH",
 
                                     "progbar_dwd_Embrace": "Progresso Embrace",
                                     "progbar_dwd_Intermagnet": "Progresso Intermagnet",
@@ -128,6 +129,7 @@ class Util():
                                     "mgbox_error_reqlc": "Erro ao gerar pedido da licença",
                                     "mgbox_error_dt_type": "Selecione o tipo de dado desejado",
                                     "mgbox_error_noinfo_period":"Não há dados no período e estação referente",
+                                    "mgbox_error_timeskip_invalid": "O valor de 'Pulo de Tempo' deve ser um número inteiro de minutos.",
                                     "mgbox_error_readme_embrace":"Não foi possível resgatar detalhes sobre embrace",
                                     "mgbox_error_readme_intermag":"Não foi possível resgatar detalhes sobre intermagnet",
                                     "mgbox_error_type":"Erro de tipo na estação",
@@ -140,6 +142,7 @@ class Util():
 
                                     "check_bold": "Negrito",
                                     "check_grid": "Grades",
+                                    "check_roti": "ROTI",
 
                                     "download_complete": "Download concluído:",
                                     "error_no_readable_data": "Erro no download (sem dados legíveis):",
@@ -219,6 +222,8 @@ class Util():
                                     "lbl_no_data": "No Data",
                                     "lbl_err_plot": "Plot Error",
                                     "lbl_warn": "Reminder",
+                                    "lbl_timeskip": "Time Skip (in minutes)",
+                                    "lbl_roti_threshold": "ROTI deviation (in minutes)",
 
                                     "btn_slt": "Select All",
                                     "btn_clr": "Clear All",
@@ -251,6 +256,7 @@ class Util():
                                     "combo_map_contour": "Map Contour",
                                     "combo_electric_field": "Electric Field",
                                     "combo_vertical_drift": "Vertical Drift",
+                                    "combo_rot": "ROT - dH",
 
                                     "progbar_dwd_Embrace": "Embrace Progress",
                                     "progbar_dwd_Intermagnet": "Intermagnet Progress",
@@ -278,6 +284,7 @@ class Util():
                                     "mgbox_error_reqlc": "Error creating license request",
                                     "mgbox_error_dt_type": "Select the desired data type",
                                     "mgbox_error_noinfo_period":"There is no data for the corresponding period and station",
+                                    "mgbox_error_timeskip_invalid": "The 'Time Skip' value must be an integer number of minutes.",
                                     "mgbox_error_readme_embrace":"Unable to retrieve details about embrace",
                                     "mgbox_error_readme_intermag":"Unable to retrieve details about intermagnet",
                                     "mgbox_error_type":"Type error in station",
@@ -290,6 +297,7 @@ class Util():
 
                                     "check_bold": "Bold",
                                     "check_grid": "Grids",
+                                    "check_roti": "ROTI",
 
                                     "msgbox_info": "Information",
                                     "download_complete": "Download completed:",

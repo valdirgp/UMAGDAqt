@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
     QLineEdit, QCalendarWidget, QFileDialog
 )
 from PyQt5.QtCore import QDate, Qt
-from PyQt5.QtGui import QWheelEvent
+from PyQt5.QtGui import QColor, QBrush, QDoubleValidator
 import psutil
 from General.util import Util
 
@@ -31,14 +31,76 @@ class SideOptionsPlot(QWidget):
         #self.updateMap_function = None
     # Função de filtro
     def filter_visible_items(self):
-        filter_text = self.search_input.text().lower()
+        def parse_val(text):
+            try:
+                if not text: return None
+                return float(text.replace(',', '.'))
+            except ValueError:
+                return None
+
+        try:
+            lat_min = parse_val(self.lat_min.text())
+            lat_max = parse_val(self.lat_max.text())
+            lon_min = parse_val(self.lon_min.text())
+            lon_max = parse_val(self.lon_max.text())
+            dip_min = parse_val(self.dip_min.text())
+            dip_max = parse_val(self.dip_max.text())
+            search_text = self.search_input.text().lower()
+        except AttributeError:
+            # Caso os widgets ainda não tenham sido criados
+            return
+
         for i in range(self.list_all_stations.count()):
             item = self.list_all_stations.item(i)
-            item.setHidden(filter_text not in item.text().lower())
+            txt = item.text()
+            # Formato esperado: "CODE (lat, lon, dip)"
+            hidden = False
+            if search_text and search_text not in txt.lower():
+                hidden = True
+
+            if not hidden:
+                try:
+                    start = txt.find('(')
+                    end = txt.find(')')
+                    if start != -1 and end != -1:
+                        parts = txt[start+1:end].split(',')
+                        if len(parts) >= 3:
+                            lat = float(parts[0])
+                            lon = float(parts[1])
+                            dip = float(parts[2])
+
+                            if lat_min is not None and lat < lat_min: hidden = True
+                            if lat_max is not None and lat > lat_max: hidden = True
+                            if lon_min is not None and lon < lon_min: hidden = True
+                            if lon_max is not None and lon > lon_max: hidden = True
+                            if dip_min is not None and dip < dip_min: hidden = True
+                            if dip_max is not None and dip > dip_max: hidden = True
+                except ValueError:
+                    pass
+            item.setHidden(hidden)
+
+    def set_filter_values(self, lat_min, lat_max, lon_min, lon_max):
+        self.lat_min.blockSignals(True)
+        self.lat_max.blockSignals(True)
+        self.lon_min.blockSignals(True)
+        self.lon_max.blockSignals(True)
+
+        self.lat_min.setText(f"{lat_min:.2f}")
+        self.lat_max.setText(f"{lat_max:.2f}")
+        self.lon_min.setText(f"{lon_min:.2f}")
+        self.lon_max.setText(f"{lon_max:.2f}")
+
+        self.lat_min.blockSignals(False)
+        self.lat_max.blockSignals(False)
+        self.lon_min.blockSignals(False)
+        self.lon_max.blockSignals(False)
+        
+        self.filter_visible_items()
 
     # creates options to create graphs
     def create_plot_options(self):
-        self.frame_side_functions = ScrollableFrame(self.window, 255, 330)
+        # Reduzimos o mínimo para 200 e permitimos expandir até 380 se houver espaço
+        self.frame_side_functions = ScrollableFrame(self.window, 200, 380)
         self.frame_side_functions.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.frame_side_functions.setObjectName("sideOptionsPlotFrame")
 
@@ -55,10 +117,45 @@ class SideOptionsPlot(QWidget):
         self.combo_download_location.currentIndexChanged.connect(self.change_local)
         layout.addWidget(self.combo_download_location)
 
-        # campo para digitar filtro
+        # Search text
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Filtrar estações...")
+        self.search_input.setPlaceholderText("Filtrar por texto...")
+        self.search_input.textChanged.connect(self.filter_visible_items)
         layout.addWidget(self.search_input)
+
+        # Filtros Lat/Lon/Dip
+        filter_layout = QVBoxLayout()
+        filter_layout.setSpacing(2)
+
+        # Latitude
+        row_lat = QHBoxLayout()
+        row_lat.addWidget(QLabel("Lat:"))
+        self.lat_min = QLineEdit(); self.lat_min.setPlaceholderText("Min"); self.lat_min.setValidator(QDoubleValidator())
+        self.lat_max = QLineEdit(); self.lat_max.setPlaceholderText("Max"); self.lat_max.setValidator(QDoubleValidator())
+        row_lat.addWidget(self.lat_min); row_lat.addWidget(self.lat_max)
+        filter_layout.addLayout(row_lat)
+
+        # Longitude
+        row_lon = QHBoxLayout()
+        row_lon.addWidget(QLabel("Lon:"))
+        self.lon_min = QLineEdit(); self.lon_min.setPlaceholderText("Min"); self.lon_min.setValidator(QDoubleValidator())
+        self.lon_max = QLineEdit(); self.lon_max.setPlaceholderText("Max"); self.lon_max.setValidator(QDoubleValidator())
+        row_lon.addWidget(self.lon_min); row_lon.addWidget(self.lon_max)
+        filter_layout.addLayout(row_lon)
+
+        # Dip
+        row_dip = QHBoxLayout()
+        row_dip.addWidget(QLabel("Dip:"))
+        self.dip_min = QLineEdit(); self.dip_min.setPlaceholderText("Min"); self.dip_min.setValidator(QDoubleValidator())
+        self.dip_max = QLineEdit(); self.dip_max.setPlaceholderText("Max"); self.dip_max.setValidator(QDoubleValidator())
+        row_dip.addWidget(self.dip_min); row_dip.addWidget(self.dip_max)
+        filter_layout.addLayout(row_dip)
+
+        layout.addLayout(filter_layout)
+
+        # Conectar sinais
+        for w in [self.lat_min, self.lat_max, self.lon_min, self.lon_max, self.dip_min, self.dip_max]:
+            w.textChanged.connect(self.filter_visible_items)
 
         # Station selection
         lbl_station = QLabel(self.util.dict_language[self.language]['lbl_st'])
@@ -69,8 +166,6 @@ class SideOptionsPlot(QWidget):
         self.scrollbar = QScrollBar()
         self.list_all_stations.setVerticalScrollBar(self.scrollbar)
 
-        # Conectar filtro em tempo real
-        self.search_input.textChanged.connect(self.filter_visible_items)
 
         # Select/Clear all buttons
         btns_layout = QHBoxLayout()
@@ -125,30 +220,45 @@ class SideOptionsPlot(QWidget):
         lbl_tpgraph = QLabel(self.util.dict_language[self.language]['lbl_tpgraph'])
         layout.addWidget(lbl_tpgraph)
         self.combo_type_plot = QComboBox()
-        self.combo_type_plot.setMaximumWidth(310)
         self.combo_type_plot.addItems([
-            "",
-            self.util.dict_language[self.language]['combo_sing'],
-            self.util.dict_language[self.language]['combo_sing_many'],
-            self.util.dict_language[self.language]['combo_many'],
-            self.util.dict_language[self.language]['combo_tide'],
-            self.util.dict_language[self.language]['combo_difference'],
-            self.util.dict_language[self.language]['combo_calm_disturb'],
-            self.util.dict_language[self.language]['combo_calm'],
-            self.util.dict_language[self.language]['combo_universal'],
-            self.util.dict_language[self.language]['combo_contorno'],
-            self.util.dict_language[self.language]['combo_map_contour'],
-            self.util.dict_language[self.language]['combo_electric_field'],
-            self.util.dict_language[self.language]['combo_vertical_drift']
+        "",                                                                 #0
+            self.util.dict_language[self.language]['combo_sing'],           #1
+            self.util.dict_language[self.language]['combo_sing_many'],      #2
+            self.util.dict_language[self.language]['combo_many'],           #3
+            self.util.dict_language[self.language]['combo_tide'],           #4
+            self.util.dict_language[self.language]['combo_calm_disturb'],   #5
+            self.util.dict_language[self.language]['combo_calm'],           #6
+            self.util.dict_language[self.language]['combo_universal'],      #7
+            self.util.dict_language[self.language]['combo_contorno'],       #8
+            self.util.dict_language[self.language]['combo_map_contour'],    #9
+            self.util.dict_language[self.language]['combo_difference'],     #10
+            self.util.dict_language[self.language]['combo_electric_field'], #11
+            self.util.dict_language[self.language]['combo_vertical_drift'], #12
+            self.util.dict_language[self.language]['combo_rot']             #13
         ])
         self.combo_type_plot.currentIndexChanged.connect(self.change_parameters)
+        # Mapeamento de índice para cor hexadecimal
+        group_colors = {
+            0: "#ffffff",  # Vazio
+            1: "#bbdefb", 2: "#bbdefb", 3: "#bbdefb", 4: "#bbdefb",  # Grupo Azul
+            5: "#ffe0b2", 6: "#ffe0b2", 7: "#ffe0b2",               # Grupo Laranja
+            8: "#a5d6a7", 9: "#a5d6a7",                             # Grupo Verde
+            10: "#d1c4e9", 11: "#d1c4e9", 12: "#d1c4e9"             # Grupo Roxo
+        }
+
+        # Aplicação automatizada
+        for index, hex_color in group_colors.items():
+            self.combo_type_plot.setItemData(
+                index, 
+                QBrush(QColor(hex_color)), 
+                Qt.ItemDataRole.BackgroundRole
+            )
         layout.addWidget(self.combo_type_plot)
 
         # Placeholder for dynamic options
         self.options_frame = QFrame()
         self.options_layout = QVBoxLayout(self.options_frame)
         self.options_frame.setLayout(self.options_layout)
-        #self.create_oneday_options()
         layout.addWidget(self.options_frame)
 
         # Calm days calendar
@@ -156,7 +266,6 @@ class SideOptionsPlot(QWidget):
         layout.addWidget(lbl_calm)
 
         self.cal_calm = QCalendarWidget()
-        self.cal_calm.setMaximumWidth(320)
         self.cal_calm.setGridVisible(True)
         self.cal_calm.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
         data = QDate(self.year[2], self.year[1], self.year[0])
@@ -167,7 +276,6 @@ class SideOptionsPlot(QWidget):
 
         # Lista para exibir as datas selecionadas
         self.date_list = QListWidget()
-        self.date_list.setMaximumWidth(310)
         self.date_list.setSelectionMode(QListWidget.MultiSelection)  # Permite selecionar múltiplos itens
         self.date_list.itemClicked.connect(lambda item: self.remove_date_from_list(item, self.selected_dates, self.date_list, self.cal_calm))  # Conectar evento de clique na lista
         layout.addWidget(self.date_list)
@@ -179,8 +287,6 @@ class SideOptionsPlot(QWidget):
         btn_layout.addWidget(self.btn_clear)
         layout.addLayout(btn_layout)
 
-        #self.frame_side_functions.inner_frame.setLayout(layout)
-        #self.frame_side_functions.setLayout(QVBoxLayout())
         self.frame_side_functions.show()
 
     def on_checkbox_changed(self):
@@ -237,34 +343,6 @@ class SideOptionsPlot(QWidget):
             date_list.takeItem(date_list.row(item))
         self.update_calendar_selection(selected_dates, calendar)
 
-    '''def update_calendar_selection(self):
-        """
-        Atualiza as datas selecionadas visualmente no QCalendarWidget.
-        """
-        from PyQt5.QtGui import QTextCharFormat, QColor
-        from PyQt5.QtCore import QDate, Qt
-        #selected_qdates = [QDate.fromString(date, "dd/MM/yyyy") for date in self.selected_dates]
-        selected_qdates = [date for date in self.selected_dates]
-        # Criar um formato de texto para as datas selecionadas (cor vermelha)
-        text_format = QTextCharFormat()
-        text_format.setForeground(QColor(0, 128, 0))  # Define a cor do texto como vermelho
-
-        # Criar um formato de texto normal (sem cor)
-        normal_format = QTextCharFormat()
-
-        # Iterar sobre as datas do mês visível
-        first_date = self.cal_calm.selectedDate().addDays(-self.cal_calm.selectedDate().day() + 1)
-        last_date = first_date.addMonths(1).addDays(-1)
-
-        # Limpar as formatações anteriores (se necessário)
-        for day in range(first_date.day(), last_date.day() + 1):
-            date = QDate(first_date.year(), first_date.month(), day)
-            self.cal_calm.setDateTextFormat(date, normal_format)
-
-        # Aplicar a cor vermelha para as datas selecionadas
-        for selected_date in selected_qdates:
-            if first_date <= selected_date <= last_date:
-                self.cal_calm.setDateTextFormat(selected_date, text_format)'''
 
     def update_calendar_selection(self, selected_dates, calendar):
         """
@@ -385,7 +463,6 @@ class SideOptionsPlot(QWidget):
         self.columm_entry = QComboBox()
         self.columm_entry.setEditable(True)
         self.columm_entry.setInsertPolicy(QComboBox.NoInsert)
-        self.columm_entry.setMaximumWidth(310)
         self.options_layout.addWidget(self.columm_entry)
 
         lbl_rows = QLabel(self.util.dict_language[self.language]['lbl_row'])
@@ -393,7 +470,6 @@ class SideOptionsPlot(QWidget):
         self.row_entry = QComboBox()
         self.row_entry.setEditable(True)
         self.row_entry.setInsertPolicy(QComboBox.NoInsert)
-        self.row_entry.setMaximumWidth(310)
         self.options_layout.addWidget(self.row_entry)
 
         self.btn_manydays_confirm = QPushButton(self.util.dict_language[self.language]['btn_confirm'])
@@ -407,12 +483,10 @@ class SideOptionsPlot(QWidget):
         lbl_minuend = QLabel(self.util.dict_language[self.language]['lbl_minuend'])
         self.options_layout.addWidget(lbl_minuend)
         self.minuend_stations_list = QListWidget()
-        self.minuend_stations_list.setMaximumWidth(310)
         self.options_layout.addWidget(self.minuend_stations_list)
         lbl_subtracted = QLabel(self.util.dict_language[self.language]['lbl_subtracted'])
         self.options_layout.addWidget(lbl_subtracted)
         self.subtracted_stations_list = QListWidget()
-        self.subtracted_stations_list.setMaximumWidth(310)
         self.options_layout.addWidget(self.subtracted_stations_list)
         self.update_lists()
     
@@ -437,8 +511,6 @@ class SideOptionsPlot(QWidget):
             calendar.setSelectedDate(nova_data)
 
         
-        
-
         # Conecta ao dateChanged do QDateEdit
         self.startdate.dateChanged.connect(lambda new_date: sync_calendar_month_year(self.cal_disturb, self.startdate))
         self.disturb_date_list = QListWidget()
@@ -451,6 +523,29 @@ class SideOptionsPlot(QWidget):
         self.btn_clear_all = QPushButton(self.util.dict_language[self.language]['btn_clr'])
         self.btn_clear_all.clicked.connect(lambda: self.clear_selection(self.cal_disturb, self.disturb_date_list, self.selected_disturb_dates))
         self.options_layout.addWidget(self.btn_clear_all)
+
+    def add_timeskip_widget(self):
+        self.lbl_timeskip = QLabel(self.util.dict_language[self.language]['lbl_timeskip'])
+        self.txt_timeskip = QLineEdit()
+        self.txt_timeskip.setText("1")
+        self.options_layout.addWidget(self.lbl_timeskip)
+        self.options_layout.addWidget(self.txt_timeskip)
+        
+        self.checkRoti = QCheckBox(self.util.dict_language[self.language]['check_roti'])
+        self.options_layout.addWidget(self.checkRoti)
+
+        self.lbl_roti_threshold = QLabel(self.util.dict_language[self.language]['lbl_roti_threshold'])
+        self.txt_roti_threshold = QLineEdit()
+        self.txt_roti_threshold.setText("5")
+        self.options_layout.addWidget(self.lbl_roti_threshold)
+        self.options_layout.addWidget(self.txt_roti_threshold)
+
+        self.lbl_roti_threshold.setVisible(False)
+        self.txt_roti_threshold.setVisible(False)
+
+        # Connect checkbox signal
+        self.checkRoti.stateChanged.connect(self.toggle_roti_options)
+
     
     def create_contorno_options(self):
         self.clear_options_frame()
@@ -555,51 +650,88 @@ class SideOptionsPlot(QWidget):
             self.list_files_widget.clear()
             self.list_files_widget.addItems(files)
 
+    def toggle_roti_options(self, state):
+        is_checked = (state == Qt.Checked)
+        self.lbl_roti_threshold.setVisible(is_checked)
+        self.txt_roti_threshold.setVisible(is_checked)
+
     # changes kind of options plotting
     def change_parameters(self, index):
         match index:
+
             case 0:
+
                 self.create_none_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.NoSelection)
+
             case 1:
+
                 self.create_oneday_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+
             case 2:
+
                 self.create_manydays_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+
             case 3:
+
                 self.create_grid_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+
             case 4:
+
                 self.create_manydays_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+
             case 5:
+
+                self.create_manydays_options()
+                self.add_disturbance_widget()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+
+            case 6:
+
+                self.create_manydays_options()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+
+            case 7:
+
+                self.create_manydays_options()
+                self.add_disturbance_widget()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+
+            case 8:
+
+                self.create_contorno_options()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+
+            case 9:
+
+                self.create_mapcontorno_options()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+
+            case 10:
+
                 self.create_manydays_options()
                 self.add_subtractions_widget()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.NoSelection)
-            case 6:
-                self.create_manydays_options()
-                self.add_disturbance_widget()
-                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
-            case 7:
-                self.create_manydays_options()
-                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
-            case 8:
-                self.create_manydays_options()
-                self.add_disturbance_widget()
-                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
-            case 9:
-                self.create_contorno_options()
-                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
-            case 10:
-                self.create_mapcontorno_options()
-                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+
             case 11:
+
                 self.create_eletricfield_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+
             case 12:
+
                 self.create_eletricfield_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+            
+            case 13:
+                self.create_manydays_options()
+                self.add_timeskip_widget()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+
         self.on_checkbox_changed()
 
     # update all info came from the chosen drive 
@@ -611,8 +743,6 @@ class SideOptionsPlot(QWidget):
         '''if self.updateMap_function:
             self.updateMap_function()'''
         
-
-
     # fill a listbox with the given data
     def populate_list_options(self, listwidget, stations):
         selecionados = [item.text() for item in listwidget.selectedItems()]
@@ -646,11 +776,25 @@ class SideOptionsPlot(QWidget):
 
     # select all station's list
     def select_all_list(self):
-        self.list_all_stations.selectAll()
+        self.list_all_stations.blockSignals(True)
+        for i in range(self.list_all_stations.count()):
+            item = self.list_all_stations.item(i)
+            if not item.isHidden():
+                item.setSelected(True)
+        self.list_all_stations.blockSignals(False)
+        self.list_all_stations.itemSelectionChanged.emit()
 
     # clear all station's list
+
     def clear_all_list(self):
-        self.list_all_stations.clearSelection()
+        self.list_all_stations.blockSignals(True)
+        for i in range(self.list_all_stations.count()):
+            item = self.list_all_stations.item(i)
+            if not item.isHidden():
+                item.setSelected(False)
+        self.list_all_stations.blockSignals(False)
+        self.list_all_stations.itemSelectionChanged.emit()
+
 
     def clear_options_frame(self):
         while self.options_layout.count():

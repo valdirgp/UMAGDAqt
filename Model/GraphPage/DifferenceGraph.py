@@ -5,6 +5,7 @@ import matplotlib.dates as mdates
 from datetime import datetime
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QDate
+import math
 
 class DifferenceGraph(GraphsModule):
     def __init__(self, root, language):
@@ -149,6 +150,7 @@ class DifferenceGraph(GraphsModule):
         plt.close('all')
         self.fig, self.ax = plt.subplots()
         self.filtred_values = []
+        self.problematic_data = []
         if isinstance(self.start_date, QDate):
             self.start_date = self.start_date.toPyDate()
         if isinstance(self.end_date, QDate):
@@ -179,17 +181,21 @@ class DifferenceGraph(GraphsModule):
             time_axis = []
 
             for day, times in self.diff_data.items():
+                day_has_valid = False
                 for time_str, values in times.items():
                     try:
                         hour, minute = map(int, time_str.split(':'))
                         dt = datetime.strptime(day, "%d/%m/%Y").replace(hour=hour, minute=minute)
                         data = values[slct_type]
-                        if data is not None:
+                        if data is not None and not math.isnan(data) and not math.isinf(data):
                             plot_values.append(data)
                             time_axis.append(dt)
                             self.filtred_values.append(data)
+                            day_has_valid = True
                     except Exception:
                         continue
+                if not day_has_valid and 'reference' not in slct_type:
+                    self.problematic_data.append(f"{day}")
 
             if time_axis and plot_values:
                 label = f'{self.min_station}-{self.sub_station} {slct_type}' if 'reference' not in slct_type else slct_type
@@ -210,7 +216,13 @@ class DifferenceGraph(GraphsModule):
         self.ax.set_xlim(self.start_date, self.end_date)
 
         if self.filtred_values:
-            self.ax.set_ylim(min(self.filtred_values), max(self.filtred_values))
+            valid_values = [v for v in self.filtred_values if v is not None and not math.isnan(v) and not math.isinf(v)]
+            if valid_values:
+                all_problems = set(self.problematic_data + getattr(self, 'problematic_calm_days', []))
+                if all_problems:
+                    msg = self.util.dict_language[self.lang]["mgbox_error_noinfo_period"] + ":\n" + "\n".join(all_problems)
+                    QMessageBox.warning(None, self.util.dict_language[self.lang]["lbl_warn"], msg)
+                self.ax.set_ylim(min(valid_values), max(valid_values))
         else:
             QMessageBox.information(
                 None,
@@ -239,4 +251,3 @@ class DifferenceGraph(GraphsModule):
             'button_press_event',
             lambda event: self.create_exporter_level_top(event, plot_type, is_difference=True)
         )
-

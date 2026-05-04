@@ -20,6 +20,7 @@ class GraphsModule():
         self.all_data = None
         self.main_downloaded_stations = None
         self.main_downloaded_stations_dict = None
+        self.problematic_calm_days = []
 
         self.util = Util()
 
@@ -57,6 +58,7 @@ class GraphsModule():
         for year in range(1990, current_year+1):
             embrace_folder_path = rf'{drive_location}Magnetometer\EMBRACE\{str(year)}'
             intermagnet_folder_path = rf'{drive_location}Magnetometer\INTERMAGNET\{str(year)}'
+            lisn_folder_path = rf'{drive_location}Magnetometer\LISN\{str(year)}'
 
             if os.path.exists(embrace_folder_path):
                 embrace_stations = os.listdir(embrace_folder_path)
@@ -70,6 +72,13 @@ class GraphsModule():
                 if intermagnet_stations:
                     for station in intermagnet_stations:
                         data_with_stations[station] = ['INTERMAGNET']
+                        main_downloaded_stations.add(station)
+            
+            if os.path.exists(lisn_folder_path):
+                lisn_stations = os.listdir(lisn_folder_path)
+                if lisn_stations:
+                    for station in lisn_stations:
+                        data_with_stations[station] = ['LISN']
                         main_downloaded_stations.add(station)
 
         if os.path.exists(self.util.resource_path('readme_stations.txt')):
@@ -272,6 +281,7 @@ class GraphsModule():
     # calculates midnight avarage for delta calculation
     def calculate_midnight_average(self, type):
         # gets data to search midnight average 
+        self.problematic_calm_days = []
         days_data = {}
         for station in self.stations:
             station = station.split()[0]
@@ -294,7 +304,7 @@ class GraphsModule():
             if not midnight_data: 
                 delta.append(0)
             else:
-                station_delta = sum(midnight_data) / len(self.slct_dates) if len(self.slct_dates) != 0 else 0
+                station_delta = sum(midnight_data) / len(midnight_data)
                 delta.append(station_delta)
 
         return delta
@@ -302,6 +312,7 @@ class GraphsModule():
     # Calculate midnight avarage for reference calculation
     def calculate_midnight_average_reference(self, type):
         # gets data to search midnight average 
+        self.problematic_calm_days = []
         all_data = {}
         for station in self.stations:
             station = station.split()[0]
@@ -319,7 +330,7 @@ class GraphsModule():
         self.info_time = {}
         for station in self.stations:
             midnight_data.extend(self.take_midnight_data(type, all_data, station))
-        delta = sum(midnight_data) / (len(self.slct_dates) * len(self.stations)) if len(self.slct_dates) != 0 else 0
+        delta = sum(midnight_data) / len(midnight_data) if midnight_data else 0
 
         return delta
     
@@ -368,26 +379,15 @@ class GraphsModule():
                         string_info+=f' - {info_type}: {data_info[station][f'{day.day}/{day.month}/{day.year}'][f'{day.hour}:{day.minute}'][base_type]} '
                 self.info_time[station].append(string_info)
 
-                if data is not None: 
+                if data is not None and not math.isnan(data) and not math.isinf(data): 
                     midnight_data.append(data)   
                 else:
-                    QMessageBox.information(
-                        None,
-                        self.util.dict_language[self.lang]["mgbox_error"], 
-                        f'{self.util.dict_language[self.lang]["mgbox_error_inval_info"]} {date.day:02}/{date.month:02}/{date.year} - {station} - {type}')
-                    self.slct_dates.remove(date)
-                    self.can_plot = False
-                    return
-                
+                    self.problematic_calm_days.append(f"{station} ({date.day:02}/{date.month:02}/{date.year}) [Quiet Day]")
+
             return midnight_data
         except Exception as error:
             print(f'take_midnight_data: {error}')
-            QMessageBox.information(
-                None,
-                self.util.dict_language[self.lang]["mgbox_error"], 
-                f'{self.util.dict_language[self.lang]["mgbox_error_noinfo_period"]} {day.day:02}/{day.month:02}/{day.year} - {station} - {type}'
-            )
-            self.can_plot = False
+            return []
 
     # inform type average and given hours for calm days
     def inform_graph(self, selected_types, avarage_types):

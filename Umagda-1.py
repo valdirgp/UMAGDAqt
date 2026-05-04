@@ -15,7 +15,7 @@ class UmagdaApp(QMainWindow):
     
     def test(self):
         return self.teste
-
+    
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(util.resource_pathGeneral('images/univap.ico')))

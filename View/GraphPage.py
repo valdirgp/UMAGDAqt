@@ -2,7 +2,7 @@ from View.Frames.SideOptionsPlot import SideOptionsPlot
 from View.Frames.Map import Map
 from PyQt5.QtWidgets import QWidget, QHBoxLayout
 from PyQt5.QtCore import Qt, QDate
-import sip
+import sip # type: ignore
 import re
 from General.util import Util
 import cartopy.crs as ccrs
@@ -62,8 +62,6 @@ class GraphPage(QWidget):
             main_layout = self.layout()
 
         self.side_options.create_plot_options()
-        self.side_options.btn_select_all.clicked.connect(self.set_all_selected)
-        self.side_options.btn_clear_all.clicked.connect(self.set_all_clear)
 
         self.side_options.populate_list_options(self.side_options.list_all_stations, self.downloaded_data_stations)
         self.side_options.list_all_stations.itemSelectionChanged.connect(self.listbox_on_click)
@@ -71,6 +69,7 @@ class GraphPage(QWidget):
 
         self.get_downloaded_stations_location()
         self.map_widget.create_map()
+        self.map_widget.range_changed.connect(self.update_range_filters)
         self.colors = ['red'] * len(self.all_locals)
         self.map_widget.set_station_map(self.longitude, self.latitude)
         self.map_widget.set_stationsname_map(self.all_locals)
@@ -87,6 +86,12 @@ class GraphPage(QWidget):
 
         main_layout.addWidget(self.side_options.frame_side_functions)
         main_layout.addWidget(self.map_widget.map_frame)
+
+    def update_range_filters(self, lat_min, lat_max, lon_min, lon_max):
+        self.side_options.set_filter_values(
+            min(lat_min, lat_max), max(lat_min, lat_max),
+            min(lon_min, lon_max), max(lon_min, lon_max)
+        )
 
     # select all stations from map and listbox
     def set_all_selected(self):
@@ -109,7 +114,11 @@ class GraphPage(QWidget):
             
             text = item.text()
             # Regex para capturar SIGLA, latitude, longitude e dip
-            match = re.match(r'^([A-Z]{3}) \(([-\d.]+), ([-\d.]+), ([-\d.]+)\)', text)
+            teste = text.split()[0]
+            if len(teste) == 3:
+                match = re.match(r'^([A-Z]{3}) \(([-\d.]+), ([-\d.]+), ([-\d.]+)\)', text)
+            else:
+                match = re.match(r'^([A-Z]{4}) \(([-\d.]+), ([-\d.]+), ([-\d.]+)\)', text)
             if match:
                 sigla = match.group(1)
                 lat = float(match.group(2))
@@ -123,11 +132,7 @@ class GraphPage(QWidget):
     def listbox_on_click(self):
         # Altera status do mapa quando a lista é selecionada
         selected_items = [item.text() for item in self.side_options.list_all_stations.selectedItems()]
-        '''for i, local in enumerate(self.all_locals):
-            if local['station'] in selected_items:
-                self.map_widget.colors[i] = 'lightgreen'
-            else:
-                self.map_widget.colors[i] = 'red'''
+        
         for i, local in enumerate(self.all_locals):
             if any(item.startswith(f"{local['station']} ") for item in selected_items):
                 self.map_widget.colors[i] = 'lightgreen'
@@ -213,7 +218,6 @@ class GraphPage(QWidget):
         self.side_options.final = self.final
         self.side_options.drive = self.drive
 
-            
         self.side_options.cal_calm.setSelectedDate(QDate(self.year[2], self.year[1], self.year[0]))
         if hasattr(self.side_options, 'startdate'):
             widget = self.side_options.startdate
@@ -365,3 +369,12 @@ class GraphPage(QWidget):
 
     def get_grid_graph(self):
         return self.side_options.is_grid_graph.isChecked()
+    
+    def get_skiptime_text(self):
+        return int(self.side_options.txt_timeskip.text())
+    
+    def get_roti_skiptime_text(self):
+        return int(self.side_options.txt_roti_threshold.text())
+    
+    def get_check_roti(self):
+        return self.side_options.checkRoti.isChecked()

@@ -1,3 +1,5 @@
+import math
+
 from Model.GraphPage.GraphsModule import GraphsModule
 from Model.Custom.CustomPltOptions import CustomPltOptions
 from datetime import datetime, timedelta
@@ -92,17 +94,24 @@ class SingleGraph(GraphsModule):
             #plt.rcParams['toolbar'] = 'toolmanager' # allows custom tools mode
             self.fig, self.ax = plt.subplots()
             self.filtred_values = []
+            self.problematic_data = []
 
             for plot_type in slct_types:
                 control_reference = True
                 for station in self.stations:
                     for day, times in self.all_data[station].items():
                         plot_values = []
+                        day_has_valid = False
                         for time in times:
                             data = self.all_data[station][day][time][plot_type]
-                            if data is not None: self.filtred_values.append(data)
+                            if data is not None and not math.isnan(data) and not math.isinf(data):
+                                self.filtred_values.append(data)
+                                day_has_valid = True
                             plot_values.append(data)
                         
+                        if not day_has_valid and 'reference' not in plot_type:
+                            self.problematic_data.append(f"{station} ({day})")
+
                         time = [self.start_date + timedelta(minutes=min) for min in range(1440)]
                         if 'reference' in plot_type:
                             if control_reference: # controle para que o mesmo tipo de referencia não se repita
@@ -131,8 +140,13 @@ class SingleGraph(GraphsModule):
         self.ax.tick_params(axis='y', which='both', right=True, labelright=False, left=True, labelleft=True)
 
         self.ax.set_xlim(self.start_date, self.end_date)
-        if self.filtred_values:
-            self.ax.set_ylim(min(self.filtred_values), max(self.filtred_values))
+        valid_values = [v for v in self.filtred_values if v is not None and not math.isnan(v) and not math.isinf(v)]
+        if valid_values:
+            all_problems = set(self.problematic_data + getattr(self, 'problematic_calm_days', []))
+            if all_problems:
+                msg = self.util.dict_language[self.lang]["mgbox_error_noinfo_period"] + ":\n" + "\n".join(all_problems)
+                QMessageBox.warning(None, self.util.dict_language[self.lang]["lbl_warn"], msg)
+            self.ax.set_ylim(min(valid_values), max(valid_values))
         else:
             QMessageBox.information(
                 None,

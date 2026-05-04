@@ -19,24 +19,29 @@ class Readme(DownloadModule):
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
     # create readme file with all stations and their acronym
-    def createfile_readme(self, root, liststations_Embrace, liststations_Intermagnet, restart_page):
+    def createfile_readme(self, root, liststations_Embrace, liststations_Intermagnet, liststations_Lisn, restart_page):
         # threading download preparation
         self.root = root
-        total_downloads = len(liststations_Embrace) + len(liststations_Intermagnet)
+        total_downloads = len(liststations_Embrace) + len(liststations_Intermagnet) + len(liststations_Lisn)
         max_threads = 8
         self.semaphore_threading = mt.Semaphore(max_threads)
         self.info_embrace_stations = []
         self.info_intermagnet_stations = []
+        self.info_lisn_stations = []
 
         self.request_embrace_queue = queue.Queue()
         self.request_intermagnet_queue = queue.Queue()
+        self.request_lisn_queue = queue.Queue()
         for station in liststations_Embrace: self.request_embrace_queue.put(station.split()[0])
         for station in liststations_Intermagnet: self.request_intermagnet_queue.put(station.split()[0])
+        for station in liststations_Lisn: self.request_lisn_queue.put(station.split()[0])
+
 
         self.threads = []
         for _ in range(int(max_threads/2)): 
             self.threads.append(mt.Thread(target=self.get_embrace_info))
             self.threads.append(mt.Thread(target=self.get_Intermagnet_info))
+            self.threads.append(mt.Thread(target=self.get_Lisn_info))
 
         # download start with threading
         self.create_progressbar('progbar_dwd_readme', total_downloads)
@@ -132,6 +137,34 @@ class Readme(DownloadModule):
             finally:
                 self.update_progressbar()
 
+    def get_Lisn_info(self):
+        url = 'https://raw.githubusercontent.com/Thiago-Mancilla/LISN_STATIONS/main/readme_magnetometer.txt'
+        try:
+            response = requests.get(url, verify=False, timeout=15)
+            lines_file = response.text.splitlines()
+        except Exception as error:
+            print(f'Erro no download readme(LISN): {error}')
+            lines_file = []
+
+        while not self.request_lisn_queue.empty():
+            station = self.request_lisn_queue.get()
+            try:
+                with self.semaphore_threading:
+                    for line in lines_file:
+                        if not line.strip() or line.startswith('#'): continue
+                        parts = line.split()
+                        if len(parts) < 5: continue
+                        
+                        if parts[0].upper() == station.upper():
+                            # parts structure: [CODE, Name..., Long, Lat, Source]
+                            self.info_lisn_stations.append({'station_acronym': parts[0].upper(), 'long': parts[-3], 'lat': parts[-2], 'station_name': ' '.join(parts[1:-3])})
+                            break
+            except Exception as error:
+                print(f'Erro ao processar estação LISN {station}: {error}')
+            finally:
+                self.update_progressbar()
+
+
     # writes readme file with obtained data from embrace and intermagnet
     def write_readme(self):
         with open(self.util.resource_path('readme_stations.txt'), 'w') as f:
@@ -155,6 +188,10 @@ class Readme(DownloadModule):
                     self.util.dict_language[self.lang]["mgbox_error"],
                     self.util.dict_language[self.lang]["mgbox_error_readme_intermag"]
                 )
+            
+            if self.info_lisn_stations:
+                for station in self.info_lisn_stations:
+                    f.write(f"{station['station_acronym']: <10}  {station['station_name']: <50}  {station['long']: <12}  {station['lat']: <10}  LISN\n")
 
     '''# checks if download is completed to write file and restart pages
     def check_write(self, restart_page):

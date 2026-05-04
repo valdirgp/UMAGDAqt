@@ -1,6 +1,7 @@
 from Model.DownloadPage.DownloadsModule import DownloadModule
 from Model.DownloadPage.Embrace import Embrace
 from Model.DownloadPage.Intermagnet import Intermagnet
+from Model.DownloadPage.Lisn import Lisn
 from Model.DownloadPage.Readme import Readme
 from View.DownloadPage import DownloadPage
 from PyQt5.QtCore import QFileSystemWatcher, QDate
@@ -19,10 +20,12 @@ class DownloadsControl:
         self.Module = DownloadModule(self.lang, self.root)
         self.Embrace = Embrace(self.lang, self.root)
         self.Intermagnet = Intermagnet(self.lang, self.root)
+        self.Lisn = Lisn(self.lang, self.root)
         self.Readme = Readme(self.lang)
 
         self.embrace_stations, self.embrace_codes = self.Embrace.create_stationlist(self.year)
         self.intermagnet_stations, self.intermagnet_codes = self.Intermagnet.create_stationlist(self.year)
+        self.lisn_stations, self.lisn_codes = self.Lisn.create_stationlist(self.year)
 
         self.watcher = QFileSystemWatcher()
         self.util = Util()
@@ -36,6 +39,8 @@ class DownloadsControl:
     def load_widgets(self):
         self.DownloadPage.set_embrace_options(self.embrace_stations)
         self.DownloadPage.set_intermagnet_options(self.intermagnet_stations)
+        self.DownloadPage.set_lisn_options(self.lisn_stations)
+
         self.config_page()
 
     def config_page(self):
@@ -48,6 +53,7 @@ class DownloadsControl:
             self.DownloadPage.get_options_frame(),
             self.embrace_stations,
             self.intermagnet_stations,
+            self.lisn_stations,
             self.config_page
         )
 
@@ -73,11 +79,21 @@ class DownloadsControl:
                 result = igrf_value(lat, lon, 0.300, ano)
                 dip = -math.degrees(math.atan((math.tan(math.radians(result[1])) / 2)))
                 self.intermagnet_stations[i] = f"{sigla} ({lat}, {lon}, {dip:.5f})"
+        for i in range(len(self.lisn_stations)):
+            match = re.match(r'^([A-Z]{3}) \(([-\d.]+), ([-\d.]+), ([-\d.]+)\)', self.lisn_stations[i])
+            if match:
+                sigla = match.group(1)
+                lat = float(match.group(2))
+                lon = float(match.group(3))
+                result = igrf_value(lat, lon, 0.300, ano)
+                dip = -math.degrees(math.atan((math.tan(math.radians(result[1])) / 2)))
+                self.lisn_stations[i] = f"{sigla} ({lat}, {lon}, {dip:.5f})"
         self.DownloadPage.set_embrace_options(self.embrace_stations)
         self.DownloadPage.set_intermagnet_options(self.intermagnet_stations)
+        self.DownloadPage.set_lisn_options(self.lisn_stations)
         self.DownloadPage.side_options.populate_stations_listbox(
             self.DownloadPage.side_options.list_all_stations,
-            sorted(self.embrace_stations + self.intermagnet_stations)
+            sorted(self.embrace_stations + self.intermagnet_stations + self.lisn_stations)
         )
 
         self.DownloadPage.year = self.year
@@ -109,6 +125,16 @@ class DownloadsControl:
 
         if any(item in self.intermagnet_codes for item in stations_selected):
             self.Intermagnet.initialize_download_Intermagnet(
+                self.DownloadPage.get_options_frame(),
+                download_path,
+                stations_selected,
+                duration,
+                duration_type,
+                start_date
+            )
+        
+        if any(item in self.lisn_codes for item in stations_selected):
+            self.Lisn.initialize_download_Lisn(
                 self.DownloadPage.get_options_frame(),
                 download_path,
                 stations_selected,
