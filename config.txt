@@ -1,6 +1,6 @@
-lang: en
-year: 14/5/2024
-final: 14/5/2024
+lang: br
+year: 10/10/2024
+final: 12/10/2024
 drive: C:\
 regions{
 "mundo":                        None;

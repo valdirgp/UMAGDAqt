@@ -236,19 +236,16 @@ class RotGraph(GraphsModule):
         self.ax.tick_params(axis='y', which='both', right=True, labelright=False, left=True, labelleft=True)
 
         self.ax.set_xlim(self.start_date, self.end_date)
+
+        all_problems = set(getattr(self, 'problematic_data', []) + getattr(self, 'problematic_calm_days', []))
+        if all_problems:
+            msg = self.util.dict_language[self.lang]["mgbox_error_noinfo_period"] + ":\n" + "\n".join(all_problems)
+            QMessageBox.warning(None, self.util.dict_language[self.lang]["lbl_warn"], msg)
+
         valid_values = [v for v in self.filtred_values if v is not None and not math.isnan(v) and not math.isinf(v)]
         if valid_values:
-            all_problems = set(getattr(self, 'problematic_data', []) + getattr(self, 'problematic_calm_days', []))
-            if all_problems:
-                msg = self.util.dict_language[self.lang]["mgbox_error_noinfo_period"] + ":\n" + "\n".join(all_problems)
-                QMessageBox.warning(None, self.util.dict_language[self.lang]["lbl_warn"], msg)
             self.ax.set_ylim(min(valid_values), max(valid_values))
         else:
-            QMessageBox.information(
-                None,
-                self.util.dict_language[self.lang]["mgbox_error"],
-                self.util.dict_language[self.lang]["mgbox_error_noinfo_period"]
-            )
             self.can_plot = False
             return
 

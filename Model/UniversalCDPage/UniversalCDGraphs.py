@@ -1281,6 +1281,9 @@ class UniversalCDModel(GraphsModule):
         Cria gráfico genérico para qualquer componente (H, X, Y, Z, D, F, I, G).
         Mantém as mesmas entradas da versão original.
         """
+        self.problematic_data = []
+        self.problematic_calm_days = []
+
         self.lcl_downloaded = local_downloaded
         self.station = station.split()[0]
         self.data_with_stations = data_with_stations
@@ -1345,6 +1348,15 @@ class UniversalCDModel(GraphsModule):
                 self.station,
                 self.data_with_stations[self.station][0]
             )
+            
+            if not disturbed_data or all(d.get(component) is None for d in disturbed_data):
+                disturb_str = self.selected_disturb_date[0].strftime('%d/%m/%Y')
+                self.problematic_data.append(f"{self.station} ({disturb_str}) [Disturbed Day]")
+
+            all_problems = set(self.problematic_data + self.problematic_calm_days)
+            if all_problems:
+                msg = self.util.dict_language[self.lang]["mgbox_error_noinfo_period"] + ":\n" + "\n".join(all_problems)
+                QMessageBox.warning(None, self.util.dict_language[self.lang]["lbl_warn"], msg)
 
             lista_legal = [d.get(component) for d in disturbed_data]
             time = [datetime.combine(self.start_date, dt_time(hour=i // 60, minute=i % 60))
@@ -1390,7 +1402,10 @@ class UniversalCDModel(GraphsModule):
         for hour in range(1440):
             try:
                 values = [day[hour][component] for day in calm_values if day[hour].get(component) is not None]
-                average = sum(values) / len(values)
+                if values:
+                    average = sum(values) / len(values)
+                else:
+                    average = None
             except Exception:
                 average = None
             calm_averages.append(average)
@@ -1403,9 +1418,12 @@ class UniversalCDModel(GraphsModule):
         for hour in range(1440):
             try:
                 values = [day[hour][component] for day in calm_values if day[hour].get(component) is not None]
-                average = sum(values) / len(values)
-                variance = sum((x - average) ** 2 for x in values) / len(values)
-                std = variance ** 0.5 + average
+                if values:
+                    average = sum(values) / len(values)
+                    variance = sum((x - average) ** 2 for x in values) / len(values)
+                    std = variance ** 0.5 + average
+                else:
+                    std = None
             except Exception:
                 std = None
             calm_avgPstd.append(std)
@@ -1418,9 +1436,12 @@ class UniversalCDModel(GraphsModule):
         for hour in range(1440):
             try:
                 values = [day[hour][component] for day in calm_values if day[hour].get(component) is not None]
-                average = sum(values) / len(values)
-                variance = sum((x - average) ** 2 for x in values) / len(values)
-                std = average - variance ** 0.5
+                if values:
+                    average = sum(values) / len(values)
+                    variance = sum((x - average) ** 2 for x in values) / len(values)
+                    std = average - variance ** 0.5
+                else:
+                    std = None
             except Exception:
                 std = None
             calm_avgMstd.append(std)
@@ -1436,7 +1457,11 @@ class UniversalCDModel(GraphsModule):
         """
         data = []
         for date in selected_dates:
-            data.append(self.get_data(date, self.station, self.data_with_stations[f'{self.station}'][0]))
+            day_data = self.get_data(date, self.station, self.data_with_stations[f'{self.station}'][0])
+            if not day_data or all(m.get('H') is None and m.get('X') is None and m.get('Z') is None for m in day_data):
+                date_str = date.strftime('%d/%m/%Y')
+                self.problematic_calm_days.append(f"{self.station} ({date_str}) [Quiet Day]")
+            data.append(day_data)
         return data
 
     def gather_station_data(self):

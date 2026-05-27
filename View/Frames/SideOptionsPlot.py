@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QPushButton, QCheckBox, QDateEdit, QSizePolicy, QScrollBar, QFrame, QListWidgetItem, 
     QLineEdit, QCalendarWidget, QFileDialog
 )
-from PyQt5.QtCore import QDate, Qt
+from PyQt5.QtCore import QDate, Qt, QEvent
 from PyQt5.QtGui import QColor, QBrush, QDoubleValidator
 import psutil
 from General.util import Util
@@ -271,6 +271,8 @@ class SideOptionsPlot(QWidget):
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_calm.setSelectedDate(data)
         self.cal_calm.setEnabled(False)
+        for child in self.cal_calm.findChildren(QWidget):
+            child.installEventFilter(self)
         self.cal_calm.clicked.connect(lambda date: self.date_selected(date, self.selected_dates, self.date_list, self.cal_calm))  # Conectar o evento de clique ao método
         layout.addWidget(self.cal_calm)
 
@@ -398,6 +400,9 @@ class SideOptionsPlot(QWidget):
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.startdate.setDate(data)
         self.options_layout.addWidget(self.startdate)
+        self.startdate.installEventFilter(self)
+        for child in self.startdate.findChildren(QWidget):
+            child.installEventFilter(self)
         self.btn_singleday_confirm = QPushButton(self.util.dict_language[self.language]['btn_confirm'])
         if self.btn_singleday_function:
             self.btn_singleday_confirm.clicked.connect(self.btn_singleday_function)
@@ -417,6 +422,9 @@ class SideOptionsPlot(QWidget):
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.startdate.setDate(data)
         self.options_layout.addWidget(self.startdate)
+        self.startdate.installEventFilter(self)
+        for child in self.startdate.findChildren(QWidget):
+            child.installEventFilter(self)
 
         lbl_final_date = QLabel(self.util.dict_language[self.language]['lbl_fin_dt'])
         self.options_layout.addWidget(lbl_final_date)
@@ -427,6 +435,9 @@ class SideOptionsPlot(QWidget):
         data = QDate(self.final[2], self.final[1], self.final[0])
         self.enddate.setDate(data)
         self.options_layout.addWidget(self.enddate)
+        self.enddate.installEventFilter(self)
+        for child in self.enddate.findChildren(QWidget):
+            child.installEventFilter(self)
 
         self.btn_globaldays_confirm = QPushButton(self.util.dict_language[self.language]['btn_confirm'])
         if self.btn_globaldays_function:
@@ -447,6 +458,9 @@ class SideOptionsPlot(QWidget):
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.startdate.setDate(data)
         self.options_layout.addWidget(self.startdate)
+        self.startdate.installEventFilter(self)
+        for child in self.startdate.findChildren(QWidget):
+            child.installEventFilter(self)
 
         lbl_final_date = QLabel(self.util.dict_language[self.language]['lbl_fin_dt'])
         self.options_layout.addWidget(lbl_final_date)
@@ -457,6 +471,9 @@ class SideOptionsPlot(QWidget):
         data = QDate(self.final[2], self.final[1], self.final[0])
         self.enddate.setDate(data)
         self.options_layout.addWidget(self.enddate)
+        self.enddate.installEventFilter(self)
+        for child in self.enddate.findChildren(QWidget):
+            child.installEventFilter(self)
 
         lbl_columns = QLabel(self.util.dict_language[self.language]['lbl_colum'])
         self.options_layout.addWidget(lbl_columns)
@@ -499,6 +516,9 @@ class SideOptionsPlot(QWidget):
         hoje = QDate.currentDate()
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.cal_disturb.setSelectedDate(data)
+        self.cal_disturb.installEventFilter(self)
+        for child in self.cal_disturb.findChildren(QWidget):
+            child.installEventFilter(self)
         #self.add_date(self.cal_disturb, self.selected_disturb_dates)
         self.cal_disturb.clicked.connect(lambda date: self.date_selected(date=date, selected_dates=self.selected_disturb_dates, date_list=self.disturb_date_list, calendar=self.cal_disturb))
         self.cal_disturb.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -559,6 +579,9 @@ class SideOptionsPlot(QWidget):
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.startdate.setDate(data)
         self.options_layout.addWidget(self.startdate)
+        self.startdate.installEventFilter(self)
+        for child in self.startdate.findChildren(QWidget):
+            child.installEventFilter(self)
 
         lbl_final_date = QLabel(self.util.dict_language[self.language]['lbl_fin_dt'])
         self.options_layout.addWidget(lbl_final_date)
@@ -569,6 +592,9 @@ class SideOptionsPlot(QWidget):
         data = QDate(self.final[2], self.final[1], self.final[0])
         self.enddate.setDate(data)
         self.options_layout.addWidget(self.enddate)
+        self.enddate.installEventFilter(self)
+        for child in self.enddate.findChildren(QWidget):
+            child.installEventFilter(self)
 
         self.btn_contour_confirm = QPushButton(self.util.dict_language[self.language]['btn_confirm'])
         if self.btn_contour_function:
@@ -589,6 +615,9 @@ class SideOptionsPlot(QWidget):
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.startdate.setDate(data)
         self.options_layout.addWidget(self.startdate)
+        self.startdate.installEventFilter(self)
+        for child in self.startdate.findChildren(QWidget):
+            child.installEventFilter(self)
 
         lbl_final_date = QLabel(self.util.dict_language[self.language]['lbl_fin_dt'])
         self.options_layout.addWidget(lbl_final_date)
@@ -599,6 +628,9 @@ class SideOptionsPlot(QWidget):
         data = QDate(self.final[2], self.final[1], self.final[0])
         self.enddate.setDate(data)
         self.options_layout.addWidget(self.enddate)
+        self.enddate.installEventFilter(self)
+        for child in self.enddate.findChildren(QWidget):
+            child.installEventFilter(self)
 
         self.btn_mapcontour_confirm = QPushButton(self.util.dict_language[self.language]['btn_confirm'])
         if self.btn_mapcontour_function:
@@ -618,6 +650,9 @@ class SideOptionsPlot(QWidget):
         data = QDate(self.year[2], self.year[1], self.year[0])
         self.startdate.setDate(data)
         self.options_layout.addWidget(self.startdate)
+        self.startdate.installEventFilter(self)
+        for child in self.startdate.findChildren(QWidget):
+            child.installEventFilter(self)
 
         lbl_final_date = QLabel(self.util.dict_language[self.language]['lbl_fin_dt'])
         self.options_layout.addWidget(lbl_final_date)
@@ -628,6 +663,9 @@ class SideOptionsPlot(QWidget):
         data = QDate(self.final[2], self.final[1], self.final[0])
         self.enddate.setDate(data)
         self.options_layout.addWidget(self.enddate)
+        self.enddate.installEventFilter(self)
+        for child in self.enddate.findChildren(QWidget):
+            child.installEventFilter(self)
 
         self.btn_select_files = QPushButton(self.util.dict_language[self.language]['btn_select_files'])
         self.btn_select_files.clicked.connect(self.open_file_dialog)
@@ -802,3 +840,13 @@ class SideOptionsPlot(QWidget):
             widget = item.widget()
             if widget is not None:
                 widget.deleteLater()
+
+    def eventFilter(self, source, event):
+        # Bloqueia o scroll da roda do mouse
+        if event.type() == QEvent.Wheel:
+            return True
+        # Bloqueia cliques do botão do meio
+        if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.MouseButtonDblClick]:
+            if event.button() == Qt.MiddleButton:
+                return True
+        return super().eventFilter(source, event)
