@@ -161,7 +161,8 @@ class SideOptionsPlot(QWidget):
         lbl_station = QLabel(self.util.dict_language[self.language]['lbl_st'])
         layout.addWidget(lbl_station)
         self.list_all_stations = QListWidget()
-        self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+        self.list_all_stations.setSelectionMode(QAbstractItemView.SingleSelection) # Já definido como SingleSelection para o caso 10, mas é bom ter um default
+        self.list_all_stations.itemSelectionChanged.connect(self.on_station_selection_changed)
         layout.addWidget(self.list_all_stations)
         self.scrollbar = QScrollBar()
         self.list_all_stations.setVerticalScrollBar(self.scrollbar)
@@ -497,15 +498,55 @@ class SideOptionsPlot(QWidget):
         self.startdate.dateChanged.connect(lambda new_date: self.sync_calendar_month_year(self.cal_calm, self.startdate))
 
     def add_subtractions_widget(self):
-        lbl_minuend = QLabel(self.util.dict_language[self.language]['lbl_minuend'])
+        '''lbl_minuend = QLabel(self.util.dict_language[self.language]['lbl_minuend'])
         self.options_layout.addWidget(lbl_minuend)
         self.minuend_stations_list = QListWidget()
         self.options_layout.addWidget(self.minuend_stations_list)
         lbl_subtracted = QLabel(self.util.dict_language[self.language]['lbl_subtracted'])
         self.options_layout.addWidget(lbl_subtracted)
         self.subtracted_stations_list = QListWidget()
+        self.options_layout.addWidget(self.subtracted_stations_list)'''
+        #self.update_lists()
+
+        # Minuendo com checkbox para definir o destino da seleção
+        self.chk_minuend = QCheckBox(self.util.dict_language[self.language]['lbl_minuend'])
+        self.chk_minuend.setChecked(True)
+        self.options_layout.addWidget(self.chk_minuend)
+        
+        self.minuend_stations_list = QListWidget()
+        self.minuend_stations_list.setMaximumHeight(40)
+        self.options_layout.addWidget(self.minuend_stations_list)
+
+        # Subtraendo com checkbox para definir o destino da seleção
+        self.chk_subtrahend = QCheckBox(self.util.dict_language[self.language]['lbl_subtracted'])
+        self.options_layout.addWidget(self.chk_subtrahend)
+        
+        self.subtracted_stations_list = QListWidget()
+        self.subtracted_stations_list.setMaximumHeight(40)
         self.options_layout.addWidget(self.subtracted_stations_list)
-        self.update_lists()
+
+        # Lógica para garantir que apenas uma checkbox esteja marcada por vez
+        self.chk_minuend.toggled.connect(lambda checked: self.chk_subtrahend.setChecked(not checked) if checked else None)
+        self.chk_subtrahend.toggled.connect(lambda checked: self.chk_minuend.setChecked(not checked) if checked else None)
+
+    def on_station_selection_changed(self):
+        selected_items = self.list_all_stations.selectedItems()
+        if not selected_items:
+            return
+        item = selected_items[0] # No modo SingleSelection, haverá apenas um item selecionado
+
+        # Se estivermos no modo Difference (índice 10), enviamos a estação para a lista ativa
+        if self.combo_type_plot.currentIndex() == 10:
+            if hasattr(self, 'chk_minuend') and self.chk_minuend.isChecked():
+                self.minuend_stations_list.clear()
+                self.minuend_stations_list.addItem(item.text())
+                if self.minuend_stations_list.count() > 0:
+                    self.minuend_stations_list.item(0).setSelected(True) # Mantém o item visualmente selecionado
+            elif hasattr(self, 'chk_subtrahend') and self.chk_subtrahend.isChecked():
+                self.subtracted_stations_list.clear()
+                self.subtracted_stations_list.addItem(item.text())
+                if self.subtracted_stations_list.count() > 0:
+                    self.subtracted_stations_list.item(0).setSelected(True) # Mantém o item visualmente selecionado
     
     def add_disturbance_widget(self):
         lbl_disturb_date = QLabel(self.util.dict_language[self.language]['lbl_disturb'])
@@ -753,7 +794,7 @@ class SideOptionsPlot(QWidget):
 
                 self.create_manydays_options()
                 self.add_subtractions_widget()
-                self.list_all_stations.setSelectionMode(QAbstractItemView.NoSelection)
+                self.list_all_stations.setSelectionMode(QAbstractItemView.SingleSelection)
 
             case 11:
 

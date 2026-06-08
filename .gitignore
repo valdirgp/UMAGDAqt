@@ -2,3 +2,9 @@
 /dist
 /build
 *.pyc
+Generate_license.py
+geo_indices.txt
+license_UMAGDA.utc
+readme_magnetometer.txt
+readme_stations.txt
+
