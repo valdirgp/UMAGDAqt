@@ -522,6 +522,9 @@ class GraphsModule():
             # Dicionário para armazenar os checkboxes
             self.checkboxes = {}
 
+            self.period_export = QCheckBox("Exportar período completo")
+            layout.addWidget(self.period_export)
+
             for idx, type_name in enumerate(slct_types):
                 cb = QCheckBox(type_name)
                 layout.addWidget(cb)
@@ -534,6 +537,166 @@ class GraphsModule():
             self.temp_window.setLayout(layout)
             self.temp_window.setModal(True)
             self.temp_window.exec_()
+    
+    def export_period_file(self, save_file_path, all_types, is_difference=False):
+        
+        if not is_difference:
+            for station in self.stations:
+
+                station = station.split()[0]
+
+                days = list(self.all_data[station].keys())
+
+                first_date = datetime.strptime(
+                    days[0],
+                    "%d/%m/%Y"
+                )
+
+                last_date = datetime.strptime(
+                    days[-1],
+                    "%d/%m/%Y"
+                )
+
+
+                filename = (
+                    f"{station.lower()}"
+                    f"{first_date.strftime('%Y%m%d')}-"
+                    f"{last_date.strftime('%Y%m%d')}.txt"
+                )
+
+
+                with open(
+                    os.path.join(save_file_path, filename),
+                    "w+"
+                ) as f:
+                    header = (
+                        f"{'YYYY':<6}"
+                        f"{'MM':<4}"
+                        f"{'DD':<4}"
+                        f"{'HH':<4}"
+                        f"{'mm':<4}"
+                    )
+
+                    for type in all_types:
+                        header += f"{type:<12}"
+
+                    header += "\n"
+
+                    f.write(header)
+
+
+                    for day, times in self.all_data[station].items():
+
+                        date = datetime.strptime(
+                            day,
+                            "%d/%m/%Y"
+                        )
+
+                        t = timedelta(0)
+
+
+                        for time in times:
+                            a_year = str(date.year)
+                            a_month = str(f"{date.month:02}")
+                            a_day = str(f"{date.day:02}")
+                            a_hour = str(f"{int(t.seconds/3600):02}")
+                            a_minute = str(f"{int((t.seconds/60)%60):02}")
+
+                            f.write(
+                                f"{a_year:<6}"
+                                f"{a_month:<4}"
+                                f"{a_day:<4}"
+                                f"{a_hour:<4}"
+                                f"{a_minute:<4}"
+                            )
+
+
+                            # MESMA FORMA QUE JÁ FUNCIONA
+                            for type in all_types:
+
+                                print("TIPO EXPORTADO:", type)
+                                print(
+                                    "TIPOS DISPONIVEIS:",
+                                    self.all_data[station][day][time].keys()
+                                )
+
+                                if type in self.all_data[station][day][time]:
+
+                                    value = self.all_data[station][day][time][type]
+
+                                else:
+
+                                    value = ""
+
+                                f.write(f"{value:<12.2f} ")
+
+
+                            f.write("\n")
+
+                            t += timedelta(minutes=1)
+        else:
+            days = list(self.diff_data.keys())
+
+            first_date = datetime.strptime(days[0], "%d/%m/%Y")
+            last_date = datetime.strptime(days[-1], "%d/%m/%Y")
+
+            filename = (
+                f"{self.min_station.lower()}-{self.sub_station.lower()}"
+                f"{first_date.strftime('%Y%m%d')}-"
+                f"{last_date.strftime('%Y%m%d')}.txt"
+            )
+
+            with open(os.path.join(save_file_path, filename), "w+") as f:
+
+                header = (
+                    f"{'YYYY':<6}"
+                    f"{'MM':<4}"
+                    f"{'DD':<4}"
+                    f"{'HH':<4}"
+                    f"{'mm':<4}"
+                )
+
+                for t in all_types:
+                    header += f"{t:<12}"
+
+                f.write(header + "\n")
+
+                for day, times in self.diff_data.items():
+
+                    date = datetime.strptime(day, "%d/%m/%Y")
+
+                    t = timedelta()
+
+                    for time in times:
+                        
+                        a_year = str(date.year)
+                        a_month = str(f"{date.month:02}")
+                        a_day = str(f"{date.day:02}")
+                        a_hour = str(f"{int(t.seconds/3600):02}")
+                        a_minute = str(f"{int((t.seconds/60)%60):02}")
+
+                        f.write(
+                            f"{a_year:<6}"
+                            f"{a_month:<4}"
+                            f"{a_day:<4}"
+                            f"{a_hour:<4}"
+                            f"{a_minute:<4}"
+                        )
+
+                        for tp in all_types:
+                            value = self.diff_data[day][time].get(tp, "")
+
+                            if value is None:
+                                value = ""
+
+                            if isinstance(value, (int, float)):
+                                f.write(f"{value:<12.2f}")
+                            else:
+                                f.write(f"{str(value):<12}")
+
+                        f.write("\n")
+
+                        t += timedelta(minutes=1)
 
     # reads all info and creates custom file
     def export_file(self, is_difference=False, is_field=True):
@@ -542,6 +705,7 @@ class GraphsModule():
             return
 
         all_types = [t for t, cb in self.checkboxes.items() if cb.isChecked()]
+        export_period = self.period_export.isChecked()
         header = 'Hour    ' + '          '.join(all_types)
 
         if hasattr(self, 'sorted_files') and self.sorted_files:
@@ -624,6 +788,16 @@ class GraphsModule():
                     except Exception as e:
                         print(f"Error processing {file_path}: {e}")
             
+            self.temp_window.accept()
+            return
+        
+        if export_period:
+            self.export_period_file(
+                save_file_path,
+                all_types,
+                is_difference
+            )
+
             self.temp_window.accept()
             return
 
