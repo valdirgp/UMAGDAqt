@@ -1,190 +1,190 @@
-acronym     station                                             longitude     latitude    source
-ARA         ARAGUATINS EMBRACE                                  -48.07352     -5.65130    EMBRACE
-ALF         ALTA FLORESTA EMBRACE                               -56.10403     -9.87033    EMBRACE
-CBA         CUIABA EMBRACE                                      -56.06945     -15.55472   EMBRACE
-CHI         CHILLAN EMBRACE                                     -71.99485     -36.64122   EMBRACE
-EUS         EUSEBIO EMBRACE                                     -38.42467     -3.87998    EMBRACE
-MED         MEDIANEIRA EMBRACE                                  -54.11451     -25.29967   EMBRACE
-CXP         CACHOEIRA PAULISTA EMBRACE                          -45.01443     -22.70207   EMBRACE
-JAT         JATAI                                               -51.71840     -17.93185   EMBRACE
-PAL         PALMAS EMBRACE                                      -48.35889     -10.17889   EMBRACE
-MAN         MANAUS                                              -59.97465     -3.10803    EMBRACE
-PVE         PORTO VELHO EMBRACE                                 -63.94000     -8.8350     EMBRACE
-RGA         RIO GRANDE                                          -67.75145     -53.78572   EMBRACE
-SJC         SAO JOSE DOS CAMPOS UNIVAP                          -45.96353     -23.20862   EMBRACE
-SMS         SAO MARTINHO DA SERRA EMBRACE                       -53.82273     -29.44357   EMBRACE
-STM         STATION MAGLISN                                     -54.53920     -2.68630    EMBRACE
-SLZ         SAO LUIS EMBRACE                                    -44.20972     -2.59417    EMBRACE
-TCM         TUCUMAN                                             -65.31555     -26.79612   EMBRACE
-VSS         VASSOURAS EMBRACE                                   -43.65223     -22.40197   EMBRACE
-AAE         ADDIS ABABA, ETHIOPIA                               038.770       09.035      INTERMAGNET
-ABG         ALIBAG, INDIA                                       072.872       18.638      INTERMAGNET
-ABK         ABISKO, SWEDEN                                      018.823       68.358      INTERMAGNET
-AIA         VERNADSKY, AGENTINE ISLANDS                         -64.258       -65.245     INTERMAGNET
-AMS         MARTIN DE VIVIES, FRENCH SOUTHERN TERRITORIES       077.570       -37.800     INTERMAGNET
-ALE         ALERT, CANADA                                       -62.353       82.497      INTERMAGNET
-API         APIA, WESTERN SAMOA                                -171.781       -13.816     INTERMAGNET
-AQU         L'AQUILA, ITALY                                     013.320       42.380      INTERMAGNET
-ARS         ARTI, RUSSIA                                        058.567       56.433      INTERMAGNET
-ASC         ASCENSION ISLAND                                    -14.380       -07.950     INTERMAGNET
-ASP         ALICE SPRINGS, AUSTRALIA                            133.883       -23.762     INTERMAGNET
-BEL         BELSK, POLAND                                       020.789       51.836      INTERMAGNET
-BFE         BRORFELDE, DENMARK                                  011.672       55.625      INTERMAGNET
-BFO         BLACK FOREST OBSERVATORY, GERMANY                   008.325       48.331      INTERMAGNET
-BLC         BAKER LAKE, CANADA                                  -96.012       64.318      INTERMAGNET
-BMT         BEIJING MING TOMBS, CHINA                           116.200       40.300      INTERMAGNET
-BNG         BANGUI, CENTRAL AFRICAN REPUBLIC                    018.570       04.330      INTERMAGNET
-BDV         BUDKOV, CZECH REPUBLIC                              014.020       49.080      INTERMAGNET
-BOU         BOULDER, USA                                       -105.233       40.140      INTERMAGNET
-BOX         BOROK, RUSSIA                                       038.230       58.070      INTERMAGNET
-BRW         BARROW, USA                                        -156.620       71.320      INTERMAGNET
-BRD         BRANDON, CANADA                                     -99.974       49.870      INTERMAGNET
-BSL         STENNIS SPACE CENTER, USA                           -89.640       30.350      INTERMAGNET
-CBB         CAMBRIDGE BAY, CANADA                              -105.031       69.123      INTERMAGNET
-CKI         COKOS (KEELING) ISLANDS, AUSTRALIA                  096.834       -12.188     INTERMAGNET
-CLF         CHAMBON LA FORET, FRANCE                            002.260       48.025      INTERMAGNET
-CMO         COLLEGE, USA                                       -147.860       64.870      INTERMAGNET
-CNB         CANBERRA, AUSTRALIA                                 149.360       -35.320     INTERMAGNET
-CNH         CHANGCHUN, CHINA                                    124.860       44.080      INTERMAGNET
-CPL         CHOUTUPPAL, INDIA                                   078.919       17.294      INTERMAGNET
-CSY         CASEY, AUSTRALIA                                    110.533       -66.283     INTERMAGNET
-CTA         CHARTERS TOWERS, AUSTRALIA                          146.264       -20.090     INTERMAGNET
-CYG         CHEONGYANG, REPUBLIC OF KOREA                       126.854       36.370      INTERMAGNET
-CZT         PORT ALFRED, FRENCH SOUTHERN TERRITORIES            051.860       -46.430     INTERMAGNET
-DED         DEADHORSE, USA                                     -148.790       70.360      INTERMAGNET
-DLR         DEL RIO, USA                                       -100.917       29.490      INTERMAGNET
-DLT         DALAT, VIETNAM                                      108.480       11.950      INTERMAGNET
-DMC         DOME CONCORDIA, ANTARCTICA                          124.167       -75.250     INTERMAGNET
-DRV         DUMONT D'URVILLE, FRENCH SOUTHERN TERRITORIES       140.010       -66.670     INTERMAGNET
-DOU         DOURBES, BELGIUM                                    004.600       50.100      INTERMAGNET
-DUR         DURONIA, ITALY                                      014.470       41.650      INTERMAGNET
-EBR         EBRO, SPAIN                                         000.333       40.957      INTERMAGNET
-EYR         EYREWELL, NEW ZEALAND                               172.393       -43.474     INTERMAGNET
-ESK         ESKDALEMUIR, UNITED KINGDOM                          -3.206       55.314      INTERMAGNET
-FCC         FORT CHURCHILL, CANADA                              -94.088       58.759      INTERMAGNET
-FRD         FREDERICKSBURG, USA                                 -77.367       38.210      INTERMAGNET
-FUR         FURSTENFELDENBRUCK, GERMANY                         011.280       48.170      INTERMAGNET
-FRN         FRESNO, USA                                        -119.720       37.090      INTERMAGNET
-GAN         GAN INT. AIRPT, ADDU ATOLL, MALDIVES                073.154       -00.695     INTERMAGNET
-GCK         GROCKA, SERBIA                                      020.767       44.633      INTERMAGNET
-GDH         QEQERTARSUAQ (GODHAVN), GREENLAND                   -53.533       69.252      INTERMAGNET
-GLN         GLENLEA, CANADA                                     -97.120       49.645      INTERMAGNET
-GNA         GNANGARA, AUSTRALIA                                 115.947       -31.780     INTERMAGNET
-GNG         GINGIN, AUSTRALIA                                   115.715       -31.356     INTERMAGNET
-GUA         GUAM, USA                                           144.870       13.590      INTERMAGNET
-GZH         GUANGZHOU, CHINA                                    112.450       23.970      INTERMAGNET
-GUI         GUIMAR-TENERIFE, SPAIN                              -16.441       28.321      INTERMAGNET
-HAD         HARTLAND, UNITED KINGDOM                             -4.480       51.000      INTERMAGNET
-HER         HERMANUS, SOUTH AFRICA                              019.230       -34.430     INTERMAGNET
-HBK         HARTEBEESTHOEK, SOUTH AFRICA                        027.710       -25.880     INTERMAGNET
-HON         HONOLULU, USA                                      -158.000       21.320      INTERMAGNET
-HLP         HEL OBSERVATORY, POLAND                             018.811       54.603      INTERMAGNET
-HRB         HURBANOVO, SLOVAKIA                                 018.190       47.873      INTERMAGNET
-HYB         HYDERABAD, INDIA                                    078.550       17.420      INTERMAGNET
-HUA         HUANCAYO, PERU                                      -75.330       -12.050     INTERMAGNET
-IQA         IQALUIT, CANADA                                     -68.518       63.753      INTERMAGNET
-IRT         IRKUTSK (PATRONY), RUSSIA                           104.450       52.170      INTERMAGNET
-ISK         ISTANBUL-KANDILI, TURKEY                            029.062       41.063      INTERMAGNET
-IZN         IZNIK, TURKEY                                       029.720       40.500      INTERMAGNET
-IPM         ISAL DE PASCUA, CHILE                              -109.420       -27.171     INTERMAGNET
-HRN         HORNSUND, SVALBARD                                  015.550       77.000      INTERMAGNET
-JAI         JAIPUR, INDIA                                       075.800       26.920      INTERMAGNET
-JCO         JIM CARRIGAN OBSERVATORY, ALASKA                   -148.799       70.356      INTERMAGNET
-KAK         KAKIOKA, JAPAN                                      140.186       36.232      INTERMAGNET
-KDU         KAKADU, AUSTRALIA                                   132.470       -12.690     INTERMAGNET
-KEP         KING EDWARD POINT, SOUTH GEORGIA                    -36.493       -54.282     INTERMAGNET
-KHB         KHABAROVSK, RUSSIA                                  134.690       47.610      INTERMAGNET
-KIR         KIRUNA, SWEDEN                                      020.420       67.843      INTERMAGNET
-KIV         KIEV DYMER, UKRAINE                                 030.300       50.720      INTERMAGNET
-KMH         KEETSMANSHOOP, NAMIBIA                              018.110       -26.540     INTERMAGNET
-KNY         KANOYA, JAPAN                                       130.880       31.420      INTERMAGNET
-KOU         KOUROU, GUYANA, FRANCE                              -52.730       05.210      INTERMAGNET
-LER         LERWICK, UNITED KINGDOM                              -1.183       60.138      INTERMAGNET
-LNP         LUNPING, TAIWAN                                     121.167       25.000      INTERMAGNET
-LON         LONJSKO POLJE, CROATIA                              016.659       45.408      INTERMAGNET
-LOV         LOVO, SWEDEN                                        017.820       59.340      INTERMAGNET
-LRM         LEARMONTH, AUSTRALIA                                114.100       -22.220     INTERMAGNET
-LVV         LVIV, UKRAINE                                       023.750       49.900      INTERMAGNET
-LYC         LYCKSELE, SWEDEN                                    018.748       64.612      INTERMAGNET
-LZH         LANZHOU, CHINA                                      103.845       36.087      INTERMAGNET
-MAB         MANHAY, BELGIUM                                     005.682       50.298      INTERMAGNET
-MAW         MAWSON, ANTARCTICA                                  062.880       -67.600     INTERMAGNET
-MBC         MOULD BAY, CANADA                                  -119.362       76.315      INTERMAGNET
-MBO         MBOUR, SENEGAL                                      -16.960       14.390      INTERMAGNET
-MCQ         MACQUARIE ISLAND, AUSTRALIA                         158.950       -54.500     INTERMAGNET
-MEA         MEANOOK, CANADA                                    -113.347       54.616      INTERMAGNET
-MGD         MAGADAN, RUSSIA                                     150.728       60.051      INTERMAGNET
-MID         MIDWAY ISLAND, USA                                 -177.380       28.210      INTERMAGNET
-MLT         MISALLAT, EGYPT                                     030.892       29.515      INTERMAGNET
-MMB         MEMAMBETSU, JAPAN                                   144.190       43.910      INTERMAGNET
-MZL         MANZHOULI, CHINA                                    117.400       49.600      INTERMAGNET
-NAQ         NARSARSUAQ, GREENLAND                               -45.433       61.167      INTERMAGNET
-NGK         NIEMEGK, GERMANY                                    012.680       52.070      INTERMAGNET
-NCK         NAGYCENK, HUNGARY                                   016.720       47.630      INTERMAGNET
-NUR         NURMIJARVI, FINLAND                                 024.660       60.510      INTERMAGNET
-NEW         NEWPORT, USA                                       -117.120       48.270      INTERMAGNET
-NVS         NOVOSIBIRSK, RUSSIA                                 083.230       54.850      INTERMAGNET
-ORC         BASE ORCADAS, LAURIE ISLAND                         -44.737       -60.737     INTERMAGNET
-OTT         OTTAWA, CANADA                                      -75.552       45.403      INTERMAGNET
-PAF         PORT-AUX-FRANCAIS, KERGUELEN ISLAND                 070.260       -49.350     INTERMAGNET
-PAG         PANAGJURISHTE, BULGARIA                             024.177       42.515      INTERMAGNET
-PBQ         POSTE-DE-LA-BALEINE, CANADA                         -77.745       55.277      INTERMAGNET
-PET         PARATUNKA, RUSSIA                                   158.248       52.971      INTERMAGNET
-PEG         PEDELI, GREECE                                      023.900       38.100      INTERMAGNET
-PHU         PHUTHUY, VIETNAM                                    105.960       21.030      INTERMAGNET
-PIL         PILAR, ARGENTINA                                    -63.881       -31.667     INTERMAGNET
-PPT         PAMATAI, TAHITI, FRANCE                            -149.574       -17.567     INTERMAGNET
-PST         PORT STANLEY, FALKLANDS ISLANDS                     -57.890       -51.700     INTERMAGNET
-QSB         QSAYBEH, LEBANON                                    035.644       33.871      INTERMAGNET
-RES         RESOLUTE BAY, CANADA                                -94.895       74.690      INTERMAGNET
-REU         LA REUNION ISLAND, FRANCE                           055.576       -21.206     INTERMAGNET
-SBA         SCOTT BASE, ANTARCTICA                              166.671       -77.829     INTERMAGNET
-SBL         SABLE ISLAND, CANADA                                -60.010       43.932      INTERMAGNET
-SFS         SAN FERNANDO, SPAIN                                 354.055       36.667      INTERMAGNET
-SHE         SAINT HELENA, SAINT HELENA                           -5.747       -15.961     INTERMAGNET
-SHU         SHUMAGIN, USA                                      -160.460       55.350      INTERMAGNET
-SIT         SITKA, USA                                         -135.330       57.060      INTERMAGNET
-SJG         SAN JUAN, USA                                       -66.150       18.110      INTERMAGNET
-SPG         SAINT PETERSBURG, RUSSIA                            029.716       60.542      INTERMAGNET
-SOD         SODANKYLA, FINLAND                                  026.630       67.370      INTERMAGNET
-SPT         SAN PABLO-TOLEDO, SPAIN                              -4.350       39.550      INTERMAGNET
-SUA         SURLARI, ROMANIA                                    026.250       44.680      INTERMAGNET
-TAM         TAMANRASSET, ALGERIA                                005.530       22.790      INTERMAGNET # This line was not changed, but the diff shows it. Let's re-check.
-STJ         ST JOHN'S, CANADA                                   -52.677       47.595      INTERMAGNET
-TAN         ANTANANARIVO, MADAGASCAR                            047.552       -18.917     INTERMAGNET
-TDC         TRISTAN DA CUNHA, TRISTAN DA CUNHA                  -12.316       -37.067     INTERMAGNET
-THL         QAANAAQ (THULE), GREENLAND                          -69.227       77.470      INTERMAGNET
-THY         TIHANY, HUNGARY                                     017.890       46.900      INTERMAGNET
-STT         SAO TEOTONIO, PORTUGAL                               -8.728       37.547      INTERMAGNET
-TIK         TIKSI, RUSSIA                                       129.000       71.580      INTERMAGNET
-TSU         TSUMEB, SOUTH AFRICA                                017.584       -19.202     INTERMAGNET
-TTB         TATUOCA, BRAZIL                                     -48.513       -01.205     INTERMAGNET
-TUC         TUCSON, USA                                        -110.730       32.170      INTERMAGNET
-UPS         UPPSALA, SWEDEN                                     017.353       59.903      INTERMAGNET
-VAL         VALENTIA, EIRE                                      -10.250       51.933      INTERMAGNET
-VIC         VICTORIA, CANADA                                   -123.420       48.520      INTERMAGNET
-VNA         NEUMAYER STATION, ANTARCTICA                         -8.282       -70.683     INTERMAGNET
-VOS         VOSTOK, ANTARCTICA                                  106.835       -78.464     INTERMAGNET
-WIC         CONRAD, AUSTRIA                                     015.866       47.931      INTERMAGNET
-WMQ         URUMQI, CHINA                                       087.710       43.810      INTERMAGNET
-WNG         WINGST, GERMANY                                     009.053       53.725      INTERMAGNET
-YAK         YAKUTSK, RUSSIA                                     129.660       61.960      INTERMAGNET
-YKC         YELLOWKNIFE, CANADA                                -114.482       62.480      INTERMAGNET
-ALTA        ALTA FLORESTA, BRASIL                               -56.08        -09.87      LISN
-ANCM        ANCON MAGDAS, PERU                                  -77.16        -11.79      LISN
-HUAM        HUANCAYO MAGDAS, PERU                               -75.323       -12.038     LISN
-ANCO        ANCON, PERU                                         -77.19        -11.77      LISN
-AREQ        AREQUIPA, PERU                                      -71.53        -16.39      LISN
-CUIB        CUIABA, BRASIL                                      -56.10        -15.59      LISN
-HUAN        HUANCAYO, PERU                                      -75.21        -12.06      LISN
-ICAM        ICA MAGDAS, PERU                                    -75.73        -14.06      LISN
-LEON        CASLEO, PERU                                        -69.29        -31.71      LISN
-JICA        JICAMARCA, PERU                                     -76.87        -11.95      LISN
-PIUR        PIURA, PERU                                         -80.63        -05.19      LISN
-PUER        PUERTO MALDONADO, PERU                              -69.18        -12.59      LISN
-LETI        LETICIA, COLOMBIA                                   -69.93        -04.21      LISN
-NAZC        NAZCA, PERU                                         -74.94        -14.83      LISN
-SAOL        SAO LUIZ, BRASIL                                    -44.21        -02.60      LISN
-TUCU        TUCUMAN, ARGENTINA                                  -79.84        -06.51      LISN
-TARA        TARAPOTO, PERU                                      -76.37        -06.48      LISN
-TMAM        TINGOMARIA MAGDAS, PERU                             -75.99        -09.29      LISN
+acronym    station                                          longitude    latitude    source    
+CHI        CHILLáN                                         -71.99485    -36.64122   EMBRACE   
+CAR        SãO JOãO DO CARIRI                             -36.52972    -7.37916    EMBRACE   
+ALF        ALTA FLORESTA (DEACTIVATED)                      -56.10403    -9.87033    EMBRACE   
+ARA        ARAGUATINS                                       -48.07352    -5.65130    EMBRACE   
+CBA        CUIABá                                          -56.06945    -15.55472   EMBRACE   
+CXP        CACHOEIRA PAULISTA                               -45.01443    -22.70207   EMBRACE   
+MAN        MANAUS (DEACTIVATED)                             -59.97465    -3.10803    EMBRACE   
+MED        MEDIANEIRA                                       -54.11451    -25.29967   EMBRACE   
+PAL        PALMAS                                           -48.35889    -10.17889   EMBRACE   
+RGA        RIO GRANDE (ARGENTINA)                           -67.75145    -53.78572   EMBRACE   
+JAT        JATAí                                           -51.71840    -17.93185   EMBRACE   
+EUS        EUSéBIO                                         -38.42467    -3.87998    EMBRACE   
+TCM        TUCUMAN                                          -65.31555    -26.79612   EMBRACE   
+SJC        SãO JOSé DOS CAMPOS                            -45.96353    -23.20862   EMBRACE   
+SLZ        SãO LUIS                                        -44.20972    -2.59417    EMBRACE   
+PVE        PORTO VELHO                                      -63.94000    -8.83500    EMBRACE   
+SMS        SãO MARTINHO DA SERRA                           -53.82273    -29.44357   EMBRACE   
+STM        SANTARéM                                        -54.53920    -2.68630    EMBRACE   
+AAE        ADDIS ABABA, ETHIOPIA                            38.77000     9.03500     INTERMAGNET
+ABK        ABISKO, SWEDEN                                   18.82300     68.35800    INTERMAGNET
+AIA        VERNADSKY, AGENTINE ISLANDS                      -64.25800    -65.24500   INTERMAGNET
+ABG        ALIBAG, INDIA                                    72.87200     18.63800    INTERMAGNET
+ALE        ALERT, CANADA                                    -62.35300    82.49700    INTERMAGNET
+AMS        MARTIN DE VIVIES, FRENCH SOUTHERN TERRITORIES    77.57000     -37.80000   INTERMAGNET
+AQU        L'AQUILA, ITALY                                  13.32000     42.38000    INTERMAGNET
+API        APIA, WESTERN SAMOA                              -171.78100   -13.81600   INTERMAGNET
+ARS        ARTI, RUSSIA                                     58.56700     56.43300    INTERMAGNET
+ASC        ASCENSION ISLAND                                 -14.38000    -7.95000    INTERMAGNET
+BDV        BUDKOV, CZECH REPUBLIC                           14.02000     49.08000    INTERMAGNET
+ASP        ALICE SPRINGS, AUSTRALIA                         133.88300    -23.76200   INTERMAGNET
+BEL        BELSK, POLAND                                    20.78900     51.83600    INTERMAGNET
+BFE        BRORFELDE, DENMARK                               11.67200     55.62500    INTERMAGNET
+BFO        BLACK FOREST OBSERVATORY, GERMANY                8.32500      48.33100    INTERMAGNET
+BLC        BAKER LAKE, CANADA                               -96.01200    64.31800    INTERMAGNET
+BMT        BEIJING MING TOMBS, CHINA                        116.20000    40.30000    INTERMAGNET
+BNG        BANGUI, CENTRAL AFRICAN REPUBLIC                 18.57000     4.33000     INTERMAGNET
+BOU        BOULDER, USA                                     -105.23300   40.14000    INTERMAGNET
+BOX        BOROK, RUSSIA                                    38.23000     58.07000    INTERMAGNET
+BRD        BRANDON, CANADA                                  -99.97400    49.87000    INTERMAGNET
+BRW        BARROW, USA                                      -156.62000   71.32000    INTERMAGNET
+BSL        STENNIS SPACE CENTER, USA                        -89.64000    30.35000    INTERMAGNET
+CBB        CAMBRIDGE BAY, CANADA                            -105.03100   69.12300    INTERMAGNET
+CKI        COKOS (KEELING) ISLANDS, AUSTRALIA               96.83400     -12.18800   INTERMAGNET
+CLF        CHAMBON LA FORET, FRANCE                         2.26000      48.02500    INTERMAGNET
+CMO        COLLEGE, USA                                     -147.86000   64.87000    INTERMAGNET
+CNB        CANBERRA, AUSTRALIA                              149.36000    -35.32000   INTERMAGNET
+CNH        CHANGCHUN, CHINA                                 124.86000    44.08000    INTERMAGNET
+CPL        CHOUTUPPAL, INDIA                                78.91900     17.29400    INTERMAGNET
+CSY        CASEY, AUSTRALIA                                 110.53300    -66.28300   INTERMAGNET
+CTA        CHARTERS TOWERS, AUSTRALIA                       146.26400    -20.09000   INTERMAGNET
+CYG        CHEONGYANG, REPUBLIC OF KOREA                    126.85400    36.37000    INTERMAGNET
+CZT        PORT ALFRED, FRENCH SOUTHERN TERRITORIES         51.86000     -46.43000   INTERMAGNET
+DED        DEADHORSE, USA                                   -148.79000   70.36000    INTERMAGNET
+DLR        DEL RIO, USA                                     -100.91700   29.49000    INTERMAGNET
+DLT        DALAT, VIETNAM                                   108.48000    11.95000    INTERMAGNET
+DMC        DOME CONCORDIA, ANTARCTICA                       124.16700    -75.25000   INTERMAGNET
+DOU        DOURBES, BELGIUM                                 4.60000      50.10000    INTERMAGNET
+DRV        DUMONT D'URVILLE, FRENCH SOUTHERN TERRITORIES    140.01000    -66.67000   INTERMAGNET
+DUR        DURONIA, ITALY                                   14.47000     41.65000    INTERMAGNET
+EBR        EBRO, SPAIN                                      0.33300      40.95700    INTERMAGNET
+ESK        ESKDALEMUIR, UNITED KINGDOM                      -3.20600     55.31400    INTERMAGNET
+EYR        EYREWELL, NEW ZEALAND                            172.39300    -43.47400   INTERMAGNET
+FCC        FORT CHURCHILL, CANADA                           -94.08800    58.75900    INTERMAGNET
+FRD        FREDERICKSBURG, USA                              -77.36700    38.21000    INTERMAGNET
+FRN        FRESNO, USA                                      -119.72000   37.09000    INTERMAGNET
+FUR        FURSTENFELDENBRUCK, GERMANY                      11.28000     48.17000    INTERMAGNET
+GAN        GAN INT. AIRPT, ADDU ATOLL, MALDIVES             73.15400     -0.69500    INTERMAGNET
+GCK        GROCKA, SERBIA                                   20.76700     44.63300    INTERMAGNET
+GDH        QEQERTARSUAQ (GODHAVN), GREENLAND                -53.53300    69.25200    INTERMAGNET
+GLN        GLENLEA, CANADA                                  -97.12000    49.64500    INTERMAGNET
+GNA        GNANGARA, AUSTRALIA                              115.94700    -31.78000   INTERMAGNET
+GNG        GINGIN, AUSTRALIA                                115.71500    -31.35600   INTERMAGNET
+GUA        GUAM, USA                                        144.87000    13.59000    INTERMAGNET
+GUI        GUIMAR-TENERIFE, SPAIN                           -16.44100    28.32100    INTERMAGNET
+GZH        GUANGZHOU, CHINA                                 112.45000    23.97000    INTERMAGNET
+HAD        HARTLAND, UNITED KINGDOM                         -4.48000     51.00000    INTERMAGNET
+HBK        HARTEBEESTHOEK, SOUTH AFRICA                     27.71000     -25.88000   INTERMAGNET
+HER        HERMANUS, SOUTH AFRICA                           19.23000     -34.43000   INTERMAGNET
+HLP        HEL OBSERVATORY, POLAND                          18.81100     54.60300    INTERMAGNET
+HON        HONOLULU, USA                                    -158.00000   21.32000    INTERMAGNET
+HRB        HURBANOVO, SLOVAKIA                              18.19000     47.87300    INTERMAGNET
+HRN        HORNSUND, SVALBARD                               15.55000     77.00000    INTERMAGNET
+HUA        HUANCAYO, PERU                                   -75.33000    -12.05000   INTERMAGNET
+HYB        HYDERABAD, INDIA                                 78.55000     17.42000    INTERMAGNET
+IPM        ISAL DE PASCUA, CHILE                            -109.42000   -27.17100   INTERMAGNET
+IQA        IQALUIT, CANADA                                  -68.51800    63.75300    INTERMAGNET
+IRT        IRKUTSK (PATRONY), RUSSIA                        104.45000    52.17000    INTERMAGNET
+ISK        ISTANBUL-KANDILI, TURKEY                         29.06200     41.06300    INTERMAGNET
+IZN        IZNIK, TURKEY                                    29.72000     40.50000    INTERMAGNET
+JAI        JAIPUR, INDIA                                    75.80000     26.92000    INTERMAGNET
+JCO        JIM CARRIGAN OBSERVATORY, ALASKA                 -148.79900   70.35600    INTERMAGNET
+KAK        KAKIOKA, JAPAN                                   140.18600    36.23200    INTERMAGNET
+KDU        KAKADU, AUSTRALIA                                132.47000    -12.69000   INTERMAGNET
+KEP        KING EDWARD POINT, SOUTH GEORGIA                 -36.49300    -54.28200   INTERMAGNET
+KHB        KHABAROVSK, RUSSIA                               134.69000    47.61000    INTERMAGNET
+KIR        KIRUNA, SWEDEN                                   20.42000     67.84300    INTERMAGNET
+KIV        KIEV DYMER, UKRAINE                              30.30000     50.72000    INTERMAGNET
+KMH        KEETSMANSHOOP, NAMIBIA                           18.11000     -26.54000   INTERMAGNET
+KNY        KANOYA, JAPAN                                    130.88000    31.42000    INTERMAGNET
+KOU        KOUROU, GUYANA, FRANCE                           -52.73000    5.21000     INTERMAGNET
+LER        LERWICK, UNITED KINGDOM                          -1.18300     60.13800    INTERMAGNET
+LNP        LUNPING, TAIWAN                                  121.16700    25.00000    INTERMAGNET
+LON        LONJSKO POLJE, CROATIA                           16.65900     45.40800    INTERMAGNET
+LOV        LOVO, SWEDEN                                     17.82000     59.34000    INTERMAGNET
+LRM        LEARMONTH, AUSTRALIA                             114.10000    -22.22000   INTERMAGNET
+LVV        LVIV, UKRAINE                                    23.75000     49.90000    INTERMAGNET
+LYC        LYCKSELE, SWEDEN                                 18.74800     64.61200    INTERMAGNET
+LZH        LANZHOU, CHINA                                   103.84500    36.08700    INTERMAGNET
+MAB        MANHAY, BELGIUM                                  5.68200      50.29800    INTERMAGNET
+MAW        MAWSON, ANTARCTICA                               62.88000     -67.60000   INTERMAGNET
+MBC        MOULD BAY, CANADA                                -119.36200   76.31500    INTERMAGNET
+MBO        MBOUR, SENEGAL                                   -16.96000    14.39000    INTERMAGNET
+MCQ        MACQUARIE ISLAND, AUSTRALIA                      158.95000    -54.50000   INTERMAGNET
+MEA        MEANOOK, CANADA                                  -113.34700   54.61600    INTERMAGNET
+MGD        MAGADAN, RUSSIA                                  150.72800    60.05100    INTERMAGNET
+MID        MIDWAY ISLAND, USA                               -177.38000   28.21000    INTERMAGNET
+MLT        MISALLAT, EGYPT                                  30.89200     29.51500    INTERMAGNET
+MMB        MEMAMBETSU, JAPAN                                144.19000    43.91000    INTERMAGNET
+MZL        MANZHOULI, CHINA                                 117.40000    49.60000    INTERMAGNET
+NAQ        NARSARSUAQ, GREENLAND                            -45.43300    61.16700    INTERMAGNET
+NCK        NAGYCENK, HUNGARY                                16.72000     47.63000    INTERMAGNET
+NEW        NEWPORT, USA                                     -117.12000   48.27000    INTERMAGNET
+NGK        NIEMEGK, GERMANY                                 12.68000     52.07000    INTERMAGNET
+NUR        NURMIJARVI, FINLAND                              24.66000     60.51000    INTERMAGNET
+NVS        NOVOSIBIRSK, RUSSIA                              83.23000     54.85000    INTERMAGNET
+ORC        BASE ORCADAS, LAURIE ISLAND                      -44.73700    -60.73700   INTERMAGNET
+OTT        OTTAWA, CANADA                                   -75.55200    45.40300    INTERMAGNET
+PAF        PORT-AUX-FRANCAIS, KERGUELEN ISLAND              70.26000     -49.35000   INTERMAGNET
+PAG        PANAGJURISHTE, BULGARIA                          24.17700     42.51500    INTERMAGNET
+PBQ        POSTE-DE-LA-BALEINE, CANADA                      -77.74500    55.27700    INTERMAGNET
+PEG        PEDELI, GREECE                                   23.90000     38.10000    INTERMAGNET
+PET        PARATUNKA, RUSSIA                                158.24800    52.97100    INTERMAGNET
+PHU        PHUTHUY, VIETNAM                                 105.96000    21.03000    INTERMAGNET
+PIL        PILAR, ARGENTINA                                 -63.88100    -31.66700   INTERMAGNET
+PPT        PAMATAI, TAHITI, FRANCE                          -149.57400   -17.56700   INTERMAGNET
+PST        PORT STANLEY, FALKLANDS ISLANDS                  -57.89000    -51.70000   INTERMAGNET
+QSB        QSAYBEH, LEBANON                                 35.64400     33.87100    INTERMAGNET
+RES        RESOLUTE BAY, CANADA                             -94.89500    74.69000    INTERMAGNET
+REU        LA REUNION ISLAND, FRANCE                        55.57600     -21.20600   INTERMAGNET
+SBA        SCOTT BASE, ANTARCTICA                           166.67100    -77.82900   INTERMAGNET
+SBL        SABLE ISLAND, CANADA                             -60.01000    43.93200    INTERMAGNET
+SFS        SAN FERNANDO, SPAIN                              -5.94500     36.66700    INTERMAGNET
+SHE        SAINT HELENA, SAINT HELENA                       -5.74700     -15.96100   INTERMAGNET
+SHU        SHUMAGIN, USA                                    -160.46000   55.35000    INTERMAGNET
+SIT        SITKA, USA                                       -135.33000   57.06000    INTERMAGNET
+SJG        SAN JUAN, USA                                    -66.15000    18.11000    INTERMAGNET
+SOD        SODANKYLA, FINLAND                               26.63000     67.37000    INTERMAGNET
+SPG        SAINT PETERSBURG, RUSSIA                         29.71600     60.54200    INTERMAGNET
+SPT        SAN PABLO-TOLEDO, SPAIN                          -4.35000     39.55000    INTERMAGNET
+STJ        ST JOHN'S, CANADA                                -52.67700    47.59500    INTERMAGNET
+STT        SAO TEOTONIO, PORTUGAL                           -8.72800     37.54700    INTERMAGNET
+SUA        SURLARI, ROMANIA                                 26.25000     44.68000    INTERMAGNET
+TAM        TAMANRASSET, ALGERIA                             5.53000      22.79000    INTERMAGNET
+TAN        ANTANANARIVO, MADAGASCAR                         47.55200     -18.91700   INTERMAGNET
+TDC        TRISTAN DA CUNHA, TRISTAN DA CUNHA               -12.31600    -37.06700   INTERMAGNET
+THL        QAANAAQ (THULE), GREENLAND                       -69.22700    77.47000    INTERMAGNET
+THY        TIHANY, HUNGARY                                  17.89000     46.90000    INTERMAGNET
+TIK        TIKSI, RUSSIA                                    129.00000    71.58000    INTERMAGNET
+TSU        TSUMEB, SOUTH AFRICA                             17.58400     -19.20200   INTERMAGNET
+TTB        TATUOCA, BRAZIL                                  -48.51300    -1.20500    INTERMAGNET
+TUC        TUCSON, USA                                      -110.73000   32.17000    INTERMAGNET
+UPS        UPPSALA, SWEDEN                                  17.35300     59.90300    INTERMAGNET
+VAL        VALENTIA, EIRE                                   -10.25000    51.93300    INTERMAGNET
+VIC        VICTORIA, CANADA                                 -123.42000   48.52000    INTERMAGNET
+VNA        NEUMAYER STATION, ANTARCTICA                     -8.28200     -70.68300   INTERMAGNET
+VOS        VOSTOK, ANTARCTICA                               106.83500    -78.46400   INTERMAGNET
+WIC        CONRAD, AUSTRIA                                  15.86600     47.93100    INTERMAGNET
+WMQ        URUMQI, CHINA                                    87.71000     43.81000    INTERMAGNET
+WNG        WINGST, GERMANY                                  9.05300      53.72500    INTERMAGNET
+YAK        YAKUTSK, RUSSIA                                  129.66000    61.96000    INTERMAGNET
+YKC        YELLOWKNIFE, CANADA                              -114.48200   62.48000    INTERMAGNET
+NAZC       NAZCA, PERU                                      -74.94000    -14.83000   LISN      
+PUER       PUERTO MALDONADO, PERU                           -69.18000    -12.59000   LISN      
+JICA       JICAMARCA, PERU                                  -76.87000    -11.95000   LISN      
+SAOL       SAO LUIZ, BRASIL                                 -44.21000    -2.60000    LISN      
+TARA       TARAPOTO, PERU                                   -76.37000    -6.48000    LISN      
+AREQ       AREQUIPA, PERU                                   -71.53000    -16.39000   LISN      
+TMAM       TINGOMARIA MAGDAS, PERU                          -75.99000    -9.29000    LISN      
+TUCU       TUCUMAN, ARGENTINA                               -79.84000    -6.51000    LISN      
+CUIB       CUIABA, BRASIL                                   -56.10000    -15.59000   LISN      
+LEON       CASLEO, PERU                                     -69.29000    -31.71000   LISN      
+ANCM       ANCON MAGDAS, PERU                               -77.16000    -11.79000   LISN      
+PIUR       PIURA, PERU                                      -80.63000    -5.19000    LISN      
+ANCO       ANCON, PERU                                      -77.19000    -11.77000   LISN      
+ALTA       ALTA FLORESTA, PERU                              -56.08000    -9.87000    LISN      
+HUAN       HUANCAYO, PERU                                   -75.21000    -12.06000   LISN      
+HUAM       HUANCAYO MAGDAS, PERU                            -75.32300    -12.03800   LISN      
+LETI       LETICIA, COLOMBIA                                -69.93000    -4.21000    LISN      
+ICAM       ICA MAGDAS, PERU                                 -75.73000    -14.06000   LISN      

@@ -251,7 +251,6 @@ class GraphPage(QWidget):
 
         self.listbox_on_click()
 
-
     def update_min_sub_list(self):
         self.side_options.populate_list_options(self.side_options.minuend_stations_list, self.downloaded_data_stations)
         self.side_options.populate_list_options(self.side_options.subtracted_stations_list, self.downloaded_data_stations)

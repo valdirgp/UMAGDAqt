@@ -48,57 +48,125 @@ class Readme(DownloadModule):
         for thread in self.threads: thread.start()
         self.check_write(restart_page)
 
-    # searches station's full name in their files and location in embrace's readme
+    # searches station's full name and location in EMBRACE readme
     def get_embrace_info(self):
         while not self.request_embrace_queue.empty():
+
             station = self.request_embrace_queue.get()
             station = 'VSS' if station == 'VSE' else station
+
             try:
                 with self.semaphore_threading:
-                    response = requests.get(f'https://embracedata.inpe.br/magnetometer/{station}/', verify=False)
-                    soup = BeautifulSoup(response.content, 'html.parser')
-                    links_year = soup.find_all('a')
-                    for link_year in links_year:
-                        year = link_year.get('href')
-                        year = year.replace('/', '')
-                            
-                        if year.isdigit():
-                            response = requests.get(f'https://embracedata.inpe.br/magnetometer/{station}/{year}/', verify=False)
-                            soup = BeautifulSoup(response.content, 'html.parser')
-                            linksday = soup.find_all('a')
-                                
-                            for linkday in linksday:
-                                day = linkday.get('href')
 
-                                if day[0].isalpha():
-                                    response = requests.get(f'https://embracedata.inpe.br/magnetometer/{station}/{year}/{day}', verify=False)
-                                    soup = BeautifulSoup(response.content, 'html.parser')
-                                    text = soup.get_text()
-                                    lines = text.split('\n')
-                                    station_name = ''
-                                        
-                                    for i in lines[0]:
-                                        if i != '-':
-                                            station_name += i
-                                        else:
-                                            station_info = {'station_acronym': station, 'station_name': station_name.upper()} 
-                                            break
-                                    break
+                    station_info = {
+                        'station_acronym': station,
+                        'station_name': station
+                    }
+
+
+                    url = (
+                        'https://embracedata.inpe.br/magnetometer/readme_magnetometer.html'
+                    )
+
+                    response = requests.get(
+                        url,
+                        verify=False,
+                        timeout=15
+                    )
+
+                    text = response.text
+
+                    for line in text.splitlines():
+
+                        if "|" not in line:
+                            continue
+
+                        parts = line.split("|")
+
+                        if len(parts) < 4:
+                            continue
+
+                        try:
+                            longitude = float(parts[1].strip())
+                            latitude = float(parts[2].strip())
+
+                            station_part = parts[3].strip()
+
+                            codigo = station_part.split()[0].upper()
+
+                            codigo = "VSE" if codigo == "VSS" else codigo
+
+                            if codigo != station.upper():
+                                continue
+
+                            station_info["station_acronym"] = station.strip()
+                            station_info["station_name"] = station_part.split("-", 1)[1].strip()
+                            station_info["long"] = longitude
+                            station_info["lat"] = latitude
+
+                            self.info_embrace_stations.append(
+                                station_info
+                            )
+
                             break
 
-                    response = requests.get('https://embracedata.inpe.br/magnetometer/readme_magnetometer.txt', verify=False)
-                    soup = BeautifulSoup(response.content, 'html.parser')
-                    text = soup.get_text().split('\n')
-                    for line in text: 
-                        if re.search(station.lower(), line):
-                            word = line.split()
-                            station_info.update({'long': word[0], 'lat': word[1]})
-                            self.info_embrace_stations.append(station_info)
-                            break
-            except Exception as error: 
-                print('Erro no download readme(Embrace): ', error)
+                        except ValueError:
+                            continue
+
+
+                        '''# procura a estação pelo código
+                        if station.upper() not in [
+                            x.upper() for x in cols
+                        ]:
+                            continue
+
+
+                        try:
+
+                            # procura latitude e longitude
+                            for i, value in enumerate(cols):
+
+                                if "longitude" in value.lower():
+
+                                    station_info["long"] = float(
+                                        cols[i+1]
+                                        .replace(",", ".")
+                                    )
+
+
+                                if "latitude" in value.lower():
+
+                                    station_info["lat"] = float(
+                                        cols[i+1]
+                                        .replace(",", ".")
+                                    )
+
+
+                            station_info["station_name"] = (
+                                cols[1]
+                                if len(cols) > 1
+                                else station
+                            )
+
+
+                        except Exception:
+                            pass
+
+
+                        break'''
+
+
+            except Exception as error:
+
+                print(
+                    "Erro no download readme(Embrace): ",
+                    error
+                )
+
+
             finally:
-                self.update_progressbar()
+                #self.update_progressbar()
+                self.progress_signal.emit("", [])
 
     # searches intermagnet info in its files
     def get_Intermagnet_info(self):
@@ -135,7 +203,8 @@ class Readme(DownloadModule):
             except Exception as error:
                 print(f'Erro no download readme(Intermagnet): ', error)
             finally:
-                self.update_progressbar()
+                #self.update_progressbar()
+                self.progress_signal.emit("", [])
 
     def get_Lisn_info(self):
         url = 'https://raw.githubusercontent.com/Thiago-Mancilla/LISN_STATIONS/main/readme_magnetometer.txt'
@@ -145,7 +214,7 @@ class Readme(DownloadModule):
         except Exception as error:
             print(f'Erro no download readme(LISN): {error}')
             lines_file = []
-
+        
         while not self.request_lisn_queue.empty():
             station = self.request_lisn_queue.get()
             try:
@@ -162,16 +231,71 @@ class Readme(DownloadModule):
             except Exception as error:
                 print(f'Erro ao processar estação LISN {station}: {error}')
             finally:
-                self.update_progressbar()
-
+                #self.update_progressbar()
+                self.progress_signal.emit("", [])
 
     # writes readme file with obtained data from embrace and intermagnet
     def write_readme(self):
+
+        # normaliza os nomes antes de calcular o tamanho
+        all_stations = (
+            self.info_embrace_stations +
+            self.info_intermagnet_stations +
+            self.info_lisn_stations
+        )
+
+        headers = [
+            "acronym",
+            "station",
+            "longitude",
+            "latitude",
+            "source"
+        ]
+
+        widths = [
+            max(len(headers[0]), max(len(s['station_acronym']) for s in all_stations)) + 4,
+            max(len(headers[1]), max(len(s['station_name']) for s in all_stations)) + 4,
+            len(headers[2]) + 4,
+            len(headers[3]) + 4,
+            len(headers[4]) + 4
+        ]
+
+
+        def format_station(station):
+
+            longitude = float(station['long'])
+
+            if longitude > 180:
+                longitude -= 360
+
+            values = [
+                station['station_acronym'].strip(),
+                station['station_name'].strip().upper(),
+                f"{longitude:.5f}",
+                f"{float(station['lat']):.5f}",
+                station['source'].strip()
+            ]
+
+            return "".join(
+                value.ljust(width)
+                for value, width in zip(values, widths)
+            ) + "\n"
+
+
         with open(self.util.resource_path('readme_stations.txt'), 'w') as f:
-            f.write("acronym     station                                             longitude     latitude    source\n")
+
+            f.write(
+                "".join(
+                    h.ljust(w)
+                    for h, w in zip(headers, widths)
+                )
+                + "\n"
+            )
+
             if self.info_embrace_stations: # check if embrace info was obtained
                 for station in self.info_embrace_stations:
-                    f.write(f"{station['station_acronym']: <10}  {station['station_name']: <50}  {station['long']: <12}  {station['lat']: <10}  EMBRACE\n")
+                    station['source'] = "EMBRACE"
+                    f.write(format_station(station))
             else:
                 QMessageBox.information(
                     self.root,
@@ -181,7 +305,8 @@ class Readme(DownloadModule):
 
             if self.info_intermagnet_stations: # check if intermagnet info was obtained
                 for station in self.info_intermagnet_stations:
-                    f.write(f"{station['station_acronym']: <10}  {station['station_name'].upper(): <50}  {station['long']: <12}  {station['lat']: <10}  INTERMAGNET\n")
+                    station['source'] = "INTERMAGNET"
+                    f.write(format_station(station))
             else:
                 QMessageBox.information(
                     self.root,
@@ -191,23 +316,23 @@ class Readme(DownloadModule):
             
             if self.info_lisn_stations:
                 for station in self.info_lisn_stations:
-                    f.write(f"{station['station_acronym']: <10}  {station['station_name']: <50}  {station['long']: <12}  {station['lat']: <10}  LISN\n")
+                    station['source'] = "LISN"
+                    f.write(format_station(station))
+            else:
+                QMessageBox.information(
+                    self.root,
+                    self.util.dict_language[self.lang]["mgbox_error"],
+                    self.util.dict_language[self.lang]["mgbox_error_readme_lisn"]
+                )
 
-    '''# checks if download is completed to write file and restart pages
-    def check_write(self, restart_page):
-        if self.porcentage < 100:
-            # Em PyQt5, use QTimer.singleShot para agendar a checagem
-            from PyQt5.QtCore import QTimer
-            QTimer.singleShot(500, lambda: self.check_write(restart_page))
-        else:
-            self.write_readme()
-            restart_page()'''
-    
     def check_write(self, restart_page):
         if self.current_file < self.total_downloads:
-            # Em PyQt5, use QTimer.singleShot para agendar a checagem
             from PyQt5.QtCore import QTimer
             QTimer.singleShot(500, lambda: self.check_write(restart_page))
         else:
             self.write_readme()
             restart_page()
+    
+    '''def restart_page(self):
+        if self.root:
+            self.root.config_page()'''

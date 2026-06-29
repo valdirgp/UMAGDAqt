@@ -43,24 +43,63 @@ class Embrace(DownloadModule):
                 print(f"Erro ao ler readme_stations.txt: {e}")
 
         # Se o arquivo local não existir ou falhar, busca da URL
-        url = 'https://embracedata.inpe.br/magnetometer/readme_magnetometer.txt'
+        url = 'https://embracedata.inpe.br/magnetometer/readme_magnetometer.html'
         try:
             with requests.get(url, timeout=15, verify=False) as response:
                 text = response.text
+
                 for line in text.splitlines():
-                    if not line.strip() or line.startswith('#') or line.startswith('For'):
+
+                    if "|" not in line:
                         continue
-                    parts = line.split()
-                    if len(parts) < 3:
+
+                    parts = line.split("|")
+
+                    if len(parts) < 4:
                         continue
+
                     try:
-                        longitude = float(parts[0].replace(',', '.'))
-                        latitude = float(parts[1].replace(',', '.'))
-                        codigo = parts[2].upper()
+                        longitude = float(parts[1].strip())
+                        latitude = float(parts[2].strip())
+
+                        station_part = parts[3].strip()
+
+                        codigo = station_part.split()[0].upper()
+
                         codigo = 'VSE' if codigo == 'VSS' else codigo
-                        estacoes[codigo] = {'latitude': latitude, 'longitude': longitude}
+
+                        estacoes[codigo] = {
+                            'latitude': latitude,
+                            'longitude': longitude
+                        }
+
                     except ValueError:
                         continue
+
+                    if not line.strip() or line.startswith('#') or line.startswith('For'):
+                        continue
+
+                    parts = line.split()
+
+                    if len(parts) < 3:
+                        continue
+
+                    try:
+                        codigo = parts[0].upper()
+
+                        longitude = float(parts[-2].replace(',', '.'))
+                        latitude = float(parts[-1].replace(',', '.'))
+
+                        codigo = 'VSE' if codigo == 'VSS' else codigo
+
+                        estacoes[codigo] = {
+                            'latitude': latitude,
+                            'longitude': longitude
+                        }
+
+                    except ValueError:
+                        continue
+
             return estacoes
         except Exception as e:
             print(f"Erro ao obter estações EMBRACE da URL: {e}")

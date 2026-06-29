@@ -59,9 +59,10 @@ class Lisn(DownloadModule):
                         #longitude = float(parts[0].replace(',', '.'))
                         #latitude = float(parts[1].replace(',', '.'))
                         #codigo = parts[2].upper()
-                        longitude = float(parts[-2].replace(',', '.'))
-                        latitude = float(parts[-1].replace(',', '.'))
                         codigo = parts[0].upper()
+
+                        longitude = float(parts[-3].replace(',', '.'))
+                        latitude = float(parts[-2].replace(',', '.'))
                         codigo = 'VSE' if codigo == 'VSS' else codigo
                         estacoes[codigo] = {'latitude': latitude, 'longitude': longitude}
                     except ValueError:

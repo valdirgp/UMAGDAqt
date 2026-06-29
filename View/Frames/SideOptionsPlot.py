@@ -723,7 +723,7 @@ class SideOptionsPlot(QWidget):
 
         self.startdate.dateChanged.connect(lambda new_date: self.sync_calendar_month_year(self.cal_calm, self.startdate))
 
-    def open_file_dialog(self):
+    def open_file_dialog(self): 
         files, _ = QFileDialog.getOpenFileNames(self, "Selecionar Arquivos")
         if files:
             self.list_files_widget.clear()
@@ -744,7 +744,7 @@ class SideOptionsPlot(QWidget):
                 self.list_all_stations.setSelectionMode(QAbstractItemView.NoSelection)
 
             case 1:
-
+                
                 self.create_oneday_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
 
@@ -873,7 +873,6 @@ class SideOptionsPlot(QWidget):
                 item.setSelected(False)
         self.list_all_stations.blockSignals(False)
         self.list_all_stations.itemSelectionChanged.emit()
-
 
     def clear_options_frame(self):
         while self.options_layout.count():
