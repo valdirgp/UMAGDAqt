@@ -1,22 +1,22 @@
 acronym    station                                          longitude    latitude    source    
-CHI        CHILLáN                                         -71.99485    -36.64122   EMBRACE   
-CAR        SãO JOãO DO CARIRI                             -36.52972    -7.37916    EMBRACE   
+CHI        CHILLáN                                          -71.99485    -36.64122   EMBRACE   
+CAR        SãO JOãO DO CARIRI                               -36.52972    -7.37916    EMBRACE   
 ALF        ALTA FLORESTA (DEACTIVATED)                      -56.10403    -9.87033    EMBRACE   
 ARA        ARAGUATINS                                       -48.07352    -5.65130    EMBRACE   
-CBA        CUIABá                                          -56.06945    -15.55472   EMBRACE   
+CBA        CUIABá                                           -56.06945    -15.55472   EMBRACE   
 CXP        CACHOEIRA PAULISTA                               -45.01443    -22.70207   EMBRACE   
 MAN        MANAUS (DEACTIVATED)                             -59.97465    -3.10803    EMBRACE   
 MED        MEDIANEIRA                                       -54.11451    -25.29967   EMBRACE   
 PAL        PALMAS                                           -48.35889    -10.17889   EMBRACE   
 RGA        RIO GRANDE (ARGENTINA)                           -67.75145    -53.78572   EMBRACE   
-JAT        JATAí                                           -51.71840    -17.93185   EMBRACE   
-EUS        EUSéBIO                                         -38.42467    -3.87998    EMBRACE   
+JAT        JATAí                                            -51.71840    -17.93185   EMBRACE   
+EUS        EUSéBIO                                          -38.42467    -3.87998    EMBRACE   
 TCM        TUCUMAN                                          -65.31555    -26.79612   EMBRACE   
-SJC        SãO JOSé DOS CAMPOS                            -45.96353    -23.20862   EMBRACE   
-SLZ        SãO LUIS                                        -44.20972    -2.59417    EMBRACE   
+SJC        SãO JOSé DOS CAMPOS                              -45.96353    -23.20862   EMBRACE   
+SLZ        SãO LUIS                                         -44.20972    -2.59417    EMBRACE   
 PVE        PORTO VELHO                                      -63.94000    -8.83500    EMBRACE   
-SMS        SãO MARTINHO DA SERRA                           -53.82273    -29.44357   EMBRACE   
-STM        SANTARéM                                        -54.53920    -2.68630    EMBRACE   
+SMS        SãO MARTINHO DA SERRA                            -53.82273    -29.44357   EMBRACE   
+STM        SANTARéM                                         -54.53920    -2.68630    EMBRACE   
 AAE        ADDIS ABABA, ETHIOPIA                            38.77000     9.03500     INTERMAGNET
 ABK        ABISKO, SWEDEN                                   18.82300     68.35800    INTERMAGNET
 AIA        VERNADSKY, AGENTINE ISLANDS                      -64.25800    -65.24500   INTERMAGNET
