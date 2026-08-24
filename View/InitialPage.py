@@ -2,9 +2,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import Qt
 from PIL import Image
-from PIL import ImageQt
 from General.util import Util
-import os
 
 
 class InitialPage(QWidget):

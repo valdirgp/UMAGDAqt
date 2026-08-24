@@ -11,6 +11,7 @@ from Model.GraphPage.ContourGraph import ContourGraph
 from Model.GraphPage.MapGraph import MapGraph
 from Model.GraphPage.ElectricGraph import ElectricGraph
 from Model.GraphPage.RotGraph import RotGraph
+from Model.GraphPage.PeriodogramGraph import PeriodogramGraph
 from View.GraphPage import GraphPage
 from PyQt5.QtCore import QFileSystemWatcher
 from General.util import Util
@@ -37,6 +38,7 @@ class GraphControl():
         self.MapModule = MapGraph(self.root, self.lang)
         self.ElectricModule = ElectricGraph(self.root, self.lang)
         self.RotModule = RotGraph(self.root, self.lang)
+        self.PeriodogramModule = PeriodogramGraph(self.root, self.lang)
 
         self.watcher = QFileSystemWatcher()
         self.util = Util()
@@ -299,7 +301,14 @@ class GraphControl():
                         self.Graphs.get_check_roti(),
                         self.Graphs.get_roti_skiptime_text() if self.Graphs.get_roti_skiptime_text() != "" else 0
                     )
-
+            case 14: # PERIODOGRAM
+                self.PeriodogramModule.plot_periodogram(
+                    self.Graphs.get_files_selection(),
+                    self.Graphs.get_start_time(),
+                    self.Graphs.get_end_time(),
+                    self.Graphs.get_bold_text(),
+                    self.Graphs.get_grid_graph(),
+                )
      
     # expõe o widget para ser adicionado ao QStackedWidget
     def get_widget(self):

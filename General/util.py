@@ -102,6 +102,7 @@ class Util():
                                     "combo_electric_field": "Campo Elétrico",
                                     "combo_vertical_drift": "Vertical Drift",
                                     "combo_rot": "ROT - dH",
+                                    "combo_periodogram": "Periodograma",
 
                                     "progbar_dwd_Embrace": "Progresso Embrace",
                                     "progbar_dwd_Intermagnet": "Progresso Intermagnet",
@@ -258,6 +259,7 @@ class Util():
                                     "combo_electric_field": "Electric Field",
                                     "combo_vertical_drift": "Vertical Drift",
                                     "combo_rot": "ROT - dH",
+                                    "combo_periodogram": "Periodogram",
 
                                     "progbar_dwd_Embrace": "Embrace Progress",
                                     "progbar_dwd_Intermagnet": "Intermagnet Progress",

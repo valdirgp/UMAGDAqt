@@ -35,5 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['General\\images\\univap.ico'],
+    icon=['General/images/univap.ico'],
 )

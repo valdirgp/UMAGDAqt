@@ -2,7 +2,6 @@ from Model.DownloadPage.DownloadsModule import DownloadModule
 from General.util import Util
 import threading as mt
 import queue
-from bs4 import BeautifulSoup
 import requests
 from urllib import request
 from urllib.error import URLError
@@ -10,7 +9,6 @@ import re
 from charset_normalizer import detect
 from urllib3.exceptions import InsecureRequestWarning
 from PyQt5.QtWidgets import QMessageBox
-import sys, os
 
 class Readme(DownloadModule):
     def __init__(self, language, root=None):
@@ -113,49 +111,6 @@ class Readme(DownloadModule):
                         except ValueError:
                             continue
 
-
-                        '''# procura a estação pelo código
-                        if station.upper() not in [
-                            x.upper() for x in cols
-                        ]:
-                            continue
-
-
-                        try:
-
-                            # procura latitude e longitude
-                            for i, value in enumerate(cols):
-
-                                if "longitude" in value.lower():
-
-                                    station_info["long"] = float(
-                                        cols[i+1]
-                                        .replace(",", ".")
-                                    )
-
-
-                                if "latitude" in value.lower():
-
-                                    station_info["lat"] = float(
-                                        cols[i+1]
-                                        .replace(",", ".")
-                                    )
-
-
-                            station_info["station_name"] = (
-                                cols[1]
-                                if len(cols) > 1
-                                else station
-                            )
-
-
-                        except Exception:
-                            pass
-
-
-                        break'''
-
-
             except Exception as error:
 
                 print(
@@ -165,7 +120,6 @@ class Readme(DownloadModule):
 
 
             finally:
-                #self.update_progressbar()
                 self.progress_signal.emit("", [])
 
     # searches intermagnet info in its files
@@ -203,7 +157,6 @@ class Readme(DownloadModule):
             except Exception as error:
                 print(f'Erro no download readme(Intermagnet): ', error)
             finally:
-                #self.update_progressbar()
                 self.progress_signal.emit("", [])
 
     def get_Lisn_info(self):
@@ -231,7 +184,6 @@ class Readme(DownloadModule):
             except Exception as error:
                 print(f'Erro ao processar estação LISN {station}: {error}')
             finally:
-                #self.update_progressbar()
                 self.progress_signal.emit("", [])
 
     # writes readme file with obtained data from embrace and intermagnet
@@ -292,7 +244,7 @@ class Readme(DownloadModule):
                 + "\n"
             )
 
-            if self.info_embrace_stations: # check if embrace info was obtained
+            if self.info_embrace_stations:
                 for station in self.info_embrace_stations:
                     station['source'] = "EMBRACE"
                     f.write(format_station(station))
@@ -303,7 +255,7 @@ class Readme(DownloadModule):
                     self.util.dict_language[self.lang]["mgbox_error_readme_embrace"]
                 )
 
-            if self.info_intermagnet_stations: # check if intermagnet info was obtained
+            if self.info_intermagnet_stations:
                 for station in self.info_intermagnet_stations:
                     station['source'] = "INTERMAGNET"
                     f.write(format_station(station))
@@ -332,7 +284,3 @@ class Readme(DownloadModule):
         else:
             self.write_readme()
             restart_page()
-    
-    '''def restart_page(self):
-        if self.root:
-            self.root.config_page()'''

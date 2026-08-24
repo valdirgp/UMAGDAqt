@@ -377,3 +377,9 @@ class GraphPage(QWidget):
     
     def get_check_roti(self):
         return self.side_options.checkRoti.isChecked()
+
+    def get_start_time(self):
+        return self.side_options.start_time.time()
+
+    def get_end_time(self):
+        return self.side_options.end_time.time()

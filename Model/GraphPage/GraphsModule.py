@@ -1,5 +1,5 @@
 from Model.Custom.CustomttkFrame import ScrollableFrame
-import os, sys
+import os
 from datetime import datetime, timedelta, date as Date
 import math
 import re
@@ -8,7 +8,7 @@ from General.util import Util
 from PyQt5.QtWidgets import (
     QMessageBox, QDialog, QVBoxLayout, QLabel, QCheckBox, QPushButton, QFileDialog, QWidget
 )
-from PyQt5.QtCore import Qt, QDate
+from PyQt5.QtCore import QDate
 from pyIGRF import igrf_value
 
 class GraphsModule():
@@ -102,13 +102,11 @@ class GraphsModule():
                             local_min = int(local_min * 60)
 
                             data_with_stations[f'{st}'].append(long)
-                            #if st == "SJC": print(data_with_stations[f'{st}'][0])
                             data_with_stations[f'{st}'].append(lat)
                             data_with_stations[f'{st}'].append(local_hour * -1)
                             data_with_stations[f'{st}'].append(local_min * -1)
                     except Exception as error:
                         print('erro adquirindo dados do readme', error)
-        #else: return [], {}
                         
         main_downloaded_stations = sorted(list(main_downloaded_stations), key=str.lower)
 

@@ -2,9 +2,9 @@ from Model.Custom.CustomttkFrame import ScrollableFrame
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QListWidget, QAbstractItemView,
     QPushButton, QCheckBox, QDateEdit, QSizePolicy, QScrollBar, QFrame, QListWidgetItem, 
-    QLineEdit, QCalendarWidget, QFileDialog
+    QLineEdit, QCalendarWidget, QFileDialog, QTimeEdit
 )
-from PyQt5.QtCore import QDate, Qt, QEvent
+from PyQt5.QtCore import QDate, Qt, QEvent, QTime
 from PyQt5.QtGui import QColor, QBrush, QDoubleValidator
 import psutil
 from General.util import Util
@@ -235,7 +235,8 @@ class SideOptionsPlot(QWidget):
             self.util.dict_language[self.language]['combo_difference'],     #10
             self.util.dict_language[self.language]['combo_electric_field'], #11
             self.util.dict_language[self.language]['combo_vertical_drift'], #12
-            self.util.dict_language[self.language]['combo_rot']             #13
+            self.util.dict_language[self.language]['combo_rot'],            #13
+            self.util.dict_language[self.language]['combo_periodogram'],          #14
         ])
         self.combo_type_plot.currentIndexChanged.connect(self.change_parameters)
         # Mapeamento de índice para cor hexadecimal
@@ -498,14 +499,6 @@ class SideOptionsPlot(QWidget):
         self.startdate.dateChanged.connect(lambda new_date: self.sync_calendar_month_year(self.cal_calm, self.startdate))
 
     def add_subtractions_widget(self):
-        '''lbl_minuend = QLabel(self.util.dict_language[self.language]['lbl_minuend'])
-        self.options_layout.addWidget(lbl_minuend)
-        self.minuend_stations_list = QListWidget()
-        self.options_layout.addWidget(self.minuend_stations_list)
-        lbl_subtracted = QLabel(self.util.dict_language[self.language]['lbl_subtracted'])
-        self.options_layout.addWidget(lbl_subtracted)
-        self.subtracted_stations_list = QListWidget()
-        self.options_layout.addWidget(self.subtracted_stations_list)'''
         #self.update_lists()
 
         # Minuendo com checkbox para definir o destino da seleção
@@ -723,6 +716,31 @@ class SideOptionsPlot(QWidget):
 
         self.startdate.dateChanged.connect(lambda new_date: self.sync_calendar_month_year(self.cal_calm, self.startdate))
 
+    def create_periodogram_options(self):
+        self.clear_options_frame()
+        self.start_time = QTimeEdit()
+        self.start_time.setDisplayFormat("HH:mm")
+        self.start_time.setTime(QTime(0,0))
+
+        self.end_time = QTimeEdit()
+        self.end_time.setDisplayFormat("HH:mm")
+        self.end_time.setTime(QTime(23,59))
+        self.options_layout.addWidget(self.start_time)
+        self.options_layout.addWidget(self.end_time)
+
+        self.btn_select_files = QPushButton(self.util.dict_language[self.language]['btn_select_files'])
+        self.btn_select_files.clicked.connect(self.open_file_dialog)
+        self.options_layout.addWidget(self.btn_select_files)
+
+        self.list_files_widget = QListWidget()
+        self.list_files_widget.setMaximumHeight(100)
+        self.options_layout.addWidget(self.list_files_widget)
+
+        self.btn_globaldays_confirm = QPushButton(self.util.dict_language[self.language]['btn_confirm'])
+        if self.btn_globaldays_function:
+            self.btn_globaldays_confirm.clicked.connect(self.btn_globaldays_function)
+        self.options_layout.addWidget(self.btn_globaldays_confirm)
+
     def open_file_dialog(self): 
         files, _ = QFileDialog.getOpenFileNames(self, "Selecionar Arquivos")
         if files:
@@ -809,6 +827,10 @@ class SideOptionsPlot(QWidget):
             case 13:
                 self.create_manydays_options()
                 self.add_timeskip_widget()
+                self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
+
+            case 14:
+                self.create_periodogram_options()
                 self.list_all_stations.setSelectionMode(QAbstractItemView.MultiSelection)
 
         self.on_checkbox_changed()
