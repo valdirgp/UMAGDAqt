@@ -304,8 +304,7 @@ class GraphControl():
             case 14: # PERIODOGRAM
                 self.PeriodogramModule.plot_periodogram(
                     self.Graphs.get_files_selection(),
-                    self.Graphs.get_start_time(),
-                    self.Graphs.get_end_time(),
+                    self.Graphs.get_period(),
                     self.Graphs.get_bold_text(),
                     self.Graphs.get_grid_graph(),
                 )

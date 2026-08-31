@@ -2,7 +2,7 @@ from Model.Custom.CustomttkFrame import ScrollableFrame
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QListWidget, QAbstractItemView,
     QPushButton, QCheckBox, QDateEdit, QSizePolicy, QScrollBar, QFrame, QListWidgetItem, 
-    QLineEdit, QCalendarWidget, QFileDialog, QTimeEdit
+    QLineEdit, QCalendarWidget, QFileDialog, QTimeEdit, QDoubleSpinBox
 )
 from PyQt5.QtCore import QDate, Qt, QEvent, QTime
 from PyQt5.QtGui import QColor, QBrush, QDoubleValidator
@@ -718,15 +718,16 @@ class SideOptionsPlot(QWidget):
 
     def create_periodogram_options(self):
         self.clear_options_frame()
-        self.start_time = QTimeEdit()
-        self.start_time.setDisplayFormat("HH:mm")
-        self.start_time.setTime(QTime(0,0))
 
-        self.end_time = QTimeEdit()
-        self.end_time.setDisplayFormat("HH:mm")
-        self.end_time.setTime(QTime(23,59))
-        self.options_layout.addWidget(self.start_time)
-        self.options_layout.addWidget(self.end_time)
+        self.lbl_periodo = QLabel(self.util.dict_language[self.language]['lbl_periodo'])
+        self.options_layout.addWidget(self.lbl_periodo)
+
+        self.period = QDoubleSpinBox()
+        self.period.setDecimals(2)
+        self.period.setMinimum(3.0)
+        self.period.setValue(24.0)
+        self.period.setSingleStep(0.5)
+        self.options_layout.addWidget(self.period)
 
         self.btn_select_files = QPushButton(self.util.dict_language[self.language]['btn_select_files'])
         self.btn_select_files.clicked.connect(self.open_file_dialog)

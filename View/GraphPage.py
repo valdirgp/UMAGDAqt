@@ -383,3 +383,8 @@ class GraphPage(QWidget):
 
     def get_end_time(self):
         return self.side_options.end_time.time()
+
+    def get_period(self):
+        return self.side_options.period.value()
+
+    

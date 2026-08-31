@@ -64,6 +64,7 @@ class Util():
                                     "lbl_warn": "Lembrete",
                                     "lbl_timeskip": "Pulo de Tempo (em minutos)",
                                     "lbl_roti_threshold": "Desvio para ROTI (em minutos)",
+                                    "lbl_periodo": "Período (em horas)",
 
                                     "btn_slt": "Selecionar Todos",
                                     "btn_clr": "Limpar Tudo",
@@ -226,6 +227,7 @@ class Util():
                                     "lbl_warn": "Reminder",
                                     "lbl_timeskip": "Time Skip (in minutes)",
                                     "lbl_roti_threshold": "ROTI deviation (in minutes)",
+                                    "lbl_periodo": "Period (in hours)",
 
                                     "btn_slt": "Select All",
                                     "btn_clr": "Clear All",
