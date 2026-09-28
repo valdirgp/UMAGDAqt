@@ -230,10 +230,27 @@ class MapGraph(GraphsModule):
                 ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
 
                 # Adiciona as features do mapa (terra, oceano, etc.) ANTES de plotar os dados
-                ax.add_feature(cfeature.LAND)
-                ax.add_feature(cfeature.OCEAN)
-                ax.add_feature(cfeature.COASTLINE)
-                ax.add_feature(cfeature.BORDERS)
+                land_110m = cfeature.NaturalEarthFeature('physical', 'land', '110m', 
+                                                                                 facecolor='#eeeeee', edgecolor='none')
+                                                
+                ocean_110m = cfeature.NaturalEarthFeature('physical', 'ocean', '110m', 
+                                                            facecolor='#9ecae1', edgecolor='none')
+                
+                coastline_110m = cfeature.NaturalEarthFeature('physical', 'coastline', '110m',
+                                                                facecolor='none', edgecolor='black', linewidth=0.5)
+                
+                borders_110m = cfeature.NaturalEarthFeature('cultural', 'admin_0_boundary_lines_land', '110m',
+                                                            facecolor='none', edgecolor='black', linewidth=0.5)
+                
+                rivers_110m = cfeature.NaturalEarthFeature('physical', 'rivers_lake_centerlines', '110m',
+                                                            facecolor='none', edgecolor='#9ecae1')
+        
+                # Adiciona os fundos primeiro (zorder menor) e as linhas depois (zorder maior)
+                ax.add_feature(land_110m, zorder=0)
+                ax.add_feature(ocean_110m, zorder=0)
+                ax.add_feature(coastline_110m, zorder=1)
+                ax.add_feature(borders_110m, zorder=1)
+                ax.add_feature(rivers_110m, zorder=1)
                 
                 ax.set_extent(self.regiao, crs=ccrs.PlateCarree())
                 

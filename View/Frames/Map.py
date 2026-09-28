@@ -59,11 +59,33 @@ class Map(QWidget):
         for spine in self.ax.spines.values():
             spine.set_linewidth(2)
 
-        self.ax.add_feature(cfeature.LAND)
+        '''self.ax.add_feature(cfeature.LAND)
         self.ax.add_feature(cfeature.OCEAN)
         self.ax.add_feature(cfeature.COASTLINE)
         self.ax.add_feature(cfeature.BORDERS)
-        self.ax.add_feature(cfeature.RIVERS)
+        self.ax.add_feature(cfeature.RIVERS)'''
+
+        land_110m = cfeature.NaturalEarthFeature('physical', 'land', '110m', 
+                                                 facecolor='#eeeeee', edgecolor='none')
+                
+        ocean_110m = cfeature.NaturalEarthFeature('physical', 'ocean', '110m', 
+                                                  facecolor='#9ecae1', edgecolor='none')
+        
+        coastline_110m = cfeature.NaturalEarthFeature('physical', 'coastline', '110m',
+                                                       facecolor='none', edgecolor='black', linewidth=0.5)
+        
+        borders_110m = cfeature.NaturalEarthFeature('cultural', 'admin_0_boundary_lines_land', '110m',
+                                                    facecolor='none', edgecolor='black', linewidth=0.5)
+        
+        rivers_110m = cfeature.NaturalEarthFeature('physical', 'rivers_lake_centerlines', '110m',
+                                                    facecolor='none', edgecolor='#9ecae1')
+
+        # Adiciona os fundos primeiro (zorder menor) e as linhas depois (zorder maior)
+        self.ax.add_feature(land_110m, zorder=0)
+        self.ax.add_feature(ocean_110m, zorder=0)
+        self.ax.add_feature(coastline_110m, zorder=1)
+        self.ax.add_feature(borders_110m, zorder=1)
+        self.ax.add_feature(rivers_110m, zorder=1)
 
         # Create the canvas and toolbar for PyQt5
         self.canvas = FigureCanvas(self.fig)
